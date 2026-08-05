@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { MagneticCTA } from "@/components/public/vfx/MagneticCTA";
 import { logOAuth } from "@/lib/oauthDebug";
 import { logAuthError, logAuthSuccess, newAuthRequestId } from "@/lib/authErrorLog";
 import { useAuth } from "@/hooks/useAuth";
+import { sanitizeRedirectUrl } from "@/lib/authRedirect";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name required").max(100),
@@ -29,7 +30,8 @@ function strength(pw: string) {
 
 export default function Signup() {
   const nav = useNavigate();
-  const { signInWithGoogle, signInWithDemo } = useAuth();
+  const loc = useLocation();
+  const { signInWithGoogle } = useAuth();
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [loading, setLoading] = useState(false);
   const s = useMemo(() => strength(form.password), [form.password]);
@@ -62,18 +64,12 @@ export default function Signup() {
           action: { label: "Sign in", onClick: () => nav("/login") },
         });
       }
-      // Auto fallback to demo sign in
-      signInWithDemo(form.email, form.name);
-      toast.success("Welcome! Signed in successfully.");
-      nav("/dashboard");
-      return;
+      return toast.error("Signup failed", { description: error.message });
     }
     logAuthSuccess("password-signup", "complete", requestId);
     if (data?.user && data?.session === null) {
-      // Email confirmation required by Supabase backend - activate demo session so user is never stuck
-      signInWithDemo(form.email, form.name);
-      toast.success("Account created! Redirecting to dashboard...");
-      nav("/dashboard");
+      toast.success("Account created! Please check your email to verify your account.");
+      nav("/login");
     } else {
       toast.success("Account created!");
       nav("/dashboard");
@@ -104,7 +100,10 @@ export default function Signup() {
           onClick={async () => {
             setLoading(true);
             try {
-              await signInWithGoogle();
+              const nextParam = new URLSearchParams(loc.search).get("next");
+              const fromState = (loc.state as any)?.from;
+              const destination = sanitizeRedirectUrl(fromState || nextParam || "/dashboard", "/dashboard");
+              await signInWithGoogle(destination);
               if (window !== window.top) setLoading(false);
             } catch (error: any) {
               toast.error(error.message);

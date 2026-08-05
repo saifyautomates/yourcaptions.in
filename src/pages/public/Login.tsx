@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logAuthError, logAuthSuccess, newAuthRequestId } from "@/lib/authErrorLog";
 import { useAuth } from "@/hooks/useAuth";
+import { sanitizeRedirectUrl } from "@/lib/authRedirect";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,8 @@ export default function Login() {
   const [lastAttempt, setLastAttempt] = useState<null | (() => void)>(null);
   
   const nextParam = new URLSearchParams(loc.search).get("next");
+  const stateFrom = (loc.state as any)?.from;
+  const destination = sanitizeRedirectUrl(stateFrom || nextParam || "/dashboard", "/dashboard");
 
   const attemptPassword = async () => {
     setAuthError(null);
@@ -34,39 +37,25 @@ export default function Login() {
       
       if (error) {
         logAuthError({ method: "password-signin", stage: "code-exchange", error, requestId });
-        // Auto fallback
-        const demoEmail = email.trim() || "creator@Yourcaptions.in";
-        signInWithDemo(demoEmail);
-        toast.success("Signed in successfully!");
-        nav(nextParam || "/dashboard", { replace: true });
+        setAuthError({ message: error.message, requestId });
         return;
       }
       
       logAuthSuccess("password-signin", "complete", requestId, { userId: data.user?.id });
       toast.success("Welcome back!");
-      nav(nextParam || "/dashboard", { replace: true });
-    } catch {
+      nav(destination, { replace: true });
+    } catch (err: any) {
       setLoading(false);
-      const demoEmail = email.trim() || "creator@Yourcaptions.in";
-      signInWithDemo(demoEmail);
-      toast.success("Signed in successfully!");
-      nav(nextParam || "/dashboard", { replace: true });
+      setAuthError({ message: err?.message || "An unexpected error occurred" });
     }
   };
 
-  const { signInWithGoogle, signInWithDemo } = useAuth();
+  const { signInWithGoogle } = useAuth();
   
-  const handleDemoSignIn = () => {
-    const demoEmail = email.trim() || "creator@Yourcaptions.in";
-    signInWithDemo(demoEmail);
-    toast.success("Signed in successfully!");
-    nav(nextParam || "/dashboard", { replace: true });
-  };
-
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(destination);
       if (window !== window.top) setLoading(false);
     } catch (error: any) {
       toast.error(error.message);
@@ -100,8 +89,8 @@ export default function Login() {
                   <div className="mt-2 text-[10px] opacity-70">Request ID: {authError.requestId}</div>
                 )}
                 <div className="mt-3 flex gap-2">
-                  <Button variant="outline" size="sm" onClick={handleDemoSignIn} className="border-[var(--error)] text-[var(--error)] hover:bg-[var(--error)] hover:text-white">
-                    Demo Access
+                  <Button variant="outline" size="sm" onClick={() => nav("/forgot-password")} className="border-[var(--error)] text-[var(--error)] hover:bg-[var(--error)] hover:text-white">
+                    Forgot Password?
                   </Button>
                 </div>
               </div>
@@ -123,16 +112,6 @@ export default function Login() {
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
             Continue with Google
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            onClick={handleDemoSignIn}
-            className="w-full mb-6"
-          >
-            ⚡ Instant Demo Sign In
           </Button>
 
           <div className="mb-6 flex items-center gap-4 text-xs font-semibold text-[var(--text-5)] uppercase tracking-wider">

@@ -41,7 +41,7 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   if (!user) {
     return (
       <Navigate
-        to="/signin"
+        to="/login"
         replace
         state={{ from: `${location.pathname}${location.search}${location.hash}` }}
       />

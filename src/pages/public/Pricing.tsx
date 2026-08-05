@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { TiltCard } from "@/components/public/vfx/TiltCard";
 import { MagneticCTA } from "@/components/public/vfx/MagneticCTA";
 import { Reveal } from "@/components/public/vfx/Reveal";
+import { usePlanPricing } from "@/hooks/usePlanPricing";
 
 type Plan = {
   name: string;
+  id: string;
   icon: string;
   monthly: number;
   yearly: number;
@@ -15,9 +17,10 @@ type Plan = {
   popular?: boolean;
 };
 
-const plans: Plan[] = [
+const defaultPlans: Plan[] = [
   {
     name: "Editor",
+    id: "editor",
     icon: "◆",
     monthly: 499,
     yearly: 416,
@@ -35,6 +38,7 @@ const plans: Plan[] = [
   },
   {
     name: "Creator",
+    id: "creator",
     icon: "▲",
     monthly: 999,
     yearly: 833,
@@ -53,6 +57,7 @@ const plans: Plan[] = [
   },
   {
     name: "Studio",
+    id: "studio",
     icon: "♛",
     monthly: 2599,
     yearly: 2166,
@@ -80,6 +85,23 @@ const faqs = [
 
 export default function Pricing() {
   const [yearly, setYearly] = useState(false);
+  const { data: pricingData } = usePlanPricing('INR');
+
+  const plans = useMemo(() => {
+    if (!pricingData) return defaultPlans;
+    return defaultPlans.map((p) => {
+      const dbPrice = pricingData.find(d => d.plan === p.id);
+      if (dbPrice) {
+        return {
+          ...p,
+          monthly: dbPrice.monthly_price,
+          yearly: dbPrice.yearly_price,
+          yearlyStrike: dbPrice.original_yearly ?? p.yearlyStrike,
+        };
+      }
+      return p;
+    });
+  }, [pricingData]);
 
   return (
     <div className="bg-[#050505] pt-32 pb-24">
@@ -105,9 +127,6 @@ export default function Pricing() {
 
         <Reveal delay={400}>
           <div className="mt-12 flex flex-col items-center gap-3">
-            {yearly && (
-              <span className="rounded-full bg-[#E60000] px-3 py-1 text-[11px] font-semibold text-white">2 months free</span>
-            )}
             <div className="inline-flex rounded-full border border-[#2A2A2A] bg-[#0D0D0D] p-1">
               {["Monthly", "Yearly"].map((l, i) => {
                 const active = (i === 1) === yearly;

@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { inspectCallbackUrl, logOAuth } from "@/lib/oauthDebug";
 import { identifyUser } from "@/lib/observability";
+import { sanitizeRedirectUrl } from "@/lib/authRedirect";
 
 interface AuthContextValue {
   user: User | null;
@@ -22,7 +23,7 @@ interface AuthContextValue {
   /** Manually retry session hydration after a network/auth failure. */
   retry: () => void;
   signOut: () => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: (returnTo?: string) => Promise<void>;
 }
 
 const SLOW_LOAD_MS = 6000;
@@ -67,6 +68,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     mountedRef.current = true;
 
+    logOAuth("session-restore-start", {
+      href: typeof window !== "undefined" ? window.location.href : "",
+      hasHash: typeof window !== "undefined" ? Boolean(window.location.hash) : false,
+      hasSearch: typeof window !== "undefined" ? Boolean(window.location.search) : false,
+    });
+
     const cb = inspectCallbackUrl();
     if (cb) {
       logOAuth("callback-return", cb);
@@ -89,6 +96,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: sub } = supabase.auth.onAuthStateChange(async (evt, sess) => {
       if (!mountedRef.current) return;
 
+      logOAuth("auth-state-change", {
+        event: evt,
+        hasSession: Boolean(sess),
+        userId: sess?.user?.id ?? null,
+        provider: sess?.user?.app_metadata?.provider ?? null,
+        expiresAt: sess?.expires_at ?? null,
+      });
+
       if (sess && !hasValidSub(sess)) {
         try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
         setSession(null);
@@ -106,20 +121,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       identifyUser(sess?.user ? { id: sess.user.id, email: sess.user.email ?? null } : null);
 
-      logOAuth("auth-state-change", {
-        event: evt,
-        hasSession: Boolean(sess),
-        userId: sess?.user?.id ?? null,
-        provider: sess?.user?.app_metadata?.provider ?? null,
-        expiresAt: sess?.expires_at ?? null,
-      });
-
       if (evt === "SIGNED_IN") {
         logOAuth("code-exchange-success", { userId: sess?.user?.id });
         logOAuth("session-created", {
           userId: sess?.user?.id,
           provider: sess?.user?.app_metadata?.provider ?? null,
         });
+        
+        if (typeof window !== 'undefined' && window.opener && window.name === 'oauth_popup') {
+          window.close();
+        }
       } else if (evt === "SIGNED_OUT") {
         logOAuth("sign-out");
       }
@@ -127,6 +138,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     supabase.auth.getSession().then(async ({ data, error: sessErr }) => {
       if (!mountedRef.current) return;
+
+      logOAuth("session-restore-complete", {
+        hasSession: Boolean(data.session),
+        userId: data.session?.user?.id ?? null,
+        error: sessErr?.message ?? null,
+      });
 
       const badJwt =
         sessErr &&
@@ -152,6 +169,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(data.session);
         setUser(data.session.user ?? null);
         identifyUser({ id: data.session.user.id, email: data.session.user.email ?? null });
+        
+        if (typeof window !== 'undefined' && window.opener && window.name === 'oauth_popup') {
+          window.close();
+        }
       }
 
       setLoading(false);
@@ -162,6 +183,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           hadHashTokens: cb.hasAccessTokenInHash || cb.hasRefreshTokenInHash,
           getSessionError: sessErr ? (sessErr as Error).message : null,
         });
+        
+        if (typeof window !== 'undefined' && window.opener && window.name === 'oauth_popup') {
+          window.close();
+        }
       }
     }).catch((err) => {
       if (!mountedRef.current) return;
@@ -228,9 +253,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signInWithGoogle = async () => {
-    const isIframe = typeof window !== "undefined" && window.self !== window.top;
-    const redirectTo = `${window.location.origin}/dashboard`;
+  const signInWithGoogle = async (returnTo?: string) => {
+    const sanitizedPath = sanitizeRedirectUrl(returnTo, "/dashboard");
+    const redirectTo = `${window.location.origin}${sanitizedPath}`;
+
+    logOAuth("initiate", {
+      requestedReturnTo: returnTo ?? null,
+      sanitizedPath,
+      redirectTo,
+    });
+
+    const isIframe = window.top !== window.self;
 
     if (isIframe) {
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -241,16 +274,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        logOAuth("initiate-error", { error: error.message });
+        throw error;
+      }
 
       if (data?.url) {
-        const popup = window.open(
-          data.url,
-          "google_oauth",
-          "width=600,height=700,status=no,resizable=yes,scrollbars=yes"
-        );
-        if (!popup || popup.closed || typeof popup.closed === "undefined") {
-          window.open(data.url, "_blank");
+        const popup = window.open(data.url, 'oauth_popup', 'width=600,height=700');
+        if (!popup) {
+          throw new Error("Popup blocked by browser. Please allow popups for this site.");
         }
       }
     } else {
@@ -260,7 +292,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           redirectTo,
         },
       });
-      if (error) throw error;
+      if (error) {
+        logOAuth("initiate-error", { error: error.message });
+        throw error;
+      }
     }
   };
 

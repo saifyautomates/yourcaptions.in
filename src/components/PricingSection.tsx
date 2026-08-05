@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTilt } from '@/hooks/useTilt';
 import { useMagnetic } from '@/hooks/useMagnetic';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { usePlanPricing } from '@/hooks/usePlanPricing';
 
 function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) {
   return (
@@ -40,6 +41,18 @@ function MagneticButton({ children, className, ...props }: any) {
 
 export function PricingSection() {
   const [isYearly, setIsYearly] = useState(true);
+  const { data: pricingData } = usePlanPricing('INR');
+  
+  const getPlanPrice = (plan: string) => {
+    const p = pricingData?.find(d => d.plan === plan);
+    if (!p) return null;
+    return isYearly ? p.yearly_price : p.monthly_price;
+  };
+
+  const getPlanOriginalYearly = (plan: string) => {
+    const p = pricingData?.find(d => d.plan === plan);
+    return p?.original_yearly;
+  };
 
   const faqs = [
     { q: "What counts as a transcription hour?", a: "Every minute of video you transcribe counts toward your monthly limit. A 5-minute video = 5 minutes used." },
@@ -62,10 +75,6 @@ export function PricingSection() {
 
       <Reveal delay={0.1} className="flex justify-center mb-16 relative">
         <div className="relative">
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#E60000] text-white text-[12px] font-bold uppercase tracking-wider px-3 py-1 rounded-full whitespace-nowrap">
-            2 months free
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#E60000] rotate-45" />
-          </div>
           <div className="bg-[#0D0D0D] border border-[#1F1F1F] rounded-full p-1 flex">
             <button 
               className={`px-8 py-3 rounded-full text-[15px] font-medium transition-colors ${!isYearly ? 'bg-[#1F1F1F] text-white' : 'text-[#888] hover:text-white'}`}
@@ -133,12 +142,12 @@ export function PricingSection() {
               <span className="text-[40px] font-black text-white leading-none tracking-tight overflow-hidden relative">
                 <AnimatePresence mode="popLayout">
                   <motion.span key={isYearly ? 'y' : 'm'} initial={{ opacity: 0, y: -20, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: 20, filter: 'blur(4px)' }} transition={{ duration: 0.3 }} className="inline-block">
-                    ₹{isYearly ? '416' : '499'}
+                    ₹{getPlanPrice('editor') ?? (isYearly ? '416' : '499')}
                   </motion.span>
                 </AnimatePresence>
               </span>
               <span className="text-[15px] text-[#555] mb-1">/month</span>
-              {isYearly && <span className="text-[13px] text-[#555] line-through mb-1 ml-2">₹558</span>}
+              {isYearly && <span className="text-[13px] text-[#555] line-through mb-1 ml-2">₹{getPlanOriginalYearly('editor') ?? '558'}</span>}
             </div>
             <button className="w-full border border-[#2A2A2A] text-white font-semibold text-[15px] py-4 rounded-xl hover:bg-white hover:text-black hover:border-white transition-colors relative z-10" data-cursor="hover">
               Get started
@@ -166,11 +175,12 @@ export function PricingSection() {
               <span className="text-[40px] font-black text-white leading-none tracking-tight overflow-hidden relative">
                 <AnimatePresence mode="popLayout">
                   <motion.span key={isYearly ? 'y' : 'm'} initial={{ opacity: 0, y: -20, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: 20, filter: 'blur(4px)' }} transition={{ duration: 0.3 }} className="inline-block">
-                    ₹{isYearly ? '833' : '999'}
+                    ₹{getPlanPrice('creator') ?? (isYearly ? '833' : '999')}
                   </motion.span>
                 </AnimatePresence>
               </span>
               <span className="text-[15px] text-[#555] mb-1">/month</span>
+              {isYearly && <span className="text-[13px] text-[#555] line-through mb-1 ml-2">₹{getPlanOriginalYearly('creator') ?? '1042'}</span>}
             </div>
             <MagneticButton className="w-full bg-[#E60000] text-white font-bold text-[15px] py-4 rounded-xl hover:bg-[#CC0000] transition-colors relative z-10">
               Upgrade now
@@ -197,11 +207,12 @@ export function PricingSection() {
               <span className="text-[40px] font-black text-white leading-none tracking-tight overflow-hidden relative">
                 <AnimatePresence mode="popLayout">
                   <motion.span key={isYearly ? 'y' : 'm'} initial={{ opacity: 0, y: -20, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: 20, filter: 'blur(4px)' }} transition={{ duration: 0.3 }} className="inline-block">
-                    ₹{isYearly ? '2,166' : '2,599'}
+                    ₹{getPlanPrice('studio') ? getPlanPrice('studio')?.toLocaleString('en-IN') : (isYearly ? '2,166' : '2,599')}
                   </motion.span>
                 </AnimatePresence>
               </span>
               <span className="text-[15px] text-[#555] mb-1">/month</span>
+              {isYearly && <span className="text-[13px] text-[#555] line-through mb-1 ml-2">₹{getPlanOriginalYearly('studio')?.toLocaleString('en-IN') ?? '2,833'}</span>}
             </div>
             <button className="w-full border border-[#2A2A2A] text-white font-semibold text-[15px] py-4 rounded-xl hover:bg-white hover:text-black hover:border-white transition-colors relative z-10" data-cursor="hover">
               Upgrade now

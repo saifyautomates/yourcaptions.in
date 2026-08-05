@@ -1,6 +1,8 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
+import { sanitizeRedirectUrl } from "@/lib/authRedirect";
+import { logOAuth } from "@/lib/oauthDebug";
 
 /**
  * Guards authenticated-only routes.
@@ -22,15 +24,26 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       />
     );
   }
+
   if (!user) {
+    const rawIntended = `${location.pathname}${location.search}${location.hash}`;
+    const sanitizedFrom = sanitizeRedirectUrl(rawIntended, "/dashboard");
+
+    logOAuth("protected-route-denied", {
+      pathname: location.pathname,
+      rawIntended,
+      sanitizedFrom,
+    });
+
     return (
       <Navigate
-        to="/signin"
+        to="/login"
         replace
-        state={{ from: `${location.pathname}${location.search}${location.hash}` }}
+        state={{ from: sanitizedFrom }}
       />
     );
   }
+
   return <>{children}</>;
 };
 

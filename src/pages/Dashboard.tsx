@@ -35,7 +35,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { planId, planName, isPaid } = usePlanInfo();
   const { balance, planCredits, topupCredits } = useCredits();
-  const isAdmin = useIsAdmin();
+  const { isAdmin } = useIsAdmin();
   
   const caps = getPlanCapabilities(planId);
   const navigate = useNavigate();
