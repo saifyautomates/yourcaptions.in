@@ -24,8 +24,8 @@ export function usePlanPricing(currency: string = 'INR') {
         .eq('is_active', true);
       
       if (error) {
-        if (error.code === 'PGRST205') {
-          console.warn('plan_pricing table not found, falling back to defaults.');
+        if (error.code === 'PGRST205' || error.code === '42P01' || error.message?.includes('does not exist')) {
+          console.warn('plan_pricing table not found or not visible, falling back to defaults.');
           return [];
         }
         console.error('Error fetching plan pricing:', error);

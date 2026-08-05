@@ -12,6 +12,7 @@ import { Session, User } from "@supabase/supabase-js";
 import { inspectCallbackUrl, logOAuth } from "@/lib/oauthDebug";
 import { identifyUser } from "@/lib/observability";
 import { sanitizeRedirectUrl } from "@/lib/authRedirect";
+import { toast } from "sonner";
 
 interface AuthContextValue {
   user: User | null;
@@ -129,6 +130,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         
         if (typeof window !== 'undefined' && window.opener && window.name === 'oauth_popup') {
+          try { window.opener.postMessage({ type: "OAUTH_SUCCESS", session: sess }, "*"); } catch {}
           window.close();
         }
       } else if (evt === "SIGNED_OUT") {
@@ -171,6 +173,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         identifyUser({ id: data.session.user.id, email: data.session.user.email ?? null });
         
         if (typeof window !== 'undefined' && window.opener && window.name === 'oauth_popup') {
+          try { window.opener.postMessage({ type: "OAUTH_SUCCESS", session: data.session }, "*"); } catch {}
           window.close();
         }
       }
@@ -185,6 +188,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         
         if (typeof window !== 'undefined' && window.opener && window.name === 'oauth_popup') {
+          try { window.opener.postMessage({ type: "OAUTH_ERROR" }, "*"); } catch {}
           window.close();
         }
       }
@@ -210,7 +214,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       supabase.auth.getSession().then(({ data }) => {
         if (data.session) {
           try {
-            window.opener.postMessage({ type: "OAUTH_SUCCESS" }, "*");
+            window.opener.postMessage({ type: "OAUTH_SUCCESS", session: data.session }, "*");
             window.close();
           } catch {
             /* noop */
@@ -219,15 +223,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
     }
 
-    const handleMessage = (evt: MessageEvent) => {
+    const handleMessage = async (evt: MessageEvent) => {
+      console.log("OAuth Parent Received Message:", evt.data);
       if (evt.data?.type === "OAUTH_SUCCESS") {
-        supabase.auth.getSession().then(({ data }) => {
+        toast.info("OAuth popup success received.");
+        if (evt.data?.session?.access_token && evt.data?.session?.refresh_token) {
+          console.log("Setting session from popup data...");
+          toast.info("Setting session from popup data...");
+          const { data, error } = await supabase.auth.setSession({
+            access_token: evt.data.session.access_token,
+            refresh_token: evt.data.session.refresh_token
+          });
+          console.log("setSession result:", { data, error });
           if (data.session) {
+            toast.success("Login successful!");
             setSession(data.session);
             setUser(data.session.user ?? null);
             setLoading(false);
+          } else {
+             toast.error("Failed to set session. Reloading...");
+             // fallback to reload if setSession fails
+             window.location.reload();
           }
-        });
+        } else {
+          console.log("No session data in message, fetching session...");
+          toast.info("No session data in message, fetching session...");
+          supabase.auth.getSession().then(({ data }) => {
+            console.log("getSession result:", data);
+            if (data.session) {
+              toast.success("Session fetched successfully!");
+              setSession(data.session);
+              setUser(data.session.user ?? null);
+              setLoading(false);
+            } else {
+               toast.error("Failed to fetch session. Reloading...");
+               window.location.reload();
+            }
+          });
+        }
+      } else if (evt.data?.type === "OAUTH_ERROR") {
+        toast.error("OAuth popup reported an error.");
       }
     };
 
@@ -264,37 +299,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     const isIframe = window.top !== window.self;
+    let popup: Window | null = null;
+    
+    if (isIframe) {
+      // Open the popup synchronously before any async operations to bypass popup blockers
+      popup = window.open("about:blank", "oauth_popup", "width=600,height=700");
+    }
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+        skipBrowserRedirect: isIframe,
+      },
+    });
+
+    if (error) {
+      logOAuth("initiate-error", { error: error.message });
+      if (popup) popup.close();
+      throw error;
+    }
 
     if (isIframe) {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo,
-          skipBrowserRedirect: true,
-        },
-      });
-
-      if (error) {
-        logOAuth("initiate-error", { error: error.message });
-        throw error;
-      }
-
-      if (data?.url) {
-        const popup = window.open(data.url, 'oauth_popup', 'width=600,height=700');
-        if (!popup) {
-          throw new Error("Popup blocked by browser. Please allow popups for this site.");
-        }
-      }
-    } else {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo,
-        },
-      });
-      if (error) {
-        logOAuth("initiate-error", { error: error.message });
-        throw error;
+      if (data?.url && popup) {
+        popup.location.href = data.url;
+      } else if (!popup) {
+        throw new Error("Popup blocked by browser. Please allow popups for this site.");
       }
     }
   };

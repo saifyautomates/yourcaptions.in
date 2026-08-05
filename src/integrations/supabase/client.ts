@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://mock.supabase.co';
+// Hardcoded fallback since OS environment has a typo.
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://mqotnlflwrgqpbhjkwyq.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key';
+
+// Fix for incorrect env var in OS
+const url = SUPABASE_URL.replace('mqotnflwrgqppbhjkwyq', 'mqotnlflwrgqpbhjkwyq');
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith('sb_publishable_') || value.startsWith('sb_secret_');
@@ -24,7 +28,7 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
   };
 }
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(url, SUPABASE_PUBLISHABLE_KEY, {
   global: {
     fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
   },
@@ -34,3 +38,4 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
   }
 });
+

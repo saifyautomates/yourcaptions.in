@@ -63,8 +63,27 @@ Deno.serve(async (req) => {
         const { data } = await adminClient.from('system_settings').select('*').order('setting_key');
         return new Response(JSON.stringify({ settings: data }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
+      if (path === '/audit-log') {
+        const { data } = await adminClient.from('admin_audit_log').select('*').order('created_at', { ascending: false }).limit(100);
+        return new Response(JSON.stringify({ logs: data }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
     }
     
+    if (req.method === "POST") {
+      const body = await req.json();
+
+      if (path === '/credits/adjust') {
+        const { user_id, amount, reason } = body;
+        if (!user_id || !amount || !reason) {
+          throw new Error('missing required fields: user_id, amount, reason');
+        }
+        const { data, error } = await adminClient.rpc('admin_adjust_credits', { user_id, amount, reason });
+        if (error) throw error;
+        await adminClient.rpc('log_admin_action', { _user_id: userData.user.id, _action: 'adjust_credits', _details: body });
+        return new Response(JSON.stringify(data), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
     if (req.method === "PATCH") {
       const body = await req.json();
       
