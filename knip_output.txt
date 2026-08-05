@@ -1,0 +1,231 @@
+Unused files (55)
+src/components/CaptionStylePanel.tsx       
+src/components/CreditTopUp.tsx             
+src/components/FuturisticBackdrop.tsx      
+src/components/home/CinematicHero.tsx      
+src/components/home/DeviceShowcase.tsx     
+src/components/home/FeatureGrid.tsx        
+src/components/home/HeroScene.tsx          
+src/components/home/LanguageOrbit3D.tsx    
+src/components/home/MagneticButton.tsx     
+src/components/home/StatsMarquee.tsx       
+src/components/home/StyleGallery.tsx       
+src/components/LanguageOrbit.tsx           
+src/components/LiveLimitsWidget.tsx        
+src/components/NavLink.tsx                 
+src/components/Skeleton.tsx                
+src/components/TranscriptionHealthPanel.tsx
+src/components/ui/accordion.tsx            
+src/components/ui/alert.tsx                
+src/components/ui/aspect-ratio.tsx         
+src/components/ui/breadcrumb.tsx           
+src/components/ui/calendar.tsx             
+src/components/ui/carousel.tsx             
+src/components/ui/chart.tsx                
+src/components/ui/checkbox.tsx             
+src/components/ui/collapsible.tsx          
+src/components/ui/command.tsx              
+src/components/ui/context-menu.tsx         
+src/components/ui/drawer.tsx               
+src/components/ui/dropdown-menu.tsx        
+src/components/ui/form.tsx                 
+src/components/ui/hover-card.tsx           
+src/components/ui/input-otp.tsx            
+src/components/ui/menubar.tsx              
+src/components/ui/navigation-menu.tsx      
+src/components/ui/pagination.tsx           
+src/components/ui/popover.tsx              
+src/components/ui/progress.tsx             
+src/components/ui/radio-group.tsx          
+src/components/ui/resizable.tsx            
+src/components/ui/separator.tsx            
+src/components/ui/sidebar.tsx              
+src/components/ui/toggle-group.tsx         
+src/components/ui/toggle.tsx               
+src/components/ui/use-toast.ts             
+src/components/UsageAlertsSettings.tsx     
+src/components/UsageDrilldown.tsx          
+src/components/UsagePanel.tsx              
+src/editor/export/ExportModal.tsx          
+src/editor/hooks/useAutoSave.ts            
+src/editor/hooks/usePlayback.ts            
+src/editor/store/projectStore.ts           
+src/hooks/use-mobile.tsx                   
+src/hooks/useUsageAlerts.ts                
+src/lib/captionTemplates.ts                
+src/lib/transcriptionService.ts            
+Unused dependencies (26)
+@hookform/resolvers              package.json:19:6
+@radix-ui/react-accordion        package.json:20:6
+@radix-ui/react-aspect-ratio     package.json:22:6
+@radix-ui/react-checkbox         package.json:24:6
+@radix-ui/react-collapsible      package.json:25:6
+@radix-ui/react-context-menu     package.json:26:6
+@radix-ui/react-dropdown-menu    package.json:28:6
+@radix-ui/react-hover-card       package.json:29:6
+@radix-ui/react-menubar          package.json:31:6
+@radix-ui/react-navigation-menu  package.json:32:6
+@radix-ui/react-popover          package.json:33:6
+@radix-ui/react-progress         package.json:34:6
+@radix-ui/react-radio-group      package.json:35:6
+@radix-ui/react-separator        package.json:38:6
+@radix-ui/react-toggle           package.json:44:6
+@radix-ui/react-toggle-group     package.json:45:6
+@react-three/drei                package.json:47:6
+@react-three/fiber               package.json:48:6
+cmdk                             package.json:54:6
+embla-carousel-react             package.json:56:6
+input-otp                        package.json:58:6
+react-day-picker                 package.json:64:6
+react-hook-form                  package.json:66:6
+react-resizable-panels           package.json:67:6
+three                            package.json:73:6
+vaul                             package.json:74:6
+Unused devDependencies (1)
+@tailwindcss/typography  package.json:80:6
+Unlisted dependencies (4)
+zustand           src/editor/store/editorStore.ts:1:24  
+zustand           src/editor/store/historyStore.ts:1:24 
+zustand           src/editor/store/timelineStore.ts:1:24
+@playwright/test  tests/e2e/credit-wallet.spec.ts:21:46 
+Unused exports (69)
+ADMIN_ROUTE_LOADERS               src/components/admin/prefetch.ts:3:14                
+GoogleButton                      src/components/AuthLayout.tsx:29:14                  
+Divider                           src/components/AuthLayout.tsx:42:14                  
+Field                             src/components/AuthLayout.tsx:59:14                  
+SubmitButton                      src/components/AuthLayout.tsx:79:14                  
+default                 function  src/components/CreditHistoryPanel.tsx:338:16         
+default                 function  src/components/CreditsBanner.tsx:132:16              
+default                 function  src/components/EditorErrorInspector.tsx:198:16       
+default                 function  src/components/FirstRunChecklist.tsx:155:16          
+default                 function  src/components/FuturisticLoader.tsx:130:16           
+default                 function  src/components/library/AdminLibraryManager.tsx:345:16
+default                 function  src/components/LoadingOverlay.tsx:107:16             
+default                 variable  src/components/MusicTab.tsx:262:16                   
+AlertDialogPortal                 src/components/ui/alert-dialog.tsx:94:3              
+AlertDialogOverlay                src/components/ui/alert-dialog.tsx:95:3              
+AvatarImage                       src/components/ui/avatar.tsx:38:18                   
+badgeVariants                     src/components/ui/badge.tsx:29:17                    
+CardHeader                        src/components/ui/card.tsx:43:16                     
+CardFooter                        src/components/ui/card.tsx:43:28                     
+CardTitle                         src/components/ui/card.tsx:43:40                     
+CardDescription                   src/components/ui/card.tsx:43:51                     
+DialogPortal                      src/components/ui/dialog.tsx:86:3                    
+DialogOverlay                     src/components/ui/dialog.tsx:87:3                    
+DialogClose                       src/components/ui/dialog.tsx:88:3                    
+ScrollBar                         src/components/ui/scroll-area.tsx:38:22              
+SelectGroup                       src/components/ui/select.tsx:134:3                   
+SelectLabel                       src/components/ui/select.tsx:138:3                   
+SelectSeparator                   src/components/ui/select.tsx:140:3                   
+SelectScrollUpButton              src/components/ui/select.tsx:141:3                   
+SelectScrollDownButton            src/components/ui/select.tsx:142:3                   
+SheetClose                        src/components/ui/sheet.tsx:98:3                     
+SheetDescription                  src/components/ui/sheet.tsx:100:3                    
+SheetFooter                       src/components/ui/sheet.tsx:101:3                    
+SheetOverlay                      src/components/ui/sheet.tsx:103:3                    
+SheetPortal                       src/components/ui/sheet.tsx:104:3                    
+toast                             src/components/ui/sonner.tsx:27:19                   
+TableFooter                       src/components/ui/table.tsx:72:41                    
+TableCaption                      src/components/ui/table.tsx:72:86                    
+ToastAction                       src/components/ui/toast.tsx:110:3                    
+FeatureGate             function  src/components/UpgradeGate.tsx:59:17                 
+default                 function  src/components/WalletBalancePanel.tsx:119:16         
+reducer                           src/hooks/use-toast.ts:71:14                         
+formatQuota                       src/hooks/useUsage.ts:81:14                          
+kindLabels                        src/hooks/useUsage.ts:91:14                          
+Constants                         src/integrations/supabase/types.ts:1547:14           
+font                              src/lib/captionStyle.ts:177:14                       
+isPresetFree                      src/lib/captionStyle.ts:2018:14                      
+getRecentEditorErrors   function  src/lib/editorControlErrors.ts:65:17                 
+guardControl            function  src/lib/editorControlErrors.ts:118:17                
+getEmojiForText         function  src/lib/emojiTags.ts:93:17                           
+buildExportChunked      function  src/lib/errorLogExport.ts:120:23                     
+iterateExportChunks     function  src/lib/errorLogExport.ts:231:24                     
+formatRangeToken                  src/lib/errorLogExport.ts:391:14                     
+PROFILE_IDC                       src/lib/exportSettings.ts:33:14                      
+triggerDownload                   src/lib/exportVideoFast.ts:24:10                     
+RESOLUTION_DIMS                   src/lib/exportVideoFast.ts:24:27                     
+FFMPEG_API_URL                    src/lib/ffmpegService.ts:23:14                       
+FFMPEG_API_AUTH                   src/lib/ffmpegService.ts:24:14                       
+processFfmpegJob        function  src/lib/ffmpegService.ts:83:23                       
+burnSubtitles           function  src/lib/ffmpegService.ts:122:23                      
+processVideoAudio       function  src/lib/ffmpegService.ts:149:23                      
+emit402                 function  src/lib/http402.ts:23:17                             
+handle402Response       function  src/lib/http402.ts:33:23                             
+MusicEngine             class     src/lib/musicEngine.ts:13:14                         
+getMusicState           function  src/lib/musicStore.ts:65:17                          
+readPerfSnapshot        function  src/lib/perfMonitor.ts:117:17                        
+snapshotMedia           function  src/lib/playbackErrors.ts:52:17                      
+categorizePlayback      function  src/lib/playbackErrors.ts:72:17                      
+snapshot                function  src/lib/realtimeDiagnostics.ts:65:17                 
+Unused exported types (52)
+BadgeProps          interface  src/components/ui/badge.tsx:23:18         
+ButtonProps         interface  src/components/ui/button.tsx:33:18        
+TextareaProps       interface  src/components/ui/textarea.tsx:5:18       
+TrackType           type       src/editor/types/editor.types.ts:3:13     
+ClipType            type       src/editor/types/editor.types.ts:4:13     
+TransitionType      type       src/editor/types/editor.types.ts:5:13     
+BlendMode           type       src/editor/types/editor.types.ts:10:13    
+EditorProject       interface  src/editor/types/editor.types.ts:14:18    
+ColorWheel          interface  src/editor/types/editor.types.ts:106:18   
+CurveData           interface  src/editor/types/editor.types.ts:113:18   
+CurvePoint          interface  src/editor/types/editor.types.ts:120:18   
+HSLData             interface  src/editor/types/editor.types.ts:125:18   
+HSLRange            interface  src/editor/types/editor.types.ts:136:18   
+Effect              interface  src/editor/types/editor.types.ts:142:18   
+EQSettings          interface  src/editor/types/editor.types.ts:165:18   
+CompressorSettings  interface  src/editor/types/editor.types.ts:175:18   
+TextSettings        interface  src/editor/types/editor.types.ts:184:18   
+TextAnimation       interface  src/editor/types/editor.types.ts:210:18   
+CaptionSegment      interface  src/editor/types/editor.types.ts:217:18   
+WordSegment         interface  src/editor/types/editor.types.ts:226:18   
+Keyframe            interface  src/editor/types/editor.types.ts:235:18   
+MediaItem           interface  src/editor/types/editor.types.ts:259:18   
+ExportSettings      interface  src/editor/types/editor.types.ts:275:18   
+RenderJob           interface  src/editor/types/editor.types.ts:297:18   
+JobStatus           type       src/hooks/useJob.ts:10:13                 
+Json                type       src/integrations/supabase/types.ts:1:13   
+Tables              type       src/integrations/supabase/types.ts:1434:13
+TablesInsert        type       src/integrations/supabase/types.ts:1463:13
+TablesUpdate        type       src/integrations/supabase/types.ts:1488:13
+Enums               type       src/integrations/supabase/types.ts:1513:13
+CompositeTypes      type       src/integrations/supabase/types.ts:1530:13
+WordTiming          interface  src/lib/captionOps.ts:10:18               
+ColorMode           type       src/lib/captionStyle.ts:3:13              
+TextAlign           type       src/lib/captionStyle.ts:5:13              
+EditorControl       type       src/lib/editorControlErrors.ts:9:13       
+Severity            type       src/lib/errorLogExport.ts:12:13           
+Source              type       src/lib/errorLogExport.ts:13:13           
+ExportExtras        type       src/lib/errorLogExport.ts:107:13          
+ExportEnrichFn      type       src/lib/errorLogExport.ts:108:13          
+ExportStatus        type       src/lib/errorLogExport.ts:347:13          
+ExportFormat        type       src/lib/errorLogExport.ts:348:13          
+ExportOutcome       type       src/lib/exportTelemetry.ts:18:13          
+ExportResolution    type       src/lib/exportVideoFast.ts:25:15          
+Segment             type       src/lib/exportVideoFast.ts:25:33          
+FFMpegInput         interface  src/lib/ffmpegService.ts:26:18            
+FFMpegOutput        interface  src/lib/ffmpegService.ts:30:18            
+PerfSample          interface  src/lib/perfMonitor.ts:14:18              
+PlaybackSurface     type       src/lib/playbackErrors.ts:9:13            
+RateLimitWindow     type       src/lib/rateLimit.ts:6:13                 
+RunLevel            type       src/lib/runLog.ts:11:13                   
+RunStep             interface  src/lib/runLog.ts:13:18                   
+ParsedWord          interface  src/lib/subtitleParser.ts:5:18            
+Duplicate exports (17)
+AdminShell|default             src/components/admin/AdminShell.tsx           
+CaptionReviewPanel|default     src/components/CaptionReviewPanel.tsx         
+CaptionRightPanel|default      src/components/CaptionRightPanel.tsx          
+CreditHistoryPanel|default     src/components/CreditHistoryPanel.tsx         
+CreditsBanner|default          src/components/CreditsBanner.tsx              
+EditorErrorInspector|default   src/components/EditorErrorInspector.tsx       
+FirstRunChecklist|default      src/components/FirstRunChecklist.tsx          
+FuturisticLoader|default       src/components/FuturisticLoader.tsx           
+AdminLibraryManager|default    src/components/library/AdminLibraryManager.tsx
+LoadingOverlay|default         src/components/LoadingOverlay.tsx             
+MusicMixer|default             src/components/MusicMixer.tsx                 
+MusicTab|default               src/components/MusicTab.tsx                   
+ProcessingStatusPanel|default  src/components/ProcessingStatusPanel.tsx      
+TranscribeCompare|default      src/components/TranscribeCompare.tsx          
+UpgradeModal|default           src/components/UpgradeModal.tsx               
+WalletBalancePanel|default     src/components/WalletBalancePanel.tsx         
+WordTimingPreview|default      src/components/WordTimingPreview.tsx          

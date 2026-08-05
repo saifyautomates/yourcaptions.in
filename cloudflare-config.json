@@ -1,0 +1,52 @@
+{
+  "zone_settings": {
+    "always_use_https": "on",
+    "brotli": "on",
+    "early_hints": "on",
+    "http3": "on",
+    "minify": {
+      "css": "on",
+      "html": "on",
+      "js": "on"
+    },
+    "rocket_loader": "on",
+    "tls_1_3": "on",
+    "browser_cache_ttl": 31536000
+  },
+  "page_rules": [
+    {
+      "targets": [
+        {
+          "target": "url",
+          "constraint": {
+            "operator": "matches",
+            "value": "*yourcaptions.com/assets/*"
+          }
+        }
+      ],
+      "actions": {
+        "cache_level": "cache_everything",
+        "edge_cache_ttl": 31536000
+      },
+      "status": "active"
+    },
+    {
+      "targets": [
+        {
+          "target": "url",
+          "constraint": {
+            "operator": "matches",
+            "value": "*yourcaptions.in/*"
+          }
+        }
+      ],
+      "actions": {
+        "forwarding_url": {
+          "url": "https://yourcaptions.com/$1",
+          "status_code": 301
+        }
+      },
+      "status": "active"
+    }
+  ]
+}

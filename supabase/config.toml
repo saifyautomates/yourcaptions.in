@@ -1,0 +1,7 @@
+project_id = "scnoehghppfpowggnvhq"
+
+[functions.log-error]
+verify_jwt = false
+
+[functions.hero-transcribe]
+verify_jwt = false

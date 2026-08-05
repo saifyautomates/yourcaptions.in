@@ -1,0 +1,59 @@
+name: E2E — Credit Wallet
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-credit-wallet-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  credit-wallet:
+    name: Credit wallet E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Preview/staging URL the spec hits. Override per-environment via repo/env secrets.
+      BASE_URL: ${{ secrets.E2E_BASE_URL || 'https://yourcaptions.com' }}
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      # Provide ONE of these to run the authenticated cases:
+      SUPABASE_TEST_SESSION_JSON: ${{ secrets.SUPABASE_TEST_SESSION_JSON }}
+      TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node_version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright (chromium)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run credit wallet E2E
+        run: npx playwright test tests/e2e/credit-wallet.spec.ts --project=chromium --reporter=list,html
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-credit-wallet
+          path: playwright-report
+          retention-days: 14
+
+      - name: Upload traces / videos on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-credit-wallet
+          path: test-results
+          retention-days: 14
