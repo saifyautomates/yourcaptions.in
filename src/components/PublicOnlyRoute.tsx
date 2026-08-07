@@ -11,14 +11,14 @@ import { logOAuth } from "@/lib/oauthDebug";
  * same page, which would cause a redirect loop.
  */
 export const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { session, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
     return <LoadingOverlay label="Loading" />;
   }
 
-  if (user) {
+  if (session) {
     const stateFrom = (location.state as { from?: string } | null)?.from;
     const searchParams = new URLSearchParams(location.search);
     const queryNext = searchParams.get("next") || searchParams.get("returnTo") || searchParams.get("redirect");
@@ -32,7 +32,7 @@ export const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => 
       queryNext,
       rawCandidate,
       resolvedTarget: target,
-      userId: user.id,
+      userId: session.user?.id,
     });
 
     // Guard against redirecting to current page or an auth path

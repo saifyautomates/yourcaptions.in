@@ -72,7 +72,10 @@ export default function Signup() {
       nav("/login");
     } else {
       toast.success("Account created!");
-      nav("/dashboard");
+      // We purposefully DO NOT navigate manually here for the same reasons as Login.
+      // signInWithPassword triggers an 'onAuthStateChange' event in useAuth.
+      // useAuth will update the global user state, and then PublicOnlyRoute 
+      // will naturally redirect the user to the dashboard.
     }
   };
 

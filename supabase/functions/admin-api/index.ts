@@ -8,7 +8,7 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  
+
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("unauthorized");
@@ -23,18 +23,18 @@ Deno.serve(async (req) => {
     const { data: userData, error: authError } = await supabase.auth.getUser();
     if (authError || !userData?.user) throw new Error("unauthorized");
     
-    // Quick admin check: check if the user is in admin_users or has super_admin role
-    // For this context, we check if they are in admin_users or if their email domain is authorized.
-    // The previous instructions used admin_users table.
     const adminClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    
+    // Check if the user is an admin in public.user_roles
     const { data: adminRole, error: roleError } = await adminClient
-      .from('admin_users')
+      .from('user_roles')
       .select('role')
       .eq('user_id', userData.user.id)
+      .eq('role', 'admin')
       .single();
       
-    if (roleError || !adminRole || adminRole.role !== 'super_admin') {
-      throw new Error("forbidden: super_admin only");
+    if (roleError || !adminRole) {
+      throw new Error("forbidden: admin only");
     }
 
     const url = new URL(req.url);
@@ -64,14 +64,13 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ settings: data }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       if (path === '/audit-log') {
-        const { data } = await adminClient.from('admin_audit_log').select('*').order('created_at', { ascending: false }).limit(100);
+        const { data } = await adminClient.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(100);
         return new Response(JSON.stringify({ logs: data }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
     }
     
     if (req.method === "POST") {
       const body = await req.json();
-
       if (path === '/credits/adjust') {
         const { user_id, amount, reason } = body;
         if (!user_id || !amount || !reason) {
@@ -79,7 +78,7 @@ Deno.serve(async (req) => {
         }
         const { data, error } = await adminClient.rpc('admin_adjust_credits', { user_id, amount, reason });
         if (error) throw error;
-        await adminClient.rpc('log_admin_action', { _user_id: userData.user.id, _action: 'adjust_credits', _details: body });
+        await adminClient.from('audit_logs').insert({ admin_id: userData.user.id, action: 'adjust_credits', details: body });
         return new Response(JSON.stringify(data), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
     }
@@ -90,13 +89,13 @@ Deno.serve(async (req) => {
       if (path.startsWith('/credit-rates/')) {
         const feature = path.split('/').pop();
         await adminClient.from('credit_rates').update(body).eq('feature', feature);
-        await adminClient.rpc('log_admin_action', { _user_id: userData.user.id, _action: 'update_credit_rate', _details: { feature, ...body } });
+        await adminClient.from('audit_logs').insert({ admin_id: userData.user.id, action: 'update_credit_rate', details: { feature, ...body } });
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
       if (path.startsWith('/plan-limits/')) {
         const plan_id = path.split('/').pop();
         await adminClient.from('plan_limits').update(body).eq('plan_id', plan_id);
-        await adminClient.rpc('log_admin_action', { _user_id: userData.user.id, _action: 'update_plan_limit', _details: { plan_id, ...body } });
+        await adminClient.from('audit_logs').insert({ admin_id: userData.user.id, action: 'update_plan_limit', details: { plan_id, ...body } });
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
       if (path.match(/^\/plan-pricing\/[^\/]+\/[^\/]+$/)) {
@@ -104,19 +103,19 @@ Deno.serve(async (req) => {
         const currency = parts.pop();
         const plan_id = parts.pop();
         await adminClient.from('plan_pricing').update(body).eq('plan_id', plan_id).eq('currency', currency);
-        await adminClient.rpc('log_admin_action', { _user_id: userData.user.id, _action: 'update_plan_pricing', _details: { plan_id, currency, ...body } });
+        await adminClient.from('audit_logs').insert({ admin_id: userData.user.id, action: 'update_plan_pricing', details: { plan_id, currency, ...body } });
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
       if (path.startsWith('/feature-flags/')) {
         const feature_name = path.split('/').pop();
         await adminClient.from('feature_flags').update(body).eq('feature_name', feature_name);
-        await adminClient.rpc('log_admin_action', { _user_id: userData.user.id, _action: 'update_feature_flag', _details: { feature_name, ...body } });
+        await adminClient.from('audit_logs').insert({ admin_id: userData.user.id, action: 'update_feature_flag', details: { feature_name, ...body } });
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
       if (path.startsWith('/system-settings/')) {
         const setting_key = path.split('/').pop();
         await adminClient.from('system_settings').update(body).eq('setting_key', setting_key);
-        await adminClient.rpc('log_admin_action', { _user_id: userData.user.id, _action: 'update_system_setting', _details: { setting_key, ...body } });
+        await adminClient.from('audit_logs').insert({ admin_id: userData.user.id, action: 'update_system_setting', details: { setting_key, ...body } });
         return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
       }
     }

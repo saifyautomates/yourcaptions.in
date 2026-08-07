@@ -28,8 +28,8 @@ export function usePlanPricing(currency: string = 'INR') {
           console.warn('plan_pricing table not found or not visible, falling back to defaults.');
           return [];
         }
-        console.error('Error fetching plan pricing:', error);
-        throw error;
+        console.warn('Error fetching plan pricing (falling back to defaults):', error);
+        return [];
       }
       
       return data as PlanPricing[];

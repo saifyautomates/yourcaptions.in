@@ -1,8 +1,10 @@
 // Permanently delete the authenticated user and cascade their data.
-// Requires the caller's JWT; uses service role to remove the auth.users row
-// (profiles/projects/captions cascade via FKs).
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -20,10 +22,11 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  const token = authHeader.slice(7);
 
+  const token = authHeader.slice(7);
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const anon = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!);
+  
   const { data: userData, error: userErr } = await anon.auth.getUser(token);
   if (userErr || !userData?.user) {
     return new Response(JSON.stringify({ error: "unauthorized" }), {

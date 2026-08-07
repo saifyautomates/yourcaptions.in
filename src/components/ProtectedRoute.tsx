@@ -11,7 +11,7 @@ import { logOAuth } from "@/lib/oauthDebug";
  * - Preserves the intended destination in `location.state.from`.
  */
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, slow, error, retry } = useAuth();
+  const { session, loading, slow, error, retry } = useAuth();
   const location = useLocation();
 
   if (loading || error) {
@@ -25,7 +25,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!user) {
+  if (!session) {
     const rawIntended = `${location.pathname}${location.search}${location.hash}`;
     const sanitizedFrom = sanitizeRedirectUrl(rawIntended, "/dashboard");
 

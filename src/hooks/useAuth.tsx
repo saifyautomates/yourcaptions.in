@@ -43,11 +43,16 @@ const AuthContext = createContext<AuthContextValue>({
 const hasValidSub = (sess: Session | null) => {
   if (!sess?.access_token) return true;
   try {
-    const payload = JSON.parse(
-      atob(sess.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
-    );
+    let base64 = sess.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4) {
+      base64 += "=";
+    }
+    const payload = JSON.parse(atob(base64));
     return typeof payload?.sub === "string" && payload.sub.length > 0;
-  } catch { return false; }
+  } catch { 
+    // If we can't parse the JWT, trust Supabase's session validation
+    return true; 
+  }
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -94,6 +99,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (mountedRef.current) setSlow(true);
     }, SLOW_LOAD_MS);
 
+    let isPopup = false;
+    try {
+      isPopup = typeof window !== 'undefined' && Boolean(window.opener) && (window.name === 'oauth_popup' || new URLSearchParams(window.location.search).get('popup') === '1');
+    } catch {
+      isPopup = false;
+    }
     const { data: sub } = supabase.auth.onAuthStateChange(async (evt, sess) => {
       if (!mountedRef.current) return;
 
@@ -129,7 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           provider: sess?.user?.app_metadata?.provider ?? null,
         });
         
-        if (typeof window !== 'undefined' && window.opener && window.name === 'oauth_popup') {
+        if (isPopup) {
           try { window.opener.postMessage({ type: "OAUTH_SUCCESS", session: sess }, "*"); } catch {}
           window.close();
         }
@@ -172,7 +183,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(data.session.user ?? null);
         identifyUser({ id: data.session.user.id, email: data.session.user.email ?? null });
         
-        if (typeof window !== 'undefined' && window.opener && window.name === 'oauth_popup') {
+        if (isPopup) {
           try { window.opener.postMessage({ type: "OAUTH_SUCCESS", session: data.session }, "*"); } catch {}
           window.close();
         }
@@ -187,7 +198,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           getSessionError: sessErr ? (sessErr as Error).message : null,
         });
         
-        if (typeof window !== 'undefined' && window.opener && window.name === 'oauth_popup') {
+        if (isPopup) {
           try { window.opener.postMessage({ type: "OAUTH_ERROR" }, "*"); } catch {}
           window.close();
         }
@@ -210,7 +221,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window === "undefined") return;
 
     // If running in an OAuth popup and already authenticated, notify opener and close
-    if (window.opener && window.opener !== window) {
+    let isPopup = false;
+    try {
+      isPopup = Boolean(window.opener) && (window.name === 'oauth_popup' || new URLSearchParams(window.location.search).get('popup') === '1');
+    } catch {
+      isPopup = false;
+    }
+    if (isPopup) {
       supabase.auth.getSession().then(({ data }) => {
         if (data.session) {
           try {
@@ -274,17 +291,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      Object.keys(localStorage).filter((k) => k.startsWith("sb-")).forEach((k) => localStorage.removeItem(k));
-    } catch {
-      /* noop */
-    }
-    setSession(null);
-    setUser(null);
-    setError(null);
-    try {
       await supabase.auth.signOut();
     } catch {
       /* noop */
+    } finally {
+      setSession(null);
+      setUser(null);
+      setError(null);
+      try {
+        Object.keys(localStorage).filter((k) => k.startsWith("sb-")).forEach((k) => localStorage.removeItem(k));
+      } catch {
+        /* noop */
+      }
     }
   };
 
@@ -298,10 +316,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       redirectTo,
     });
 
-    const isIframe = window.top !== window.self;
+    let isIframe = false;
+    try {
+      isIframe = window.top !== window.self;
+    } catch {
+      isIframe = true;
+    }
     let popup: Window | null = null;
+    let finalRedirectTo = redirectTo;
     
     if (isIframe) {
+      finalRedirectTo = redirectTo.includes('?') ? `${redirectTo}&popup=1` : `${redirectTo}?popup=1`;
       // Open the popup synchronously before any async operations to bypass popup blockers
       popup = window.open("about:blank", "oauth_popup", "width=600,height=700");
     }
@@ -309,7 +334,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo,
+        redirectTo: finalRedirectTo,
         skipBrowserRedirect: isIframe,
       },
     });

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { scrollReveal } from "@/lib/animations";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { AuthDiagnostics } from "@/components/AuthDiagnostics";
 
 export default function Login() {
   const nav = useNavigate();
@@ -33,9 +34,9 @@ export default function Login() {
     const requestId = newAuthRequestId();
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      setLoading(false);
       
       if (error) {
+        setLoading(false);
         logAuthError({ method: "password-signin", stage: "code-exchange", error, requestId });
         setAuthError({ message: error.message, requestId });
         return;
@@ -43,7 +44,12 @@ export default function Login() {
       
       logAuthSuccess("password-signin", "complete", requestId, { userId: data.user?.id });
       toast.success("Welcome back!");
-      nav(destination, { replace: true });
+      // We purposefully DO NOT navigate manually here.
+      // signInWithPassword triggers an 'onAuthStateChange' event in useAuth.
+      // useAuth will update the global user state, and then PublicOnlyRoute 
+      // will naturally redirect the user to the dashboard.
+      // Navigating manually causes a race condition where the ProtectedRoute 
+      // is rendered before the context has updated its user object.
     } catch (err: any) {
       setLoading(false);
       setAuthError({ message: err?.message || "An unexpected error occurred" });
@@ -67,6 +73,11 @@ export default function Login() {
 
   return (
     <section className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 py-16 bg-[var(--bg-1)]">
+      {/* Auth Diagnostics */}
+      <div className="absolute top-4 left-4 z-50">
+        <AuthDiagnostics />
+      </div>
+
       {/* Subtle Red Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[var(--red-3)]/5 rounded-full blur-[120px] pointer-events-none" />
       
