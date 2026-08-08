@@ -2,7 +2,7 @@
 // Uses the Postgres `check_and_record_usage` RPC (SECURITY DEFINER) via the
 // service-role client so caps are enforced atomically at the DB layer.
 
-import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 export interface RateCaps {
   perMinute: number;
@@ -18,7 +18,7 @@ export const RATE_LIMITS: Record<string, RateCaps> = {
 
 export function makeAdmin(): SupabaseClient {
   return createClient(
-    Deno.env.get("SUPABASE_URL")!,
+    (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"),
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 }
@@ -144,5 +144,32 @@ export async function deductCredits(
     await admin.from("profiles")
       .update({ credits_seconds: Math.max(0, prof.credits_seconds - Math.ceil(seconds)) })
       .eq("id", userId);
+  }
+}
+
+/**
+ * Refund `minutes` to the user's credit_wallets. Best-effort; caller
+ * should treat any failure here as non-fatal to the request.
+ */
+export async function refundCredits(
+  admin: SupabaseClient,
+  userId: string,
+  seconds: number,
+): Promise<void> {
+  if (!seconds || seconds <= 0) return;
+  const minutes = Math.max(1, Math.ceil(seconds / 60));
+  const { data: wallet } = await admin
+    .from("credit_wallets")
+    .select("plan_credits, topup_credits")
+    .eq("user_id", userId)
+    .single();
+
+  if (wallet) {
+    // We don't easily know if it came from topup or plan, so we refund to plan first.
+    // Ideally we'd refund to whichever was deducted, but this is a simple fallback.
+    const newPlan = Number(wallet.plan_credits ?? 0) + minutes;
+    await admin.from("credit_wallets")
+      .update({ plan_credits: newPlan })
+      .eq("user_id", userId);
   }
 }

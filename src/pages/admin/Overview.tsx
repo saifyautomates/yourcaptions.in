@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Users, FolderKanban, Download, IndianRupee, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { adminFetch } from "@/lib/adminFetch";
 import { StatCard, SectionHeader, EmptyState, TableSkeleton, pctDelta, formatINR } from "@/components/admin/primitives";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -54,9 +55,10 @@ export default function Overview() {
   const { data: stats, error: statsErrObj } = useQuery({
     queryKey: STATS_KEY,
     queryFn: async () => {
-      const { data, error } = await (supabase.rpc as any)("admin_overview_stats");
-      if (error) throw error;
-      return data as Stats;
+      const res = await adminFetch(`/functions/v1/admin-api/overview-stats`);
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      return (Array.isArray(data) ? data[0] : data) as Stats;
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -66,7 +68,9 @@ export default function Overview() {
   const { data: activity } = useQuery({
     queryKey: ACTIVITY_KEY,
     queryFn: async () => {
-      const { data } = await (supabase.rpc as any)("admin_recent_activity", { _limit: 10 });
+      const res = await adminFetch(`/functions/v1/admin-api/recent-activity`);
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
       return (data as Activity[]) ?? [];
     },
     staleTime: 15_000,

@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from '@supabase/supabase-js'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,30 +15,39 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) throw new Error('unauthorized');
+
     const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: userData, error: authError } = await supabaseClient.auth.getUser();
+    
+    const adminClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+    if (authError || !userData?.user) throw new Error("unauthorized");
     const { action, payload } = await req.json();
     let result;
     switch (action) {
       case 'reserve_credits':
-        result = await supabaseClient.rpc('reserve_credits', payload);
+        result = await adminClient.rpc('reserve_credits', payload);
         break;
       case 'commit_credits':
-        result = await supabaseClient.rpc('commit_credits', payload);
+        result = await adminClient.rpc('commit_credits', payload);
         break;
       case 'refund_credits':
-        result = await supabaseClient.rpc('refund_credits', payload);
+        result = await adminClient.rpc('refund_credits', payload);
         break;
       case 'add_topup_credits':
-        result = await supabaseClient.rpc('add_topup_credits', payload);
-        break;
-      case 'admin_adjust_credits':
-        result = await supabaseClient.rpc('admin_adjust_credits', payload);
+        result = await adminClient.rpc('add_topup_credits', payload);
         break;
       case 'monthly_credit_reset':
-        result = await supabaseClient.rpc('monthly_credit_reset', payload);
+        result = await adminClient.rpc('monthly_credit_reset', payload);
         break;
       default:
         throw new Error('Unknown action');

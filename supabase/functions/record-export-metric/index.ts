@@ -3,7 +3,7 @@
 // Called by the client after every export attempt — success, failure, or
 // cancel. Runs with the caller's JWT so RLS assigns rows to the right user.
 
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient } from "@supabase/supabase-js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const url = Deno.env.get("SUPABASE_URL")!;
+    const url = (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq");
     const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabase = createClient(url, anon, { global: { headers: { Authorization: authHeader } } });
     const { data: userData } = await supabase.auth.getUser();

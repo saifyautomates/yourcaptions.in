@@ -4,6 +4,7 @@ import {
 } from "recharts";
 import { CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { adminFetch } from "@/lib/adminFetch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SectionHeader, StatCard, EmptyState, TableSkeleton, StatusBadge, formatINR } from "@/components/admin/primitives";
@@ -25,8 +26,14 @@ export default function AdminSubscriptionsPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await (supabase.rpc as any)("admin_subscriptions_summary");
-      if (!cancelled) setSummary(data as Summary);
+      try {
+        const res = await adminFetch("/functions/v1/admin-api/subscriptions-summary");
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        if (!cancelled) setSummary((Array.isArray(data) ? data[0] : data) as Summary);
+      } catch (e) {
+        console.error("Failed to load summary", e);
+      }
     })();
     (async () => {
       const { data } = await supabase.from("subscriptions").select("*").order("created_at", { ascending: false }).limit(100);

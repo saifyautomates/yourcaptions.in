@@ -1,5 +1,5 @@
 // Permanently delete the authenticated user and cascade their data.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "@supabase/supabase-js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
   }
 
   const token = authHeader.slice(7);
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseUrl = (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq");
   const anon = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!);
   
   const { data: userData, error: userErr } = await anon.auth.getUser(token);

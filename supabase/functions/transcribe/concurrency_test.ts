@@ -14,10 +14,10 @@ import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.t
 import {
   createClient,
   SupabaseClient,
-} from "https://esm.sh/@supabase/supabase-js@2.45.0";
+} from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  Deno.env.get("SUPABASE_URL") ?? Deno.env.get("VITE_SUPABASE_URL")!;
+  Deno.env.get("SUPABASE_URL")?.replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq") ?? Deno.env.get("VITE_SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 // Mirrors RATE_LIMITS in supabase/functions/_shared/rate-limit.ts — if this

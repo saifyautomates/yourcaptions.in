@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Save, Shield, UserPlus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { adminFetch } from "@/lib/adminFetch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,15 +20,22 @@ type SettingRow = { key: string; value: any };
 const KEYS = ["maintenance_mode", "plan_limits", "upload_rules", "feature_flags"] as const;
 
 async function loadSettings(): Promise<Record<string, any>> {
-  const { data } = await (supabase.from("platform_settings" as any) as any).select("key,value").in("key", KEYS as any);
+  const res = await adminFetch("/functions/v1/admin-api/system-settings");
+  if (!res.ok) throw new Error("Failed to load settings");
+  const data = await res.json();
   const map: Record<string, any> = {};
-  ((data as unknown as SettingRow[]) ?? []).forEach((r) => (map[r.key] = r.value));
+  (data.settings || []).forEach((r: any) => {
+    map[r.setting_key] = r.value ?? r;
+  });
   return map;
 }
 
 async function saveSetting(key: string, value: any) {
-  const { error } = await (supabase.rpc as any)("admin_update_setting", { _key: key, _value: value });
-  if (error) throw error;
+  const res = await adminFetch(`/functions/v1/admin-api/system-settings/${key}`, {
+    method: "PATCH",
+    body: JSON.stringify({ value })
+  });
+  if (!res.ok) throw new Error(await res.text());
 }
 
 export default function AdminSettingsPage() {
@@ -49,9 +57,17 @@ export default function AdminSettingsPage() {
 
   const inviteAdmin = async () => {
     if (!adminEmail.includes("@")) return toast.error("Invalid email");
-    const { error } = await (supabase.rpc as any)("admin_set_role", { _email: adminEmail, _role: "admin", _grant: true });
-    if (error) toast.error(error.message);
-    else { toast.success(`Admin granted to ${adminEmail} (they must sign up first if new)`); setAdminEmail(""); }
+    try {
+      const res = await adminFetch("/functions/v1/admin-api/users/set-role", {
+        method: "POST",
+        body: JSON.stringify({ _email: adminEmail, _role: "admin", _grant: true })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      toast.success(`Admin granted to ${adminEmail}`); 
+      setAdminEmail("");
+    } catch (e: any) {
+      toast.error(e.message);
+    }
   };
 
   const doWipe = async () => {
@@ -63,10 +79,10 @@ export default function AdminSettingsPage() {
 
   if (!settings) return <div className="text-sm text-muted-foreground">Loading…</div>;
 
-  const maint = settings.maintenance_mode ?? { enabled: false, message: "" };
-  const limits = settings.plan_limits ?? { free_minutes: 30, pro_minutes: 300, team_minutes: 1800 };
-  const upload = settings.upload_rules ?? { max_upload_mb: 1024, allowed_types: [] };
-  const flags = settings.feature_flags ?? {};
+  const maint = settings.maintenance_mode?.value || settings.maintenance_mode || { enabled: false, message: "" };
+  const limits = settings.plan_limits?.value || settings.plan_limits || { free_minutes: 30, pro_minutes: 300, team_minutes: 1800 };
+  const upload = settings.upload_rules?.value || settings.upload_rules || { max_upload_mb: 1024, allowed_types: [] };
+  const flags = settings.feature_flags?.value || settings.feature_flags || {};
 
   return (
     <div className="space-y-6">

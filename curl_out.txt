@@ -1,0 +1,2 @@
+* Could not resolve host: mqotnflwrgqppbhjkwyg.supabase.co
+* Closing connection 0

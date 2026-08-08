@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Users as UsersIcon, Search, Trash2, Shield, ShieldOff, ExternalLink, FolderKanban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { adminFetch } from "@/lib/adminFetch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -38,9 +39,9 @@ export default function AdminUsersPage() {
   const { data: rows } = useQuery({
     queryKey: USERS_KEY,
     queryFn: async () => {
-      const { data, error } = await (supabase.rpc as any)("admin_list_users");
-      if (error) throw error;
-      return data as Row[];
+      const res = await adminFetch("/functions/v1/admin-api/users");
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json() as Row[];
     },
     staleTime: 30_000,
     refetchOnWindowFocus: false,
@@ -96,8 +97,11 @@ export default function AdminUsersPage() {
 
   const setPlanM = useMutation({
     mutationFn: async ({ r, plan }: { r: Row; plan: string }) => {
-      const { error } = await (supabase.rpc as any)("admin_grant_access", { _user_id: r.user_id, _plan: plan, _mode: "set" });
-      if (error) throw error;
+      const res = await adminFetch("/functions/v1/admin-api/users/grant-access", {
+        method: "POST",
+        body: JSON.stringify({ _user_id: r.user_id, _plan: plan, _mode: "set" })
+      });
+      if (!res.ok) throw new Error(await res.text());
     },
     onMutate: ({ r, plan }) => ({ prev: patchCache((rs) => rs.map((x) => x.user_id === r.user_id ? { ...x, plan: plan as Row["plan"] } : x)) }),
     onError: (err, _v, ctx) => { if (ctx?.prev) qc.setQueryData(USERS_KEY, ctx.prev); toast.error((err as Error).message); },
@@ -107,8 +111,11 @@ export default function AdminUsersPage() {
 
   const adminM = useMutation({
     mutationFn: async (r: Row) => {
-      const { error } = await (supabase.rpc as any)("admin_set_role", { _user_id: r.user_id, _role: "admin", _grant: !r.is_admin });
-      if (error) throw error;
+      const res = await adminFetch("/functions/v1/admin-api/users/set-role", {
+        method: "POST",
+        body: JSON.stringify({ _user_id: r.user_id, _role: "admin", _grant: !r.is_admin })
+      });
+      if (!res.ok) throw new Error(await res.text());
     },
     onMutate: (r) => ({ prev: patchCache((rs) => rs.map((x) => x.user_id === r.user_id ? { ...x, is_admin: !x.is_admin } : x)) }),
     onError: (err, _v, ctx) => { if (ctx?.prev) qc.setQueryData(USERS_KEY, ctx.prev); toast.error((err as Error).message); },
@@ -118,8 +125,11 @@ export default function AdminUsersPage() {
 
   const creditsM = useMutation({
     mutationFn: async ({ r, seconds }: { r: Row; seconds: number }) => {
-      const { error } = await (supabase.rpc as any)("admin_grant_access", { _user_id: r.user_id, _credits_seconds: seconds, _mode: "add" });
-      if (error) throw error;
+      const res = await adminFetch("/functions/v1/admin-api/users/grant-access", {
+        method: "POST",
+        body: JSON.stringify({ _user_id: r.user_id, _credits_seconds: seconds, _mode: "add" })
+      });
+      if (!res.ok) throw new Error(await res.text());
     },
     onMutate: ({ r, seconds }) => ({ prev: patchCache((rs) => rs.map((x) => x.user_id === r.user_id ? { ...x, credits_seconds: (x.credits_seconds ?? 0) + seconds } : x)) }),
     onError: (err, _v, ctx) => { if (ctx?.prev) qc.setQueryData(USERS_KEY, ctx.prev); toast.error((err as Error).message); },
@@ -129,8 +139,11 @@ export default function AdminUsersPage() {
 
   const deleteM = useMutation({
     mutationFn: async (r: Row) => {
-      const { error } = await (supabase.rpc as any)("admin_delete_user", { _user_id: r.user_id });
-      if (error) throw error;
+      const res = await adminFetch("/functions/v1/admin-api/users/delete", {
+        method: "POST",
+        body: JSON.stringify({ _user_id: r.user_id })
+      });
+      if (!res.ok) throw new Error(await res.text());
     },
     onMutate: (r) => ({ prev: patchCache((rs) => rs.filter((x) => x.user_id !== r.user_id)) }),
     onError: (err, _v, ctx) => { if (ctx?.prev) qc.setQueryData(USERS_KEY, ctx.prev); toast.error((err as Error).message); },
@@ -288,10 +301,9 @@ function UserProjectsList({ userId, email }: { userId: string; email: string | n
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin", "user-projects", userId],
     queryFn: async () => {
-      const { data, error } = await (supabase.rpc as any)("admin_list_projects", {
-        _limit: 100, _offset: 0, _status: null, _search: email || null,
-      });
-      if (error) throw error;
+      const res = await adminFetch(`/functions/v1/admin-api/projects`);
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
       return (data as Array<{ id: string; title: string; status: string; created_at: string; user_id: string; duration_seconds: number | null }>)
         .filter((p) => p.user_id === userId);
     },

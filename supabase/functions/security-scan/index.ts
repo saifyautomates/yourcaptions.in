@@ -1,8 +1,8 @@
 // Server-side security scanner. Admin-only. Performs a set of built-in checks
 // against the project's Postgres catalog + error_logs and upserts results into
 // public.security_findings (keyed by scanner_name + external_id).
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { createClient } from "@supabase/supabase-js";
+const corsHeaders = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS" };
 
 type Sev = "info" | "low" | "medium" | "high" | "critical";
 interface Check {
@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const authHeader = req.headers.get("Authorization") ?? "";
-  const supaUrl = Deno.env.get("SUPABASE_URL")!;
+  const supaUrl = (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq");
   const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
   const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 

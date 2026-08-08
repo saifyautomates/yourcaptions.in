@@ -2,7 +2,7 @@
 // Client calls this immediately before starting a video export so we can
 // block over-quota exports without doing any encoding work.
 
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient } from "@supabase/supabase-js";
 import { enforceRateLimit, makeAdmin } from "../_shared/rate-limit.ts";
 import { consumeQuota } from "../_shared/quota.ts";
 
@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const url = Deno.env.get("SUPABASE_URL")!;
+    const url = (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq");
     const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
     const user = createClient(url, anon, { global: { headers: { Authorization: authHeader } } });
     const { data: userData } = await user.auth.getUser();

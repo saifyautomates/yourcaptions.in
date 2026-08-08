@@ -1,10 +1,10 @@
 // Transcribes the currently active hero video with ElevenLabs Scribe v2,
 // caches the word-level timings, and returns them (plus optional translation).
 // Public: safe to call from the marketing hero.
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { createClient } from "@supabase/supabase-js";
+const corsHeaders = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS" };
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq");
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const ELEVEN_KEY = Deno.env.get("ELEVENLABS_API_KEY");
@@ -139,19 +139,14 @@ async function transcribeWithElevenLabs(videoUrl: string): Promise<{
 
 async function translate(text: string, langName: string): Promise<string | null> {
   if (!OPENAI_API_KEY || !text) return null;
-  const r = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
+  const j = await callAI({
+          model: "gpt-4o-mini",
+          messages: [
         { role: "system", content: `Translate the user's text to ${langName}. Return only the translation, no quotes or notes.` },
         { role: "user", content: text },
-      ],
-    }),
-  });
-  if (!r.ok) return null;
-  const j = await r.json();
+      ]
+        }).catch(() => null);
+        if (!j) return null;
   return (j.choices?.[0]?.message?.content ?? "").trim() || null;
 }
 

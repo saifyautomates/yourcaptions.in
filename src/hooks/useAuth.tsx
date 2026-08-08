@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(null);
         setUser(null);
         setError(null);
-        setLoading(false);
+        if (evt !== "INITIAL_SESSION") setLoading(false);
         logOAuth("session-missing", { reason: "stale-jwt-purged-onchange", event: evt });
         return;
       }
@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(sess);
       setUser(sess?.user ?? null);
       setError(null);
-      setLoading(false);
+      if (evt !== "INITIAL_SESSION") setLoading(false);
 
       identifyUser(sess?.user ? { id: sess.user.id, email: sess.user.email ?? null } : null);
 
@@ -140,8 +140,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           provider: sess?.user?.app_metadata?.provider ?? null,
         });
         
-        if (isPopup) {
-          try { window.opener.postMessage({ type: "OAUTH_SUCCESS", session: sess }, "*"); } catch {}
+        if (isPopup && sess) {
+          try { window.opener.postMessage({ type: "OAUTH_SUCCESS", session: { access_token: sess.access_token, refresh_token: sess.refresh_token } }, "*"); } catch (e) { console.error("postMessage error:", e); }
           window.close();
         }
       } else if (evt === "SIGNED_OUT") {
@@ -184,7 +184,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         identifyUser({ id: data.session.user.id, email: data.session.user.email ?? null });
         
         if (isPopup) {
-          try { window.opener.postMessage({ type: "OAUTH_SUCCESS", session: data.session }, "*"); } catch {}
+          try { window.opener.postMessage({ type: "OAUTH_SUCCESS", session: { access_token: data.session.access_token, refresh_token: data.session.refresh_token } }, "*"); } catch (e) { console.error("postMessage error:", e); }
           window.close();
         }
       }
@@ -231,10 +231,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       supabase.auth.getSession().then(({ data }) => {
         if (data.session) {
           try {
-            window.opener.postMessage({ type: "OAUTH_SUCCESS", session: data.session }, "*");
+            window.opener.postMessage({ type: "OAUTH_SUCCESS", session: { access_token: data.session.access_token, refresh_token: data.session.refresh_token } }, "*");
             window.close();
-          } catch {
-            /* noop */
+          } catch (e) {
+            console.error("postMessage error:", e);
           }
         }
       });

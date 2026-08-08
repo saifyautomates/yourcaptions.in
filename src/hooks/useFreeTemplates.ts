@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { adminFetch } from "@/lib/adminFetch";
 import { CAP_PRESETS, FREE_PRESET_NAMES } from "@/lib/captionStyle";
 
 const KEY = "free_templates";
@@ -51,11 +52,11 @@ export function useFreeTemplates() {
 
   const save = useCallback(async (nextNames: string[]) => {
     const validated = validateFreeTemplateNames(nextNames);
-    const { error } = await supabase.rpc("admin_update_setting", {
-      _key: KEY,
-      _value: validated as any,
+    const res = await adminFetch(`/functions/v1/admin-api/system-settings/${KEY}`, {
+      method: "PATCH",
+      body: JSON.stringify({ value: validated })
     });
-    if (error) throw error;
+    if (!res.ok) throw new Error(await res.text());
     setNames(validated);
   }, []);
 

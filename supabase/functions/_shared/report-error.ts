@@ -3,7 +3,7 @@
 // lands in `error_logs` and triggers the same admin alerting as frontend
 // errors. Fire-and-forget; never throws.
 
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient } from "@supabase/supabase-js";
 
 type Severity = "info" | "warning" | "error" | "critical";
 
@@ -19,7 +19,7 @@ let _admin: ReturnType<typeof createClient> | null = null;
 function admin() {
   if (_admin) return _admin;
   _admin = createClient(
-    Deno.env.get("SUPABASE_URL")!,
+    (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"),
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
   return _admin;

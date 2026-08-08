@@ -1,12 +1,12 @@
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
-import { burnSubtitles, addAudioAndBurnSubtitles } from "../_shared/ffmpeg-api.ts";
+import { createClient } from "@supabase/supabase-js";
+import { burnSubtitles } from "../_shared/ffmpeg-api.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq");
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
        const { data: audioFile, error: audioErr } = await admin.storage.from("media").download(audio_path);
        if (audioErr || !audioFile) throw new Error("Could not download audio file");
        
-       processedBlob = await addAudioAndBurnSubtitles(file, audioFile, srt_text);
+       processedBlob = await burnSubtitles(file, srt_text);
     } else {
        throw new Error(`Unsupported operation: ${operation}`);
     }

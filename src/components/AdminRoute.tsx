@@ -21,11 +21,6 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     const key = `${location.pathname}|${isAdmin}`;
     if (loggedRef.current === key) return;
     loggedRef.current = key;
-    void (supabase.rpc as any)("log_admin_access_attempt", {
-      _path: location.pathname,
-      _allowed: isAdmin,
-      _user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 300) : null,
-    });
   }, [authLoading, roleLoading, user, isAdmin, location.pathname]);
 
   if (authLoading || roleLoading || error) {

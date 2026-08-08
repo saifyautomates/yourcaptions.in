@@ -1,7 +1,7 @@
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
-import { enforceRateLimit, makeAdmin, requireCredits } from "../_shared/rate-limit.ts";
+import { createClient } from "@supabase/supabase-js";
+import { enforceRateLimit, makeAdmin, requireCredits, deductCredits, refundCredits } from "../_shared/rate-limit.ts";
 import { createJob, startJob, progressWriter, succeedJob, failJob } from "../_shared/jobs.ts";
-import { consumeQuota, peekRemaining } from "../_shared/quota.ts";
+import { consumeQuota, peekRemaining, refundQuota } from "../_shared/quota.ts";
 import { assemblyLang, deepgramLang } from "../_shared/lang-map.ts";
 
 
@@ -10,7 +10,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq");
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ASSEMBLYAI_KEY = Deno.env.get("ASSEMBLYAI_API_KEY");
 const DEEPGRAM_KEY = Deno.env.get("DEEPGRAM_API_KEY");
@@ -328,12 +328,14 @@ async function runTranscription(project_id: string, providerOverride: string | u
     if (!project.compare_mode) {
       const q = await consumeQuota(supabase, project.user_id, "caption_seconds", duration);
       if (!q.ok) throw new Error(q.message);
+      await deductCredits(admin, project.user_id, duration);
     } else {
       const { count } = await supabase.from("captions").select("id", { count: "exact", head: true })
         .eq("project_id", project_id).eq("language", project.source_language);
       if (!count) {
         const q = await consumeQuota(supabase, project.user_id, "caption_seconds", duration);
         if (!q.ok) throw new Error(q.message);
+        await deductCredits(admin, project.user_id, duration);
       }
     }
 

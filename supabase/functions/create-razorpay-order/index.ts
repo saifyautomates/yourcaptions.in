@@ -1,4 +1,4 @@
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient } from "@supabase/supabase-js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     if (!authHeader) throw new Error("unauthorized");
 
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
+      (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"),
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
     if (!orderRes.ok) throw new Error(`Razorpay: ${await orderRes.text()}`);
     const order = await orderRes.json();
 
-    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const admin = createClient((Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     await admin.from("payments").insert({
       user_id: userData.user.id,
       razorpay_order_id: order.id,

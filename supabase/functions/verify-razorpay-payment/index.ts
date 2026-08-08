@@ -1,4 +1,4 @@
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient } from "@supabase/supabase-js";
 import { createHmac } from "node:crypto";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     if (!authHeader) throw new Error("unauthorized");
 
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
+      (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"),
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
       .digest("hex");
     if (expected !== razorpay_signature) throw new Error("signature mismatch");
 
-    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const admin = createClient((Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     // Load the pending payment row. This is the ONLY source of truth for what
     // the user paid for — never trust the client's kind/pack/plan.

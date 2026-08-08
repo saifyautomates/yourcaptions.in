@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Flag, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { adminFetch } from "@/lib/adminFetch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SectionHeader, EmptyState, TableSkeleton, StatusBadge } from "@/components/admin/primitives";
@@ -27,8 +28,14 @@ export default function AdminReportsPage() {
       if (!cancelled) setExports((data as any) ?? []);
     })();
     (async () => {
-      const { data } = await (supabase.rpc as any)("admin_security_alerts", { _limit: 30 });
-      if (!cancelled) setAlerts((data as any) ?? []);
+      try {
+        const res = await adminFetch("/functions/v1/admin-api/security-alerts");
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        if (!cancelled) setAlerts(data ?? []);
+      } catch(e) {
+        if (!cancelled) setAlerts([]);
+      }
     })();
     return () => { cancelled = true; };
   }, []);

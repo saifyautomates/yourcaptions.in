@@ -25,16 +25,6 @@ const primary = [
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon },
 ];
 
-const advanced = [
-  { to: "/admin/hero", label: "Hero video", icon: Film },
-  { to: "/admin/usage", label: "Usage summary", icon: Activity },
-  { to: "/admin/roles", label: "Role management", icon: ShieldCheck },
-  { to: "/admin/alerts", label: "Security alerts", icon: ShieldAlert },
-  { to: "/admin/performance", label: "Performance", icon: Gauge },
-  { to: "/admin/errors", label: "Error logs", icon: Bug },
-  { to: "/dashboard/run-logs", label: "Run logs", icon: ScrollText },
-];
-
 const NavList = ({ onNavigate }: { onNavigate?: () => void }) => {
   const renderItem = (i: { to: string; label: string; icon: any; end?: boolean }) => (
     <NavLink
@@ -62,8 +52,6 @@ const NavList = ({ onNavigate }: { onNavigate?: () => void }) => {
     <nav className="flex flex-col gap-1 px-3 py-4">
       <p className="px-2 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Admin</p>
       {primary.map(renderItem)}
-      <p className="mt-4 px-2 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Advanced</p>
-      {advanced.map(renderItem)}
     </nav>
   );
 };
@@ -153,7 +141,7 @@ export const AdminShell = () => {
   useEffect(() => { prefetchAllAdminRoutes(); }, []);
 
   const current =
-    [...primary, ...advanced].find((i) =>
+    [...primary].find((i) =>
       i.to === "/admin" ? location.pathname === "/admin" : location.pathname.startsWith(i.to)
     )?.label ?? "Admin";
   return (

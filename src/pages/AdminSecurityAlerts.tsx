@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { adminFetch } from "@/lib/adminFetch";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, ShieldAlert, ShieldCheck, UserMinus, UserPlus } from "lucide-react";
@@ -35,13 +36,15 @@ export default function AdminSecurityAlerts() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await (supabase.rpc as any)("admin_security_alerts", { _limit: 200 });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const res = await adminFetch("/functions/v1/admin-api/security-alerts");
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setRows((data ?? []) as Alert[]);
+    } catch (e: any) {
+      toast.error(e.message);
     }
-    setRows((data ?? []) as Alert[]);
+    setLoading(false);
   };
 
   useEffect(() => {

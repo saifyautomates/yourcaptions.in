@@ -10,7 +10,7 @@ import { AdminRoute } from "@/components/AdminRoute";
 import { PublicOnlyRoute } from "@/components/PublicOnlyRoute";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { RealtimeDiagnosticsPanel } from "@/components/RealtimeDiagnosticsPanel";
-import { AuthDiagnosticsPanel } from "@/components/AuthDiagnosticsPanel";
+
 import { useTemplateWarnings } from "@/hooks/useTemplateWarnings";
 import { UpgradeGate } from "@/components/UpgradeGate";
 import { PublicLayout } from "./layouts/PublicLayout";
@@ -37,11 +37,6 @@ const ProjectView = lazy(() => import("./pages/ProjectView.tsx"));
 const Plugins = lazy(() => import("./pages/Plugins.tsx"));
 const Testimonials = lazy(() => import("./pages/Testimonials.tsx"));
 
-const AdminUsage = lazy(() => import("./pages/AdminUsage.tsx"));
-const AdminPerformance = lazy(() => import("./pages/AdminPerformance.tsx"));
-const AdminHero = lazy(() => import("./pages/AdminHero.tsx"));
-const AdminRoles = lazy(() => import("./pages/AdminRoles.tsx"));
-const AdminSecurityAlerts = lazy(() => import("./pages/AdminSecurityAlerts.tsx"));
 const AdminControlCenter = lazy(() => import("./pages/admin/AdminControlCenter.tsx"));
 const AdminShell = lazy(() => import("./components/admin/AdminShell.tsx"));
 const AdminOverview = lazy(() => import("./pages/admin/Overview.tsx"));
@@ -55,7 +50,6 @@ const AdminFeedbackPage = lazy(() => import("./pages/admin/Feedback.tsx"));
 const BatchUploads = lazy(() => import("./pages/BatchUploads.tsx"));
 const AssetLibrary = lazy(() => import("./pages/AssetLibrary.tsx"));
 const TeamSpaces = lazy(() => import("./pages/TeamSpaces.tsx"));
-const ErrorLogs = lazy(() => import("./pages/ErrorLogs.tsx"));
 const SmokeTest = lazy(() => import("./pages/SmokeTest.tsx"));
 const TemplatesSmokeTest = lazy(() => import("./pages/TemplatesSmokeTest.tsx"));
 const RunLogs = lazy(() => import("./pages/RunLogs.tsx"));
@@ -178,17 +172,10 @@ const App = () => (
                 <Route path="reports" element={<AdminReportsPage />} />
                 <Route path="settings" element={<AdminSettingsPage />} />
                 <Route path="feedback" element={<AdminFeedbackPage />} />
-                <Route path="usage" element={<AdminUsage />} />
-                <Route path="errors" element={<ErrorLogs />} />
-                <Route path="performance" element={<AdminPerformance />} />
-                <Route path="hero" element={<AdminHero />} />
-                <Route path="roles" element={<AdminRoles />} />
-                <Route path="alerts" element={<AdminSecurityAlerts />} />
                 <Route path="control-center" element={<AdminControlCenter />} />
               </Route>
               <Route path="/dashboard/security" element={<AdminRoute><SecurityIssues /></AdminRoute>} />
               <Route path="/dashboard/run-logs" element={<AdminRoute><RunLogs /></AdminRoute>} />
-              <Route path="/dashboard/errors" element={<AdminRoute><ErrorLogs /></AdminRoute>} />
               <Route path="/dashboard/smoke-test" element={<AdminRoute><SmokeTest /></AdminRoute>} />
               <Route path="/dashboard/templates-smoke-test" element={<AdminRoute><TemplatesSmokeTest /></AdminRoute>} />
               <Route path="/dashboard/e2e-test" element={<AdminRoute><E2ETest /></AdminRoute>} />
@@ -201,7 +188,6 @@ const App = () => (
         </AuthProvider>
       </BrowserRouter>
       <RealtimeDiagnosticsPanel />
-      <AuthDiagnosticsPanel />
     </TooltipProvider>
   </QueryClientProvider>
 );

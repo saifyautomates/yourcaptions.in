@@ -5,7 +5,7 @@
 // per-segment progress to public.jobs. Clients subscribe by jobId over
 // Supabase Realtime and can safely reconnect at any time.
 
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient } from "@supabase/supabase-js";
 import { enforceRateLimit, requireCredits, deductCredits, makeAdmin } from "../_shared/rate-limit.ts";
 import { createJob, startJob, progressWriter, succeedJob, failJob } from "../_shared/jobs.ts";
 import { consumeQuota, peekRemaining } from "../_shared/quota.ts";
@@ -37,7 +37,7 @@ interface RunOpts {
 }
 
 async function runDub(opts: RunOpts) {
-  const url = Deno.env.get("SUPABASE_URL")!;
+  const url = (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq");
   const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const admin = createClient(url, service);
   const setProgress = progressWriter(admin, opts.jobId);
@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const url = Deno.env.get("SUPABASE_URL")!;
+    const url = (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq");
     const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabase = createClient(url, anon, { global: { headers: { Authorization: authHeader } } });
     const admin = makeAdmin();

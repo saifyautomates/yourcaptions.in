@@ -8,12 +8,6 @@ export const ADMIN_ROUTE_LOADERS: Record<string, () => Promise<unknown>> = {
   "/admin/exports": () => import("@/pages/admin/Exports"),
   "/admin/reports": () => import("@/pages/admin/Reports"),
   "/admin/settings": () => import("@/pages/admin/Settings"),
-  "/admin/hero": () => import("@/pages/AdminHero"),
-  "/admin/usage": () => import("@/pages/AdminUsage"),
-  "/admin/roles": () => import("@/pages/AdminRoles"),
-  "/admin/alerts": () => import("@/pages/AdminSecurityAlerts"),
-  "/admin/performance": () => import("@/pages/AdminPerformance"),
-  "/admin/errors": () => import("@/pages/ErrorLogs"),
   "/dashboard/run-logs": () => import("@/pages/RunLogs"),
 };
 

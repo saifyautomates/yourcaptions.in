@@ -2,14 +2,14 @@
 // Rows live in public.jobs. Progress + message are written incrementally so
 // the client can display a live progress bar and resume after reconnect.
 
-import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 export type JobKind = "transcribe" | "dub" | "translate";
 export type JobStatus = "queued" | "running" | "succeeded" | "failed" | "canceled";
 
 export function jobsClient(): SupabaseClient {
   return createClient(
-    Deno.env.get("SUPABASE_URL")!,
+    (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"),
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 }

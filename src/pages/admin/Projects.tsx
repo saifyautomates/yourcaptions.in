@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FolderKanban, Search, RefreshCw, Trash2, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { adminFetch } from "@/lib/adminFetch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,13 +36,12 @@ export default function AdminProjectsPage() {
   const { data: rows } = useQuery({
     queryKey: listKey,
     queryFn: async () => {
-      const { data, error } = await (supabase.rpc as any)("admin_list_projects", {
-        _limit: 2000, _offset: 0,
-        _status: status === "all" ? null : status,
-        _search: dq || null,
-      });
-      if (error) throw error;
-      return data as Row[];
+      const searchParams = new URLSearchParams();
+      if (status !== "all") searchParams.set("status", status);
+      if (dq) searchParams.set("search", dq);
+      const res = await adminFetch(`/functions/v1/admin-api/projects?${searchParams.toString()}`);
+      if (!res.ok) throw new Error(await res.text());
+      return (await res.json()) as Row[];
     },
     staleTime: 20_000,
     placeholderData: (prev) => prev,

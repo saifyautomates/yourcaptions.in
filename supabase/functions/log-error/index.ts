@@ -4,7 +4,7 @@
 // to admins the first time a `critical` error is seen (or when a `critical`
 // error recurs after being resolved).
 
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient } from "@supabase/supabase-js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
   if (authHeader?.startsWith("Bearer ")) {
     try {
       const authClient = createClient(
-        Deno.env.get("SUPABASE_URL")!,
+        (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"),
         Deno.env.get("SUPABASE_ANON_KEY")!,
         { global: { headers: { Authorization: authHeader } } },
       );
@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
   const fingerprint = await sha1(fpInput);
 
   const admin = createClient(
-    Deno.env.get("SUPABASE_URL")!,
+    (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"),
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 

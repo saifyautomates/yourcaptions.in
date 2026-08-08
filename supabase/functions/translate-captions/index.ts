@@ -1,4 +1,4 @@
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient } from "@supabase/supabase-js";
 import { enforceRateLimit, makeAdmin, requireCredits, deductCredits } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
@@ -257,7 +257,7 @@ Deno.serve(async (req) => {
     if (!authHeader) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: corsHeaders });
 
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
+      (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"),
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
@@ -340,17 +340,7 @@ Return JSON: {"translations":[{"i":0,"text":"...","confidence":0.87}, ...]} — 
 Segments:
 ${JSON.stringify(batch.map((s, i) => ({ i, text: s.text })))}`;
 
-      const apiKey = Deno.env.get("OPENAI_API_KEY");
-      const endpoint = "https://api.openai.com/v1/chat/completions";
-      const aiRes = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          // Pro handles low-resource dialects (Haryanvi, Bhojpuri, Darija…)
-          // dramatically better than flash, which collapses them to Hindi/MSA.
+      const aiJson = await callAI({
           model: dialectGuide ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash",
           messages: [
             { role: "system", content: `You are a professional subtitle translator specializing in regional dialects. Translate to ${targetName}. ${dialectGuide ? "Preserve the dialect's distinctive vocabulary and grammar — do NOT normalize to the nearest standard language. " : ""}Reply with JSON only, including a per-segment confidence score.` },
@@ -358,10 +348,7 @@ ${JSON.stringify(batch.map((s, i) => ({ i, text: s.text })))}`;
           ],
           response_format: { type: "json_object" },
           max_tokens: 8192,
-        }),
-      });
-      if (!aiRes.ok) throw new Error(`AI: ${aiRes.status} ${await aiRes.text()}`);
-      const aiJson = await aiRes.json();
+        });
       const finishReason = aiJson.choices?.[0]?.finish_reason;
       const content = aiJson.choices?.[0]?.message?.content ?? "{}";
       if (finishReason === "length") {

@@ -3,7 +3,7 @@
 // Returns { text, audio (base64), mime, words } where ElevenLabs words are
 // generated from character timestamps so the hero captions lock to the voice.
 
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+const corsHeaders = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS" };
 
 // Voice keys the client exposes → { elevenlabs voice id, openai voice name }
 const VOICE_MAP: Record<string, { el: string; openai: string; label: string }> = {
@@ -74,22 +74,14 @@ async function translate(text: string, langName: string): Promise<string> {
   const key = Deno.env.get("OPENAI_API_KEY");
   if (!key || langName.toLowerCase() === "english") return text;
   try {
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
+    const j = await callAI({
+          model: "google/gemini-3-flash-preview",
+          messages: [
           { role: "system", content: `Translate to ${langName}. Keep it natural and conversational. Preserve "Yourcaptions.in" literally. Return ONLY the translation, no quotes, no extras.` },
           { role: "user", content: text },
-        ],
-      }),
-    });
-    if (!r.ok) return text;
-    const j = await r.json();
+        ]
+        }).catch(() => null);
+        if (!j) return text;
     const out = j.choices?.[0]?.message?.content?.trim();
     return out || text;
   } catch { return text; }

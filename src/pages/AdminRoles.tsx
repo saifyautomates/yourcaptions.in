@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { adminFetch } from "@/lib/adminFetch";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,18 +29,20 @@ export default function AdminRoles() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase.rpc("admin_list_users");
-    if (error) {
-      toast.error(error.message);
-    } else {
+    try {
+      const res = await adminFetch("/functions/v1/admin-api/users");
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
       setRows(
         (data ?? []).map((r: any) => ({
           user_id: r.user_id,
           email: r.email,
           full_name: r.full_name,
           is_admin: r.is_admin,
-        })),
+        }))
       );
+    } catch (e: any) {
+      toast.error(e.message);
     }
     setLoading(false);
   };
@@ -51,20 +54,24 @@ export default function AdminRoles() {
   const setRole = async (opts: { user_id?: string; email?: string; grant: boolean }) => {
     const key = opts.user_id ?? opts.email ?? "";
     setBusy(key);
-    const { error } = await supabase.rpc("admin_set_role", {
-      _user_id: opts.user_id ?? undefined,
-      _email: opts.email ?? undefined,
-      _role: "admin",
-      _grant: opts.grant,
-    });
-    setBusy(null);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const res = await adminFetch("/functions/v1/admin-api/users/set-role", {
+        method: "POST",
+        body: JSON.stringify({
+          _user_id: opts.user_id ?? undefined,
+          _email: opts.email ?? undefined,
+          _role: "admin",
+          _grant: opts.grant,
+        })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      toast.success(opts.grant ? "Admin access granted" : "Admin access revoked");
+      if (opts.email) setInviteEmail("");
+      void load();
+    } catch (e: any) {
+      toast.error(e.message);
     }
-    toast.success(opts.grant ? "Admin access granted" : "Admin access revoked");
-    if (opts.email) setInviteEmail("");
-    void load();
+    setBusy(null);
   };
 
   const filtered = rows.filter((r) => {

@@ -26,7 +26,7 @@ export const CreditSync = {
     topupCreditsUsed: number;
   } {
     const cost = CreditSync.estimateCost(feature, durationMinutes);
-    const { total, planCredits, topupCredits } = useCreditStore.getState();
+    const { balance: total, planCredits, topupCredits } = useCreditStore.getState();
     
     const missing = Math.max(0, cost - total);
     const canAfford = missing === 0;

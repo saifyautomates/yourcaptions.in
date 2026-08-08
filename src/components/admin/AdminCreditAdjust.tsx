@@ -18,15 +18,15 @@ export function AdminCreditAdjust() {
     if (!email) return;
     setLoading(true);
     
-    // Note: Assuming a secure RPC or admin lookup exists
-    const { data, error } = await supabase.rpc('admin_get_user_by_email', { user_email: email });
-    
-    if (error) {
-      toast.error('User not found or error fetching user');
-      setUserData(null);
-    } else if (data) {
+    try {
+      const res = await adminFetch(`/functions/v1/admin-api/users/search?email=${encodeURIComponent(email)}`);
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
       setUserData({ id: data.id, balance: data.total_credits || 0 });
       toast.success('User found');
+    } catch (error) {
+      toast.error('User not found or error fetching user');
+      setUserData(null);
     }
     setLoading(false);
   };

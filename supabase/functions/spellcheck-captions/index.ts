@@ -6,9 +6,10 @@
 // limited per user via the shared enforceRateLimit helper so anonymous or
 // scripted callers can't burn AI credits.
 
-import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createClient } from "@supabase/supabase-js";
 import { enforceRateLimit, makeAdmin } from "../_shared/rate-limit.ts";
 
+import { callAI } from "../_shared/ai.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -25,7 +26,7 @@ Deno.serve(async (req) => {
       });
     }
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
+      (Deno.env.get("SUPABASE_URL") || "").replace("mqotnflwrgqppbhjkwyq", "mqotnlflwrgqpbhjkwyq"),
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
@@ -63,21 +64,13 @@ The "original" MUST match the input text exactly (case, spacing).`;
 
     const user = `Language: ${language || "auto"}\n\nCaptions:\n${text.slice(0, 12000)}`;
 
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "content-type": "application/json", "authorization": `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "system", content: sys }, { role: "user", content: user }],
-        response_format: { type: "json_object" },
-      }),
-    });
-
-    if (!res.ok) {
-      const t = await res.text();
-      return new Response(JSON.stringify({ error: `AI gateway ${res.status}`, detail: t.slice(0, 500) }), { status: 502, headers: { ...corsHeaders, "content-type": "application/json" } });
-    }
-    const data = await res.json();
+    const data = await callAI({
+          model: "gpt-4o-mini",
+          messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+          response_format: { type: "json_object" }
+        }).catch((e) => {
+          throw new Error(e.message);
+        });
     const content = data?.choices?.[0]?.message?.content ?? "{}";
     let parsed: any = {};
     try { parsed = JSON.parse(content); } catch { parsed = { issues: [] }; }

@@ -2,7 +2,7 @@
 // so edge functions can atomically check + record usage against the caller's
 // monthly plan limit.
 
-import { SupabaseClient } from "npm:@supabase/supabase-js@2.45.0";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export type MeterKind = "caption_seconds" | "dub_seconds" | "export_count";
 
@@ -83,4 +83,36 @@ function kindLabel(k: MeterKind): string {
   return k === "caption_seconds" ? "caption generation"
        : k === "dub_seconds"     ? "AI voiceover"
        : "video exports";
+}
+
+// Attempt to refund `amount` units if a job fails.
+export async function refundQuota(
+  admin: SupabaseClient,
+  user_id: string,
+  kind: MeterKind,
+  amount: number,
+): Promise<void> {
+  const period = new Date();
+  const periodStart = new Date(Date.UTC(period.getUTCFullYear(), period.getUTCMonth(), 1))
+    .toISOString().slice(0, 10);
+  
+  // A simple refund is just a negative consume (if consume_quota supports negative, but it throws on < 0).
+  // We can just update the usage_meters table directly.
+  const { data: meter } = await admin
+    .from("usage_meters")
+    .select("used")
+    .eq("user_id", user_id)
+    .eq("kind", kind)
+    .eq("period_start", periodStart)
+    .maybeSingle();
+    
+  if (meter) {
+    const newUsed = Math.max(0, Number(meter.used) - Math.max(0, Math.ceil(amount)));
+    await admin
+      .from("usage_meters")
+      .update({ used: newUsed })
+      .eq("user_id", user_id)
+      .eq("kind", kind)
+      .eq("period_start", periodStart);
+  }
 }
