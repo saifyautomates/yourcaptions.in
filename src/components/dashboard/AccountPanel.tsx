@@ -43,21 +43,19 @@ export const AccountPanel = () => {
 
   if (!user) {
     return (
-      <div className="fixed bottom-[76px] right-4 md:bottom-6 md:right-6 z-50">
-        <div className="flex flex-col gap-2 rounded-2xl border border-border/50 bg-card/60 p-2 shadow-2xl backdrop-blur-xl">
-          <Link
-            to="/login"
-            className="flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            Sign In
-          </Link>
-          <Link
-            to="/signup"
-            className="flex items-center justify-center rounded-xl bg-secondary px-4 py-2 text-[13px] font-medium text-foreground hover:bg-secondary/80 transition-colors"
-          >
-            Create Account
-          </Link>
-        </div>
+      <div className="flex flex-col gap-2 rounded-2xl border border-border/50 bg-card/60 p-2 shadow-sm backdrop-blur-xl md:flex-row">
+        <Link
+          to="/login"
+          className="flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          Sign In
+        </Link>
+        <Link
+          to="/signup"
+          className="flex items-center justify-center rounded-xl bg-secondary px-4 py-2 text-[13px] font-medium text-foreground hover:bg-secondary/80 transition-colors"
+        >
+          Create Account
+        </Link>
       </div>
     );
   }
@@ -67,25 +65,25 @@ export const AccountPanel = () => {
   const email = user?.email;
 
   return (
-    <div className="fixed bottom-[76px] right-4 md:bottom-6 md:right-6 z-50">
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
-          <button
-            className={`group relative flex items-center gap-3 rounded-2xl border border-border/40 bg-card/70 p-2 pr-3 shadow-2xl backdrop-blur-xl transition-all hover:bg-card/90 hover:border-border/60 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${open ? "bg-card/90 border-border/60 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]" : ""}`}
-          >
-            <div className="relative">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/20 text-sm font-bold text-primary">
-                {initial}
-              </span>
-              <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-background bg-green-500" />
-            </div>
-            <div className="flex flex-col items-start text-left">
-              <span className="text-[13px] font-semibold text-foreground/90 max-w-[120px] truncate">{fullName}</span>
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{isAdmin ? "Admin" : planName}</span>
-            </div>
-            <ChevronUp className={`ml-2 h-4 w-4 text-muted-foreground transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
-          </button>
-        </DropdownMenuTrigger>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={`group relative flex items-center justify-center rounded-full border border-border/40 bg-card/70 p-1 shadow-sm backdrop-blur-xl transition-all hover:bg-card/90 hover:border-border/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${open ? "bg-card/90 border-border/60" : ""}`}
+        >
+          <div className="relative">
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+              {initial}
+            </span>
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-green-500" />
+          </div>
+          {/* Text is hidden to keep it small as requested */}
+          <div className="hidden flex-col items-start text-left">
+            <span className="text-[12px] font-semibold text-foreground/90 max-w-[100px] truncate leading-tight">{fullName}</span>
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider leading-tight">{isAdmin ? "Admin" : planName}</span>
+          </div>
+          <ChevronUp className={`hidden text-muted-foreground transition-transform duration-300`} />
+        </button>
+      </DropdownMenuTrigger>
         
         <DropdownMenuContent
           align="end"
@@ -196,6 +194,5 @@ export const AccountPanel = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
   );
 };

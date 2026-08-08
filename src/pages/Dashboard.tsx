@@ -122,10 +122,10 @@ export default function Dashboard() {
         </div>
 
         {/* MAIN LAYOUT: PROJECTS & SIDEBAR */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="flex flex-col gap-8">
           
           {/* LEFT: PROJECTS GRID */}
-          <div className="lg:col-span-3">
+          <div className="w-full">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-[var(--text-1)]">Recent Projects</h2>
               <div className="relative w-full max-w-[200px] sm:max-w-[260px]">
@@ -165,60 +165,9 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* RIGHT: ACCOUNT SIDEBAR */}
-          <div className="space-y-6">
-            <Card className="border-[var(--border-3)] bg-[var(--bg-2)]">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-[var(--red-tint-3)] flex items-center justify-center text-[var(--red-3)]">
-                    <Crown size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[var(--text-1)]">{planName} Plan</h3>
-                    <p className="text-xs text-[var(--text-4)]">{isAdmin ? "Admin privileges active" : "Manage subscription"}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-[var(--text-4)]">Minutes left</span>
-                    <span className="font-semibold font-mono text-[var(--text-1)]">
-                      {isAdmin ? "∞" : `${Math.max(0, balance)} min`}
-                    </span>
-                  </div>
-                  
-                  {!isAdmin && (
-                    <>
-                      <div className="h-1.5 w-full bg-[var(--bg-5)] rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-[var(--red-3)]" 
-                          style={{ width: `${Math.min(100, Math.max(0, (balance / caps.monthlyMinutes) * 100))}%` }} 
-                        />
-                      </div>
-                      <Link to="/pricing">
-                        <Button variant="outline" className="w-full mt-2" size="sm">
-                          Buy More Credits
-                        </Button>
-                      </Link>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[var(--border-3)] bg-[var(--bg-2)]">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-[var(--text-1)] mb-4">Included Features</h3>
-                <ul className="space-y-3">
-                  {PLANS.find(p => p.id === (planId || "starter"))?.features.slice(0, 4).map((f, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-[var(--text-4)]">
-                      <div className="mt-0.5 text-[var(--success)] shrink-0"><Sparkles size={14} /></div>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+          {/* RIGHT: ACCOUNT SIDEBAR REMOVED AS PER REQUEST */}
+          <div className="space-y-6 hidden lg:block">
+            {/* The right sidebar was removed, we keep this empty column to maintain layout structure or we can change grid cols. Let's just remove it and let the grid-cols expand. */}
           </div>
           
         </div>

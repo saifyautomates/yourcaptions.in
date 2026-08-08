@@ -4,6 +4,11 @@
 // with Storage / Transcription / Audio Clean bars + Upgrade Now.
 
 import { ReactNode, useState } from "react";
+import { useCredits } from "@/hooks/useCredits";
+import { usePlanInfo } from "@/hooks/usePlanInfo";
+import { getPlanCapabilities, PLANS } from "@/lib/plans";
+import { Progress } from "@/components/ui/progress";
+
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { AccountPanel } from "./dashboard/AccountPanel";
 import {
@@ -77,8 +82,12 @@ const NavContent = ({
   onSignOut: () => void;
   onNavigate?: () => void;
 }) => {
+  const { planId, planName } = usePlanInfo();
+  const { balance } = useCredits();
+  const caps = getPlanCapabilities(planId);
+
   return (
-    <>
+    <div className="flex flex-col h-full">
       <div className="mb-6 px-2 pt-2">
         <Logo onClick={onNavigate} />
       </div>
@@ -131,8 +140,60 @@ const NavContent = ({
             </NavLink>
           </div>
         )}
+      
+        {!isAdmin && (
+          <div className="mt-auto pt-8 pb-4">
+            <div className="bg-card/50 border border-border/40 rounded-xl p-4">
+              <div className="flex justify-between items-center mb-4">
+                <span className="font-bold text-[13px] text-foreground uppercase tracking-wider">{planName}</span>
+                <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase">Monthly</span>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1.5">
+                    <span className="text-muted-foreground font-medium">Storage</span>
+                    <span className="text-muted-foreground/60"><span className="text-emerald-500">0 GB</span> / 5.0 GB</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-emerald-500/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500" style={{ width: '0%' }} />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1.5">
+                    <span className="text-muted-foreground font-medium">Transcription</span>
+                    <span className="text-muted-foreground/60"><span className="text-emerald-500">{Math.max(0, balance)} mins</span> left</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-emerald-500/10 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-emerald-500" 
+                      style={{ width: `${Math.min(100, Math.max(0, (balance / caps.monthlyMinutes) * 100))}%` }} 
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1.5">
+                    <span className="text-muted-foreground font-medium">Audio Clean</span>
+                    <span className="text-muted-foreground/60"><span className="text-emerald-500">0</span> / 3</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-emerald-500/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500" style={{ width: '0%' }} />
+                  </div>
+                </div>
+              </div>
+              
+              <Link to="/pricing" onClick={onNavigate}>
+                <button className="w-full mt-5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[13px] py-2.5 rounded-lg transition-colors">
+                  Upgrade Now
+                </button>
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
-    </>
+    </div>
   );
 };
 
@@ -294,7 +355,10 @@ export const DashboardLayout = ({ children, fullWidth, headerCenter }: { childre
           </div>
           <div className="hidden flex-1 md:flex items-center px-4">{headerCenter}</div>
 
-          {/* Right section removed as per modern SaaS design */}
+          {/* Right section: Account Panel */}
+          <div className="flex items-center gap-2">
+            <AccountPanel />
+          </div>
         </header>
 
         <div className={`mx-auto w-full ${fullWidth ? "max-w-[1600px]" : "max-w-6xl"} px-4 py-6 sm:px-8 sm:py-8`}>
@@ -313,7 +377,6 @@ export const DashboardLayout = ({ children, fullWidth, headerCenter }: { childre
         </Link>
       )}
 
-      <AccountPanel />
       <MobileBottomNav />
     </div>
   );
