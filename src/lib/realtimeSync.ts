@@ -39,10 +39,21 @@ class RealtimeSyncManager {
       .from('credit_wallets')
       .select('plan_credits, topup_credits')
       .eq('user_id', this.userId)
-      .single();
+      .maybeSingle();
     
     if (data && !error) {
       useCreditStore.getState().setCredits(data.plan_credits || 0, data.topup_credits || 0);
+    } else {
+      // Fallback to legacy profiles.credits_seconds if credit_wallets table is missing
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('credits_seconds')
+        .eq('id', this.userId)
+        .maybeSingle();
+      
+      if (profile) {
+        useCreditStore.getState().setCredits(profile.credits_seconds || 0, 0);
+      }
     }
   }
 
@@ -59,6 +70,17 @@ class RealtimeSyncManager {
       }, (payload) => {
         const { plan_credits, topup_credits } = payload.new;
         useCreditStore.getState().setCredits(plan_credits || 0, topup_credits || 0);
+      })
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'profiles',
+        filter: `id=eq.${this.userId}`
+      }, (payload) => {
+        const { credits_seconds } = payload.new;
+        if (credits_seconds !== undefined) {
+          useCreditStore.getState().setCredits(credits_seconds || 0, 0);
+        }
       })
       .subscribe();
 

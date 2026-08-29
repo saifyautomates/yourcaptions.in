@@ -92,7 +92,7 @@ const NavContent = ({
         <Logo onClick={onNavigate} />
       </div>
 
-      <nav className="flex flex-col gap-6" aria-label="Primary">
+      <nav className="flex flex-col gap-6 flex-1" aria-label="Primary">
         <div>
           <div className="mb-2 px-3 text-[12px] font-bold uppercase tracking-wider text-muted-foreground/60">Main</div>
           <div className="flex flex-col gap-1">
@@ -143,49 +143,49 @@ const NavContent = ({
       
         {!isAdmin && (
           <div className="mt-auto pt-8 pb-4">
-            <div className="bg-card/50 border border-border/40 rounded-xl p-4">
+            <div className="bg-[#1c1c1c] border border-white/5 rounded-xl p-4">
               <div className="flex justify-between items-center mb-4">
-                <span className="font-bold text-[13px] text-foreground uppercase tracking-wider">{planName}</span>
-                <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase">Monthly</span>
+                <span className="font-bold text-[14px] text-white uppercase tracking-wide">{planName}</span>
+                <span className="text-[10px] font-bold text-[#4ba475] border border-[#4ba475]/30 bg-[#4ba475]/10 px-2 py-0.5 rounded uppercase tracking-wider">Monthly</span>
               </div>
               
               <div className="space-y-4">
                 <div>
-                  <div className="flex justify-between text-[11px] mb-1.5">
-                    <span className="text-muted-foreground font-medium">Storage</span>
-                    <span className="text-muted-foreground/60"><span className="text-emerald-500">0 GB</span> / 5.0 GB</span>
+                  <div className="flex justify-between text-[12.5px] mb-1.5">
+                    <span className="text-[#a1a1aa] font-medium">Storage</span>
+                    <span className="text-[#71717a] font-medium"><span className="text-[#4ba475]">0 GB</span> / 5.0 GB</span>
                   </div>
-                  <div className="h-1.5 w-full bg-emerald-500/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500" style={{ width: '0%' }} />
+                  <div className="h-2 w-full bg-[#24352b] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#4ba475] rounded-full" style={{ width: '0%' }} />
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-[11px] mb-1.5">
-                    <span className="text-muted-foreground font-medium">Transcription</span>
-                    <span className="text-muted-foreground/60"><span className="text-emerald-500">{Math.max(0, balance)} mins</span> left</span>
+                  <div className="flex justify-between text-[12.5px] mb-1.5">
+                    <span className="text-[#a1a1aa] font-medium">Transcription</span>
+                    <span className="text-[#71717a] font-medium"><span className="text-[#4ba475]">{Number(Math.max(0, balance)).toFixed(1)} mins</span> left</span>
                   </div>
-                  <div className="h-1.5 w-full bg-emerald-500/10 rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-[#24352b] rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-emerald-500" 
+                      className="h-full bg-[#4ba475] rounded-full" 
                       style={{ width: `${Math.min(100, Math.max(0, (balance / caps.monthlyMinutes) * 100))}%` }} 
                     />
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-[11px] mb-1.5">
-                    <span className="text-muted-foreground font-medium">Audio Clean</span>
-                    <span className="text-muted-foreground/60"><span className="text-emerald-500">0</span> / 3</span>
+                  <div className="flex justify-between text-[12.5px] mb-1.5">
+                    <span className="text-[#a1a1aa] font-medium">Audio Clean</span>
+                    <span className="text-[#71717a] font-medium"><span className="text-[#4ba475]">0</span> / 3</span>
                   </div>
-                  <div className="h-1.5 w-full bg-emerald-500/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500" style={{ width: '0%' }} />
+                  <div className="h-2 w-full bg-[#24352b] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#4ba475] rounded-full" style={{ width: '0%' }} />
                   </div>
                 </div>
               </div>
               
               <Link to="/pricing" onClick={onNavigate}>
-                <button className="w-full mt-5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[13px] py-2.5 rounded-lg transition-colors">
+                <button className="w-full mt-6 bg-[#4ba475] hover:bg-[#3f8c63] text-white font-semibold text-[14px] py-2.5 rounded-lg transition-colors">
                   Upgrade Now
                 </button>
               </Link>

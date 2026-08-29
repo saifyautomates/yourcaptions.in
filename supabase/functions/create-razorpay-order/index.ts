@@ -10,8 +10,10 @@ const corsHeaders = {
 const PLANS: Record<string, { amount: number }> = {
   creator_monthly: { amount: 79900 },
   creator_yearly: { amount: 699000 },
+  creator_annual: { amount: 699000 }, // alias for yearly
   studio_monthly: { amount: 199900 },
   studio_yearly: { amount: 1799000 },
+  studio_annual: { amount: 1799000 }, // alias for yearly
 };
 
 const TOPUPS: Record<string, { amount: number; seconds: number; label: string }> = {
@@ -22,6 +24,7 @@ const TOPUPS: Record<string, { amount: number; seconds: number; label: string }>
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  
   try {
     const KEY_ID = Deno.env.get("RAZORPAY_KEY_ID");
     const KEY_SECRET = Deno.env.get("RAZORPAY_KEY_SECRET");
@@ -35,6 +38,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
+
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) throw new Error("unauthorized");
 
@@ -45,26 +49,34 @@ Deno.serve(async (req) => {
     const notes: Record<string, string> = { user_id: userData.user.id, kind };
     let planForRow: string | null = null;
     let packForRow: string | null = null;
+    
+    // Default billing handling
+    let billing = "monthly";
 
     if (kind === "topup") {
       const pack = String(body.pack ?? "");
       const cfg = TOPUPS[pack];
       if (!cfg) throw new Error("invalid pack");
+      
       amount = cfg.amount;
       notes.pack = pack;
       notes.seconds = String(cfg.seconds);
       packForRow = pack;
     } else {
       const plan = String(body.plan ?? "");
-      const billing = String(body.billing ?? "monthly");
+      billing = String(body.billing ?? "monthly");
+      // Normalize to 'yearly' for consistent DB status
+      if (billing === "annual") billing = "yearly";
+
       const planKey = `${plan}_${billing}`;
       const cfg = PLANS[planKey];
+      
       if (!cfg) throw new Error("invalid plan or billing");
+      
       amount = cfg.amount;
       notes.plan = plan;
       notes.billing = billing;
-      // We will store plan in the database row, maybe we should also store billing
-      // Since `plan` column is limited, we can encode billing into `status`.
+      
       planForRow = plan;
     }
 
@@ -78,6 +90,7 @@ Deno.serve(async (req) => {
         notes,
       }),
     });
+
     if (!orderRes.ok) throw new Error(`Razorpay: ${await orderRes.text()}`);
     const order = await orderRes.json();
 
@@ -86,15 +99,14 @@ Deno.serve(async (req) => {
       user_id: userData.user.id,
       razorpay_order_id: order.id,
       amount_paise: amount,
-      // For top-ups we leave plan null and encode the pack in the row via a
-      // synthetic status prefix so verification can look it up without a new column.
       plan: planForRow as any,
-      status: kind === "topup" ? `created:topup:${packForRow}` : `created:plan:${notes.billing}`,
+      status: kind === "topup" ? `created:topup:${packForRow}` : `created:plan:${billing}`,
     });
 
     return new Response(JSON.stringify({
       order_id: order.id, amount, key_id: KEY_ID, kind,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e.message ?? String(e) }), {
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
