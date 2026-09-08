@@ -101,6 +101,83 @@ async function startServer() {
     }
   });
 
+  // OAuth popup callback handler to transmit auth session safely across window boundaries
+  app.get(['/auth/callback', '/auth/callback/'], (req, res) => {
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Authenticating...</title>
+  <style>
+    body {
+      background: #090a0f;
+      color: #f1f5f9;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: #ef4444;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <p>Authenticating your account...</p>
+  <script>
+    (function() {
+      try {
+        const hash = window.location.hash ? window.location.hash.substring(1) : "";
+        const search = window.location.search ? window.location.search.substring(1) : "";
+        const params = new URLSearchParams(hash || search);
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+        const error = params.get('error') || params.get('error_description');
+
+        if (window.opener) {
+          if (access_token && refresh_token) {
+            window.opener.postMessage({
+              type: 'OAUTH_SUCCESS',
+              session: { access_token, refresh_token }
+            }, '*');
+          } else if (error) {
+            window.opener.postMessage({
+              type: 'OAUTH_ERROR',
+              error: error
+            }, '*');
+          } else {
+            window.opener.postMessage({
+              type: 'OAUTH_SUCCESS',
+              hash: window.location.hash,
+              search: window.location.search
+            }, '*');
+          }
+          setTimeout(() => {
+            window.close();
+          }, 300);
+        } else {
+          window.location.href = '/dashboard';
+        }
+      } catch (e) {
+        console.error("Callback error:", e);
+      }
+    })();
+  </script>
+</body>
+</html>`);
+  });
+
   const supabaseUrl = process.env.SUPABASE_URL || 'https://mqotnlflwrgqpbhjkwyq.supabase.co';
   if (supabaseUrl) {
     app.use('/api/supabase', createProxyMiddleware({

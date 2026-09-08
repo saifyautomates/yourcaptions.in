@@ -11,11 +11,11 @@ import { logOAuth } from "@/lib/oauthDebug";
  * same page, which would cause a redirect loop.
  */
 export const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session, loading } = useAuth();
+  const { session, loading, hydrating } = useAuth();
   const location = useLocation();
 
-  if (loading) {
-    return <LoadingOverlay label="Loading" />;
+  if (loading || hydrating) {
+    return <LoadingOverlay label="Loading..." />;
   }
 
   if (session) {

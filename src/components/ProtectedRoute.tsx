@@ -11,13 +11,13 @@ import { logOAuth } from "@/lib/oauthDebug";
  * - Preserves the intended destination in `location.state.from`.
  */
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session, loading, slow, error, retry } = useAuth();
+  const { session, loading, hydrating, slow, error, retry } = useAuth();
   const location = useLocation();
 
-  if (loading || error) {
+  if (loading || hydrating || error) {
     return (
       <LoadingOverlay
-        label={error ? "Auth check failed" : "Loading"}
+        label={error ? "Auth check failed" : "Loading your workspace..."}
         hint={slow && !error ? "Still checking your session — this is taking longer than usual." : undefined}
         error={error}
         onRetry={retry}

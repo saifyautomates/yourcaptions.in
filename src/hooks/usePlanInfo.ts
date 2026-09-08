@@ -24,13 +24,22 @@ export interface PlanInfo {
 }
 
 export function usePlanInfo(): PlanInfo {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const initialPlan = profile?.plan || "starter";
   const [state, setState] = useState<PlanInfo>({
-    loading: true, planId: "starter", planName: "Free", renewsAt: null, status: null, isPaid: false,
+    loading: true,
+    planId: initialPlan,
+    planName: PLAN_LABEL[initialPlan] ?? "Free",
+    renewsAt: null,
+    status: null,
+    isPaid: initialPlan !== "starter",
   });
 
   useEffect(() => {
-    if (!user) { setState({ loading: false, planId: "starter", planName: "Free", renewsAt: null, status: null, isPaid: false }); return; }
+    if (!user) {
+      setState({ loading: false, planId: "starter", planName: "Free", renewsAt: null, status: null, isPaid: false });
+      return;
+    }
     let cancelled = false;
 
     const load = async () => {
@@ -42,7 +51,7 @@ export function usePlanInfo(): PlanInfo {
       ]);
       if (cancelled) return;
 
-      const planId = (sub?.plan as string) ?? (prof?.plan as string) ?? "starter";
+      const planId = (sub?.plan as string) ?? (prof?.plan as string) ?? profile?.plan ?? "starter";
       let renewsAt: Date | null = null;
       if (sub?.current_period_end) {
         renewsAt = new Date(sub.current_period_end as string);
@@ -63,8 +72,10 @@ export function usePlanInfo(): PlanInfo {
     };
     load();
 
-    return () => { cancelled = true; };
-  }, [user]);
+    return () => {
+      cancelled = true;
+    };
+  }, [user, profile?.plan]);
 
   return state;
 }

@@ -1,14 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const getSupabaseUrl = () => {
-  if (typeof window !== 'undefined') {
-    return `${window.location.origin}/api/supabase`;
-  }
-  return import.meta.env.VITE_SUPABASE_URL;
-};
-
-const SUPABASE_URL = getSupabaseUrl();
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -22,3 +15,12 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     autoRefreshToken: true,
   }
 });
+
+// Configure functions client to route through local backend emulation in browser
+if (typeof window !== 'undefined') {
+  try {
+    (supabase as any).functionsUrl = new URL(`${window.location.origin}/api/supabase/functions/v1`);
+  } catch (e) {
+    console.warn("Could not set custom functionsUrl", e);
+  }
+}

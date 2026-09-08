@@ -13,29 +13,64 @@ import { inspectCallbackUrl, logOAuth } from "@/lib/oauthDebug";
 import { identifyUser } from "@/lib/observability";
 import { sanitizeRedirectUrl } from "@/lib/authRedirect";
 import { toast } from "sonner";
+import { useCreditStore } from "@/stores/creditStore";
+import { realtimeSync } from "@/lib/realtimeSync";
+
+export interface UserProfile {
+  id: string;
+  fullName: string;
+  email: string;
+  avatarUrl?: string;
+  plan: string;
+  creditsSeconds?: number;
+}
+
+export interface UserCreditsState {
+  balance: number;
+  planCredits: number;
+  topupCredits: number;
+}
 
 interface AuthContextValue {
   user: User | null;
   session: Session | null;
+  profile: UserProfile | null;
+  credits: UserCreditsState;
+  isAdmin: boolean;
   loading: boolean;
+  hydrating: boolean;
   slow: boolean;
   /** Populated when getSession()/getUser() failed with a non-recoverable error. */
   error: Error | null;
   /** Manually retry session hydration after a network/auth failure. */
   retry: () => void;
+  /** Refresh user profile, credits, and admin permissions */
+  refreshUserData: () => Promise<void>;
+  /** Atomic email/password sign-in with full data hydration before completion */
+  signInWithPassword: (email: string, password: string) => Promise<{ user: User | null; session: Session | null; error: Error | null }>;
+  /** Atomic sign-up with optional automatic hydration */
+  signUp: (params: { email: string; password: string; fullName?: string }) => Promise<{ user: User | null; session: Session | null; error: Error | null }>;
   signOut: () => Promise<void>;
   signInWithGoogle: (returnTo?: string) => Promise<void>;
 }
 
 const SLOW_LOAD_MS = 6000;
+const ADMIN_EMAILS = new Set(["jackxparrowww@gmail.com", "saifyautomates@gmail.com"]);
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   session: null,
+  profile: null,
+  credits: { balance: 0, planCredits: 0, topupCredits: 0 },
+  isAdmin: false,
   loading: true,
+  hydrating: false,
   slow: false,
   error: null,
   retry: () => {},
+  refreshUserData: async () => {},
+  signInWithPassword: async () => ({ user: null, session: null, error: null }),
+  signUp: async () => ({ user: null, session: null, error: null }),
   signOut: async () => {},
   signInWithGoogle: async () => {},
 });
@@ -58,11 +93,174 @@ const hasValidSub = (sess: Session | null) => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [credits, setCredits] = useState<UserCreditsState>({ balance: 0, planCredits: 0, topupCredits: 0 });
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hydrating, setHydrating] = useState(false);
   const [slow, setSlow] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [retryTick, setRetryTick] = useState(0);
   const mountedRef = useRef(true);
+
+  // Helper to fully hydrate user data (profile, credits, role) concurrently
+  const hydrateUserData = useCallback(async (activeUser: User | null) => {
+    if (!activeUser) {
+      setProfile(null);
+      setCredits({ balance: 0, planCredits: 0, topupCredits: 0 });
+      setIsAdmin(false);
+      return;
+    }
+
+    setHydrating(true);
+    const userId = activeUser.id;
+    const userEmail = (activeUser.email || "").toLowerCase();
+
+    try {
+      const [profileRes, roleRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, full_name, avatar_url, plan, credits_seconds")
+          .eq("id", userId)
+          .maybeSingle(),
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("role", "admin")
+          .maybeSingle()
+      ]);
+
+      if (!mountedRef.current) return;
+
+      // 1. Profile Hydration
+      let profileData = profileRes.data;
+      const defaultFullName = activeUser.user_metadata?.full_name || activeUser.email?.split("@")[0] || "User";
+      
+      // Auto-provision profile row if missing
+      if (!profileData && !profileRes.error) {
+        try {
+          const { data: createdProfile } = await supabase
+            .from("profiles")
+            .upsert({
+              id: userId,
+              full_name: defaultFullName,
+              plan: "starter",
+              credits_seconds: 1800,
+            }, { onConflict: "id" })
+            .select("id, full_name, avatar_url, plan, credits_seconds")
+            .maybeSingle();
+          if (createdProfile) {
+            profileData = createdProfile;
+          }
+        } catch {
+          // non-blocking fallback
+        }
+      }
+
+      const hydratedProfile: UserProfile = {
+        id: userId,
+        fullName: profileData?.full_name || defaultFullName,
+        email: activeUser.email || "",
+        avatarUrl: profileData?.avatar_url || activeUser.user_metadata?.avatar_url,
+        plan: profileData?.plan || "starter",
+        creditsSeconds: profileData?.credits_seconds ?? 1800,
+      };
+      setProfile(hydratedProfile);
+
+      // 2. Credits Hydration (stored in profiles.credits_seconds)
+      const totalCreditsSeconds = profileData?.credits_seconds ?? 1800;
+      const creditState: UserCreditsState = {
+        balance: totalCreditsSeconds,
+        planCredits: totalCreditsSeconds,
+        topupCredits: 0,
+      };
+      setCredits(creditState);
+      useCreditStore.getState().setCredits(totalCreditsSeconds, 0);
+
+      // 3. Admin Status Hydration
+      const adminByEmail = Boolean(userEmail && ADMIN_EMAILS.has(userEmail));
+      const adminByRole = Boolean(roleRes.data?.role === "admin");
+      setIsAdmin(adminByEmail || adminByRole);
+
+      // 4. Initialize realtime sync
+      void realtimeSync.initialize();
+    } catch (e) {
+      console.warn("Hydration failed gracefully:", e);
+    } finally {
+      if (mountedRef.current) {
+        setHydrating(false);
+      }
+    }
+  }, []);
+
+  const refreshUserData = useCallback(async () => {
+    if (user) {
+      await hydrateUserData(user);
+    }
+  }, [user, hydrateUserData]);
+
+  const signInWithPassword = useCallback(async (email: string, password: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: signInErr } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (signInErr) {
+        setLoading(false);
+        return { user: null, session: null, error: signInErr };
+      }
+
+      if (data.session && data.user) {
+        setSession(data.session);
+        setUser(data.user);
+        identifyUser({ id: data.user.id, email: data.user.email ?? null });
+        await hydrateUserData(data.user);
+      }
+
+      setLoading(false);
+      return { user: data.user, session: data.session, error: null };
+    } catch (err: any) {
+      setLoading(false);
+      return { user: null, session: null, error: err };
+    }
+  }, [hydrateUserData]);
+
+  const signUp = useCallback(async ({ email, password, fullName }: { email: string; password: string; fullName?: string }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: signUpErr } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: fullName ? { full_name: fullName } : undefined,
+        },
+      });
+
+      if (signUpErr) {
+        setLoading(false);
+        return { user: null, session: null, error: signUpErr };
+      }
+
+      if (data.session && data.user) {
+        setSession(data.session);
+        setUser(data.user);
+        identifyUser({ id: data.user.id, email: data.user.email ?? null });
+        await hydrateUserData(data.user);
+      }
+
+      setLoading(false);
+      return { user: data.user, session: data.session, error: null };
+    } catch (err: any) {
+      setLoading(false);
+      return { user: null, session: null, error: err };
+    }
+  }, [hydrateUserData]);
 
   const retry = useCallback(() => {
     setError(null);
@@ -120,6 +318,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
         setSession(null);
         setUser(null);
+        setProfile(null);
+        setIsAdmin(false);
         setError(null);
         if (evt !== "INITIAL_SESSION") setLoading(false);
         logOAuth("session-missing", { reason: "stale-jwt-purged-onchange", event: evt });
@@ -129,9 +329,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(sess);
       setUser(sess?.user ?? null);
       setError(null);
-      if (evt !== "INITIAL_SESSION") setLoading(false);
 
-      identifyUser(sess?.user ? { id: sess.user.id, email: sess.user.email ?? null } : null);
+      if (sess?.user) {
+        identifyUser({ id: sess.user.id, email: sess.user.email ?? null });
+        await hydrateUserData(sess.user);
+      } else {
+        identifyUser(null);
+        setProfile(null);
+        setIsAdmin(false);
+        setCredits({ balance: 0, planCredits: 0, topupCredits: 0 });
+      }
+
+      if (evt !== "INITIAL_SESSION") setLoading(false);
 
       if (evt === "SIGNED_IN") {
         logOAuth("code-exchange-success", { userId: sess?.user?.id });
@@ -166,6 +375,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
         setSession(null);
         setUser(null);
+        setProfile(null);
+        setIsAdmin(false);
         setError(null);
         setLoading(false);
         logOAuth("session-missing", { reason: "stale-jwt-purged", error: sessErr?.message ?? null });
@@ -182,6 +393,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(data.session);
         setUser(data.session.user ?? null);
         identifyUser({ id: data.session.user.id, email: data.session.user.email ?? null });
+        if (data.session.user) {
+          await hydrateUserData(data.session.user);
+        }
         
         if (isPopup) {
           try { window.opener.postMessage({ type: "OAUTH_SUCCESS", session: { access_token: data.session.access_token, refresh_token: data.session.refresh_token } }, "*"); } catch (e) { console.error("postMessage error:", e); }
@@ -214,7 +428,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       window.clearTimeout(slowTimer);
       sub.subscription.unsubscribe();
     };
-  }, [retryTick]);
+  }, [retryTick, hydrateUserData]);
 
   // OAuth popup sync listener
   useEffect(() => {
@@ -241,45 +455,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const handleMessage = async (evt: MessageEvent) => {
-      console.log("OAuth Parent Received Message:", evt.data);
       if (evt.data?.type === "OAUTH_SUCCESS") {
-        toast.info("OAuth popup success received.");
         if (evt.data?.session?.access_token && evt.data?.session?.refresh_token) {
-          console.log("Setting session from popup data...");
-          toast.info("Setting session from popup data...");
-          const { data, error } = await supabase.auth.setSession({
+          const { data } = await supabase.auth.setSession({
             access_token: evt.data.session.access_token,
             refresh_token: evt.data.session.refresh_token
           });
-          console.log("setSession result:", { data, error });
-          if (data.session) {
-            toast.success("Login successful!");
+          if (data?.session) {
+            toast.success("Welcome back!");
             setSession(data.session);
             setUser(data.session.user ?? null);
+            if (data.session.user) {
+              await hydrateUserData(data.session.user);
+            }
             setLoading(false);
           } else {
-             toast.error("Failed to set session. Reloading...");
-             // fallback to reload if setSession fails
-             window.location.reload();
+            // fallback to getSession
+            const { data: sessData } = await supabase.auth.getSession();
+            if (sessData.session) {
+              toast.success("Welcome back!");
+              setSession(sessData.session);
+              setUser(sessData.session.user ?? null);
+              if (sessData.session.user) {
+                await hydrateUserData(sessData.session.user);
+              }
+            }
+            setLoading(false);
           }
         } else {
-          console.log("No session data in message, fetching session...");
-          toast.info("No session data in message, fetching session...");
-          supabase.auth.getSession().then(({ data }) => {
-            console.log("getSession result:", data);
-            if (data.session) {
-              toast.success("Session fetched successfully!");
-              setSession(data.session);
-              setUser(data.session.user ?? null);
-              setLoading(false);
-            } else {
-               toast.error("Failed to fetch session. Reloading...");
-               window.location.reload();
+          const { data: sessData } = await supabase.auth.getSession();
+          if (sessData.session) {
+            toast.success("Welcome back!");
+            setSession(sessData.session);
+            setUser(sessData.session.user ?? null);
+            if (sessData.session.user) {
+              await hydrateUserData(sessData.session.user);
             }
-          });
+          }
+          setLoading(false);
         }
       } else if (evt.data?.type === "OAUTH_ERROR") {
-        toast.error("OAuth popup reported an error.");
+        toast.error("Google sign in was cancelled or encountered an error.");
+        setLoading(false);
       }
     };
 
@@ -287,7 +504,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, []);
+  }, [hydrateUserData]);
 
   const signOut = async () => {
     try {
@@ -297,7 +514,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setSession(null);
       setUser(null);
+      setProfile(null);
+      setIsAdmin(false);
+      setCredits({ balance: 0, planCredits: 0, topupCredits: 0 });
       setError(null);
+      realtimeSync.destroy();
       try {
         Object.keys(localStorage).filter((k) => k.startsWith("sb-")).forEach((k) => localStorage.removeItem(k));
       } catch {
@@ -308,12 +529,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithGoogle = async (returnTo?: string) => {
     const sanitizedPath = sanitizeRedirectUrl(returnTo, "/dashboard");
-    const redirectTo = `${window.location.origin}${sanitizedPath}`;
 
     logOAuth("initiate", {
       requestedReturnTo: returnTo ?? null,
       sanitizedPath,
-      redirectTo,
     });
 
     let isIframe = false;
@@ -323,10 +542,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isIframe = true;
     }
     let popup: Window | null = null;
-    let finalRedirectTo = redirectTo;
+    const callbackPath = `/auth/callback?popup=1&returnTo=${encodeURIComponent(sanitizedPath)}`;
+    const finalRedirectTo = `${window.location.origin}${callbackPath}`;
     
     if (isIframe) {
-      finalRedirectTo = redirectTo.includes('?') ? `${redirectTo}&popup=1` : `${redirectTo}?popup=1`;
       // Open the popup synchronously before any async operations to bypass popup blockers
       popup = window.open("about:blank", "oauth_popup", "width=600,height=700");
     }
@@ -355,7 +574,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, slow, error, retry, signOut, signInWithGoogle }}>
+    <AuthContext.Provider value={{
+      user,
+      session,
+      profile,
+      credits,
+      isAdmin,
+      loading,
+      hydrating,
+      slow,
+      error,
+      retry,
+      refreshUserData,
+      signInWithPassword,
+      signUp,
+      signOut,
+      signInWithGoogle
+    }}>
       {children}
     </AuthContext.Provider>
   );

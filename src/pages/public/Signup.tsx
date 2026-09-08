@@ -31,7 +31,7 @@ function strength(pw: string) {
 export default function Signup() {
   const nav = useNavigate();
   const loc = useLocation();
-  const { signInWithGoogle } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [loading, setLoading] = useState(false);
   const s = useMemo(() => strength(form.password), [form.password]);
@@ -47,14 +47,13 @@ export default function Signup() {
     if (!p.success) return toast.error(p.error.errors[0].message);
     setLoading(true);
     const requestId = newAuthRequestId();
-    const { data, error } = await supabase.auth.signUp({
+
+    const { user, session, error } = await signUp({
       email: form.email,
       password: form.password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: { full_name: form.name },
-      },
+      fullName: form.name,
     });
+
     setLoading(false);
     if (error) {
       const d = logAuthError({ method: "password-signup", stage: "code-exchange", error, requestId });
@@ -66,16 +65,17 @@ export default function Signup() {
       }
       return toast.error("Signup failed", { description: error.message });
     }
+
     logAuthSuccess("password-signup", "complete", requestId);
-    if (data?.user && data?.session === null) {
+    if (user && session === null) {
       toast.success("Account created! Please check your email to verify your account.");
       nav("/login");
     } else {
-      toast.success("Account created!");
-      // We purposefully DO NOT navigate manually here for the same reasons as Login.
-      // signInWithPassword triggers an 'onAuthStateChange' event in useAuth.
-      // useAuth will update the global user state, and then PublicOnlyRoute 
-      // will naturally redirect the user to the dashboard.
+      toast.success("Account created! Welcome to YourCaptions.");
+      const nextParam = new URLSearchParams(loc.search).get("next");
+      const fromState = (loc.state as any)?.from;
+      const destination = sanitizeRedirectUrl(fromState || nextParam || "/dashboard", "/dashboard");
+      nav(destination, { replace: true });
     }
   };
 

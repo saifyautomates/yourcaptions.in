@@ -29,7 +29,7 @@ import { usePlanInfo } from "@/hooks/usePlanInfo";
 import { useCredits } from "@/hooks/useCredits";
 
 export const AccountPanel = () => {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { isAdmin } = useIsAdmin();
   const { planName } = usePlanInfo();
   const { planCredits } = useCredits();
@@ -60,9 +60,9 @@ export const AccountPanel = () => {
     );
   }
 
-  const initial = (user?.user_metadata?.full_name ?? user?.email ?? "?").toString().charAt(0).toUpperCase();
-  const fullName = user?.user_metadata?.full_name ?? user?.email;
-  const email = user?.email;
+  const initial = (profile?.fullName ?? user?.user_metadata?.full_name ?? user?.email ?? "?").toString().charAt(0).toUpperCase();
+  const fullName = profile?.fullName ?? user?.user_metadata?.full_name ?? user?.email;
+  const email = profile?.email ?? user?.email;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
