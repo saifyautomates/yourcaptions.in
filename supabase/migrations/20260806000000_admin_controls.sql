@@ -215,7 +215,8 @@ DROP POLICY IF EXISTS "credit_rates_read" ON credit_rates;
 CREATE POLICY "credit_rates_read" ON credit_rates FOR SELECT USING (true);
 DROP POLICY IF EXISTS "credit_rates_admin" ON credit_rates;
 CREATE POLICY "credit_rates_admin" ON credit_rates FOR ALL
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','superadmin')));
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- plan_limits: public read, admin write only
 ALTER TABLE plan_limits ENABLE ROW LEVEL SECURITY;
@@ -223,7 +224,8 @@ DROP POLICY IF EXISTS "plan_limits_read" ON plan_limits;
 CREATE POLICY "plan_limits_read" ON plan_limits FOR SELECT USING (true);
 DROP POLICY IF EXISTS "plan_limits_admin" ON plan_limits;
 CREATE POLICY "plan_limits_admin" ON plan_limits FOR ALL
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','superadmin')));
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- plan_pricing: public read, admin write only
 ALTER TABLE plan_pricing ENABLE ROW LEVEL SECURITY;
@@ -231,7 +233,8 @@ DROP POLICY IF EXISTS "plan_pricing_read" ON plan_pricing;
 CREATE POLICY "plan_pricing_read" ON plan_pricing FOR SELECT USING (true);
 DROP POLICY IF EXISTS "plan_pricing_admin" ON plan_pricing;
 CREATE POLICY "plan_pricing_admin" ON plan_pricing FOR ALL
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','superadmin')));
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- feature_flags: public read, admin write only
 ALTER TABLE feature_flags ENABLE ROW LEVEL SECURITY;
@@ -239,7 +242,8 @@ DROP POLICY IF EXISTS "feature_flags_read" ON feature_flags;
 CREATE POLICY "feature_flags_read" ON feature_flags FOR SELECT USING (true);
 DROP POLICY IF EXISTS "feature_flags_admin" ON feature_flags;
 CREATE POLICY "feature_flags_admin" ON feature_flags FOR ALL
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','superadmin')));
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- system_settings: public read, admin write only
 ALTER TABLE system_settings ENABLE ROW LEVEL SECURITY;
@@ -247,13 +251,14 @@ DROP POLICY IF EXISTS "system_settings_read" ON system_settings;
 CREATE POLICY "system_settings_read" ON system_settings FOR SELECT USING (true);
 DROP POLICY IF EXISTS "system_settings_admin" ON system_settings;
 CREATE POLICY "system_settings_admin" ON system_settings FOR ALL
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','superadmin')));
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- admin_audit_log: admin read only
 ALTER TABLE admin_audit_log ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "audit_log_admin" ON admin_audit_log;
 CREATE POLICY "audit_log_admin" ON admin_audit_log FOR SELECT
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','superadmin')));
+  USING (public.has_role(auth.uid(), 'admin'));
 
 -- ============================================
 -- TRIGGER: Update updated_at on all admin tables
