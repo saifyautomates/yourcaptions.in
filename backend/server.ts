@@ -1,14 +1,14 @@
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
 import express from 'express';
 import cors from 'cors';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
-// Handle both ESM and CJS environments
-const _dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath((typeof import.meta !== 'undefined' && import.meta.url) ? import.meta.url : 'file://' + __filename));
+// Handle both development and bundled production CJS environments cleanly
+const _dirname = typeof __dirname !== 'undefined' ? __dirname : path.resolve(process.cwd(), 'backend');
 const rootDir = path.resolve(_dirname, '..');
+
 
 const registeredFunctions = new Map<string, (req: Request) => Promise<Response>>();
 

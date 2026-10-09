@@ -70,7 +70,7 @@ function buildHtml(templateName: string, data: Record<string, any> = {}): { subj
         `),
       };
 
-    case "usage-alert":
+    case "usage-alert": {
       const pct = data.percentUsed ?? 80;
       const meter = data.meter ?? "processing minutes";
       return {
@@ -88,8 +88,9 @@ function buildHtml(templateName: string, data: Record<string, any> = {}): { subj
           </div>
         `),
       };
+    }
 
-    case "export-ready":
+    case "export-ready": {
       const projectName = data.projectName ?? "Your video";
       const downloadUrl = data.downloadUrl ?? "https://yourcaptions.in/dashboard";
       return {
@@ -103,8 +104,9 @@ function buildHtml(templateName: string, data: Record<string, any> = {}): { subj
           <p style="font-size: 13px; color: #64748b; text-align: center;">You can also access and re-edit this project anytime in your dashboard.</p>
         `),
       };
+    }
 
-    case "payment-success":
+    case "payment-success": {
       const planName = data.planName ?? "Subscription Plan";
       const amount = data.amount ? `₹${(data.amount / 100).toFixed(0)}` : "";
       return {
@@ -117,6 +119,8 @@ function buildHtml(templateName: string, data: Record<string, any> = {}): { subj
           </div>
         `),
       };
+    }
+
 
     default:
       return {

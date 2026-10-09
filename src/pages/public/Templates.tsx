@@ -81,6 +81,8 @@ const SIGNATURE_PACKS: Record<string, { label: string; badgeClass: string; icon:
   },
 };
 
+const PREVIEW_WORDS = ["EVERY", "WORD", "DRIVES", "VIRALITY"];
+
 export default function Templates() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -93,13 +95,13 @@ export default function Templates() {
   const nav = useNavigate();
 
   // Global karaoke word tick for all cards
-  const previewWords = ["EVERY", "WORD", "DRIVES", "VIRALITY"];
   useEffect(() => {
     const timer = setInterval(() => {
-      setActiveWordIndex((prev) => (prev + 1) % previewWords.length);
+      setActiveWordIndex((prev) => (prev + 1) % PREVIEW_WORDS.length);
     }, 400);
     return () => clearInterval(timer);
   }, []);
+
 
   const filteredTemplates = useMemo(() => {
     return CAP_PRESETS.filter((t) => {
@@ -305,7 +307,7 @@ export default function Templates() {
 
                   {/* Live Karaoke Animated Words */}
                   <div className="relative z-10 flex flex-wrap items-center justify-center gap-1.5 px-2 text-center">
-                    {previewWords.map((word, wordIdx) => {
+                    {PREVIEW_WORDS.map((word, wordIdx) => {
                       const isActive = wordIdx === activeWordIndex;
                       return (
                         <span
