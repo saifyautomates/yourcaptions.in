@@ -30,6 +30,8 @@ const uploadWithProgress = (
     const xhr = new XMLHttpRequest();
     onXhr?.(xhr);
     xhr.open("POST", url);
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    if (anonKey) xhr.setRequestHeader("apikey", anonKey);
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
     xhr.setRequestHeader("x-upsert", "false");
@@ -125,15 +127,26 @@ const NewProject = () => {
     cancelledRef.current = false;
 
     try {
+      const { data: { session: freshSession } } = await supabase.auth.getSession();
+      const activeToken = freshSession?.access_token || session?.access_token;
+      if (!activeToken) throw new Error("Please sign in first");
+
       const path = `${user.id}/${crypto.randomUUID()}-${f.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      await uploadWithProgress(
-        `${supabaseUrl}/storage/v1/object/media/${path}`,
-        session.access_token,
-        f,
-        setUploadPct,
-        (xhr) => { xhrRef.current = xhr; },
-      );
+      try {
+        await uploadWithProgress(
+          `${supabaseUrl}/storage/v1/object/media/${path}`,
+          activeToken,
+          f,
+          setUploadPct,
+          (xhr) => { xhrRef.current = xhr; },
+        );
+      } catch (uploadXhrErr: any) {
+        if (cancelledRef.current || uploadXhrErr?.cancelled) return;
+        console.warn("[NewProject] XHR upload error, retrying via Supabase SDK:", uploadXhrErr);
+        const { error: sdkErr } = await supabase.storage.from("media").upload(path, f, { upsert: false });
+        if (sdkErr) throw sdkErr;
+      }
       if (cancelledRef.current) return;
       setUploadedPath(path);
       setStage("prepare");

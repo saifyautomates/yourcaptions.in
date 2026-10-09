@@ -56,7 +56,17 @@ interface AuthContextValue {
 }
 
 const SLOW_LOAD_MS = 6000;
-const ADMIN_EMAILS = new Set(["jackxparrowww@gmail.com", "saifyautomates@gmail.com"]);
+const ADMIN_EMAILS = new Set([
+  "jackxparrowww@gmail.com",
+  "saifyautomates@gmail.com",
+  "creator.demo@yourcaptions.in",
+  "creator@yourcaptions.in",
+]);
+
+export const DEMO_CREDENTIALS = {
+  email: "creator.demo@yourcaptions.in",
+  password: "DemoAccountPassword2026!Secure",
+};
 
 export const DEMO_USER: User = {
   id: "00000000-0000-4000-8000-000000000001",
@@ -324,20 +334,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
     if (hasDemo) {
       try { localStorage.setItem("captions:demo_session", "true"); } catch { /* noop */ }
-      setSession(DEMO_SESSION);
-      setUser(DEMO_USER);
-      setProfile({
-        id: DEMO_USER.id,
-        fullName: "Demo Creator",
-        email: DEMO_USER.email!,
-        plan: "creator",
-        creditsSeconds: 18000,
+      supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
+        if (!mountedRef.current) return;
+        if (existingSession && existingSession.user?.email === DEMO_CREDENTIALS.email) {
+          setSession(existingSession);
+          setUser(existingSession.user);
+          await hydrateUserData(existingSession.user);
+          setIsAdmin(true);
+          setLoading(false);
+          setHydrating(false);
+          return;
+        }
+        try {
+          const { data: authData, error: authErr } = await supabase.auth.signInWithPassword(DEMO_CREDENTIALS);
+          if (!authErr && authData?.session && mountedRef.current) {
+            setSession(authData.session);
+            setUser(authData.user);
+            await hydrateUserData(authData.user);
+            setIsAdmin(true);
+            setLoading(false);
+            setHydrating(false);
+            return;
+          }
+        } catch { /* fallback below */ }
+        if (mountedRef.current) {
+          setSession(DEMO_SESSION);
+          setUser(DEMO_USER);
+          setProfile({
+            id: DEMO_USER.id,
+            fullName: "Demo Creator",
+            email: DEMO_USER.email!,
+            plan: "creator",
+            creditsSeconds: 18000,
+          });
+          setCredits({ balance: 18000, planCredits: 18000, topupCredits: 0 });
+          setIsAdmin(true);
+          setLoading(false);
+          setHydrating(false);
+        }
       });
-      setCredits({ balance: 18000, planCredits: 18000, topupCredits: 0 });
-      setIsAdmin(true);
-      setLoading(false);
-      setHydrating(false);
-      setError(null);
       return;
     }
 
@@ -554,10 +589,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [hydrateUserData]);
 
-  const signInAsDemo = useCallback(() => {
+  const signInAsDemo = useCallback(async () => {
     try {
       localStorage.setItem("captions:demo_session", "true");
     } catch { /* noop */ }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword(DEMO_CREDENTIALS);
+      if (!error && data?.session) {
+        setSession(data.session);
+        setUser(data.user);
+        await hydrateUserData(data.user);
+        setIsAdmin(true);
+        setLoading(false);
+        setHydrating(false);
+        setError(null);
+        toast.success("Welcome back, Creator! Entered studio workspace.");
+        return;
+      }
+    } catch (err) {
+      console.warn("[useAuth] Real demo signin failed, using offline session", err);
+    }
     setSession(DEMO_SESSION);
     setUser(DEMO_USER);
     setProfile({
@@ -573,7 +625,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setHydrating(false);
     setError(null);
     toast.success("Welcome back, Creator! Entered studio workspace.");
-  }, []);
+  }, [hydrateUserData]);
 
   const signOut = async () => {
     try {

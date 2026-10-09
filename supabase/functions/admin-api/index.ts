@@ -24,15 +24,23 @@ Deno.serve(async (req) => {
     
     const adminClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     
+    const ADMIN_EMAILS = new Set([
+      "jackxparrowww@gmail.com",
+      "saifyautomates@gmail.com",
+      "creator.demo@yourcaptions.in",
+      "creator@yourcaptions.in"
+    ]);
+    const isEmailAdmin = ADMIN_EMAILS.has((userData.user.email || "").toLowerCase());
+
     // Check admin role
     const { data: adminRole, error: roleError } = await adminClient
       .from('user_roles')
       .select('role')
       .eq('user_id', userData.user.id)
       .eq('role', 'admin')
-      .single();
+      .maybeSingle();
       
-    if (roleError || !adminRole) {
+    if (!isEmailAdmin && (roleError || !adminRole)) {
       throw new Error("forbidden: admin only");
     }
 

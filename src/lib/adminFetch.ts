@@ -5,6 +5,7 @@ export async function adminFetch(path: string, options: RequestInit = {}) {
   const url = `${import.meta.env.VITE_SUPABASE_URL}${path}`;
   
   const headers = new Headers(options.headers || {});
+  headers.set('apikey', import.meta.env.VITE_SUPABASE_ANON_KEY as string);
   if (session?.access_token) {
     headers.set('Authorization', `Bearer ${session.access_token}`);
   }

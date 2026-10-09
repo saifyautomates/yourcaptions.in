@@ -28,6 +28,8 @@ const uploadWithProgress = (url: string, token: string, file: File, onProgress: 
   new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", url);
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    if (anonKey) xhr.setRequestHeader("apikey", anonKey);
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
     xhr.setRequestHeader("x-upsert", "false");

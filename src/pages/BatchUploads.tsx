@@ -68,6 +68,8 @@ const uploadWithProgress = (
     const xhr = new XMLHttpRequest();
     onXhr?.(xhr);
     xhr.open("POST", url);
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    if (anonKey) xhr.setRequestHeader("apikey", anonKey);
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
     xhr.setRequestHeader("x-upsert", "false");
@@ -163,15 +165,25 @@ const BatchUploads = () => {
     try {
       patch(id, { status: "uploading", progress: 0, errorMessage: undefined });
 
+      const { data: { session: freshSession } } = await supabase.auth.getSession();
+      const activeToken = freshSession?.access_token || session.access_token;
+
       const path = `${user.id}/${crypto.randomUUID()}-${item.file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      await uploadWithProgress(
-        `${supabaseUrl}/storage/v1/object/media/${path}`,
-        session.access_token,
-        item.file,
-        (pct) => patch(id, { progress: pct }),
-        (xhr) => { xhrRefs.current.set(id, xhr); },
-      );
+      try {
+        await uploadWithProgress(
+          `${supabaseUrl}/storage/v1/object/media/${path}`,
+          activeToken,
+          item.file,
+          (pct) => patch(id, { progress: pct }),
+          (xhr) => { xhrRefs.current.set(id, xhr); },
+        );
+      } catch (uploadXhrErr: any) {
+        if (cancelledRef.current.has(id) || uploadXhrErr?.cancelled) return;
+        console.warn("[BatchUploads] XHR upload error, retrying via Supabase SDK:", uploadXhrErr);
+        const { error: sdkErr } = await supabase.storage.from("media").upload(path, item.file, { upsert: false });
+        if (sdkErr) throw sdkErr;
+      }
       uploadedPathRefs.current.set(id, path);
       if (cancelledRef.current.has(id)) return;
 
