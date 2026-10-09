@@ -786,37 +786,51 @@ const TemplatesTab = ({ s, onChange, onTemplateApplied }: { s: CapStyle; onChang
         })}
       </div>
 
-      {/* Quick one-click styles */}
+      {/* Trending Creator Styles */}
       <div className="px-4 pt-3">
-        <div className="mb-2 text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">Quick Styles</div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="mb-2.5 flex items-center justify-between text-[13px] font-bold uppercase tracking-wider text-muted-foreground">
+          <span className="flex items-center gap-1.5 text-foreground">
+            <span className="text-base">🔥</span> Trending Creator Styles
+          </span>
+          <span className="text-[11px] font-medium text-primary">1-Click Apply</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
           {[
-            { name: "Yellow Highlight", icon: Highlighter, tint: "bg-primary/15 text-primary border-primary/40" },
-            { name: "Popping Text", icon: ZapIcon, tint: "bg-primary/15 text-primary border-primary/40" },
-            { name: "Stroke Outline", icon: Circle, tint: "bg-foreground/10 text-foreground border-foreground/40" },
+            { id: "hormozi", name: "Creator · Hormozi Viral", label: "Alex Hormozi", tag: "Yellow Pop", icon: "👑" },
+            { id: "mrbeast", name: "Creator · MrBeast Pop", label: "MrBeast", tag: "Cyan Box", icon: "⚡" },
+            { id: "iman", name: "Creator · Iman Gadzhi Luxury", label: "Iman Gadzhi", tag: "Gold Luxury", icon: "💎" },
+            { id: "ali", name: "Creator · Ali Abdaal Studio", label: "Ali Abdaal", tag: "Minimal Pill", icon: "☕" },
+            { id: "neon", name: "Reels · Cyber Neon Glow", label: "Cyber Neon", tag: "Electric Glow", icon: "🌈" },
+            { id: "desi", name: "Desi · Bollywood Hit", label: "Bollywood Hit", tag: "Desi Viral", icon: "🇮🇳" },
           ].map((q) => {
-            const preset = CAP_PRESETS.find((p) => p.name === q.name);
+            const preset = CAP_PRESETS.find((p) => p.name.toLowerCase() === q.name.toLowerCase());
             if (!preset) return null;
-            const Icon = q.icon;
-            const isActive = activeName === q.name;
+            const isActive = activeName?.toLowerCase() === q.name.toLowerCase();
             return (
               <motion.button
                 key={q.name}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.94 }}
-                animate={isActive ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-                transition={{ duration: 0.35 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => {
-                  gateApply(q.name, () => {
-                    setActiveName(q.name);
+                  gateApply(preset.name, () => {
+                    setActiveName(preset.name);
                     onChange(normalizeCapStyle({ ...DEFAULT_CAP_STYLE, ...preset.patch }));
                   });
                 }}
-
-                className={`flex flex-col items-center gap-1 rounded-md border px-2 py-2 text-[13px] font-medium transition ${isActive ? q.tint : "border-border bg-input/40 text-foreground hover:border-primary/50"}`}
+                className={`flex items-center gap-2 rounded-xl border p-2.5 text-left transition ${
+                  isActive
+                    ? "border-primary bg-primary/15 text-primary shadow-[0_0_12px_rgba(239,68,68,0.25)]"
+                    : "border-border bg-card/60 text-foreground hover:border-primary/40 hover:bg-card"
+                }`}
               >
-                <Icon className="h-4 w-4" />
-                <span className="leading-tight text-center">{q.name}</span>
+                <span className="text-lg">{q.icon}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[13px] font-bold leading-tight">{q.label}</div>
+                  <div className="truncate text-[11px] text-muted-foreground">{q.tag}</div>
+                </div>
+                {isActive && (
+                  <span className="h-2 w-2 rounded-full bg-primary" />
+                )}
               </motion.button>
             );
           })}

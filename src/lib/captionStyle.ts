@@ -1983,6 +1983,10 @@ export const FREE_PRESET_NAMES: readonly string[] = [
   "Dynamic · Classic Pill",
   "Desi · Bollywood Hit",
   "Creator · Hormozi Viral",
+  "Creator · MrBeast Pop",
+  "Creator · Ali Abdaal Studio",
+  "Creator · Iman Gadzhi Luxury",
+  "Reels · Cyber Neon Glow",
 ];
 const FREE_SET = new Set(FREE_PRESET_NAMES.map((n) => n.toLowerCase()));
 export const isPresetFree = (name: string): boolean => FREE_SET.has(name.toLowerCase());
