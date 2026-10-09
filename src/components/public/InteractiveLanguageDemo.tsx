@@ -2,11 +2,13 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Check, Volume2, VolumeX, Sparkles, Search, Play, Pause, Captions, Upload, Video, Mic, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LANGUAGES as ALL_LANGUAGES } from '@/lib/languages';
+import { getCaptionForLanguage } from '@/lib/demoCaptions';
 
 
 export interface LanguageInfo {
   name: string;
   category: 'Indian' | 'Global' | 'MiddleEast' | 'Roman';
+  native?: string;
 }
 
 export const LANGUAGES: LanguageInfo[] = ALL_LANGUAGES.map(lang => {
@@ -25,16 +27,16 @@ export const LANGUAGES: LanguageInfo[] = ALL_LANGUAGES.map(lang => {
     category = 'Roman';
   }
 
-  return { name: lang.name, category };
+  return { name: lang.name, category, native: lang.native };
 }).concat([
-  { name: 'Hinglish', category: 'Roman' },
-  { name: 'Tanglish', category: 'Roman' },
-  { name: 'Teluglish', category: 'Roman' },
-  { name: 'Minglish', category: 'Roman' },
-  { name: 'Gujlish', category: 'Roman' },
-  { name: 'Kanglish', category: 'Roman' },
-  { name: 'Manglish', category: 'Roman' },
-  { name: 'Punglish', category: 'Roman' }
+  { name: 'Hinglish', category: 'Roman', native: 'Hinglish' },
+  { name: 'Tanglish', category: 'Roman', native: 'Tanglish' },
+  { name: 'Teluglish', category: 'Roman', native: 'Teluglish' },
+  { name: 'Minglish', category: 'Roman', native: 'Minglish' },
+  { name: 'Gujlish', category: 'Roman', native: 'Gujlish' },
+  { name: 'Kanglish', category: 'Roman', native: 'Kanglish' },
+  { name: 'Manglish', category: 'Roman', native: 'Manglish' },
+  { name: 'Punglish', category: 'Roman', native: 'Punglish' }
 ]).filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i); // Unique by name
 
 export interface VideoPreset {
@@ -280,26 +282,38 @@ export default function InteractiveLanguageDemo() {
     setSelectedLang(lang);
   };
 
-  // Dynamic Spoken Voice Caption Lookup
-  const currentCaption = useMemo(() => {
+  // Dynamic Spoken Voice Caption Lookup with 100% language coverage
+  const captionData = useMemo(() => {
     if (customVideoUrl) {
       const isEnglish = selectedLang.name === 'English';
       const isHindi = selectedLang.name === 'Hindi' || selectedLang.name === 'Hinglish';
+      let text = '';
       if (isEnglish) {
-        return `[Auto-Captions for ${customVideoName}]: High-accuracy voice subtitles generated in real-time!`;
+        text = `Auto-captions for ${customVideoName || 'video'}: High accuracy voice subtitles generated in real-time!`;
       } else if (isHindi) {
-        return scriptMode === 'native'
-          ? `[${customVideoName} के ऑडियो कैप्शंस]: आपकी अपनी वीडियो के लिए ऑटो-सिंक्ड सबटाइटल्स!`
-          : `[${customVideoName} ke audio captions]: Aapki apni video ke liye auto-synced subtitles!`;
+        text = scriptMode === 'native'
+          ? `${customVideoName || 'वीडियो'} के ऑडियो कैप्शंस: ऑटो-सिंक्ड वायरल सबटाइटल्स!`
+          : `${customVideoName || 'video'} ke audio captions: auto-synced viral subtitles!`;
+      } else {
+        text = `${selectedLang.name} subtitles for ${customVideoName || 'video'} — powered by Yourcaptions.in!`;
       }
-      return scriptMode === 'native'
-        ? `${selectedLang.name} Subtitles for ${customVideoName} — Powered by Yourcaptions.in!`
-        : `${selectedLang.name} Subtitles for ${customVideoName} — Powered by Yourcaptions.in!`;
+      return { text, words: text.split(/\s+/).filter(Boolean) };
     }
 
-    const langData = currentPreset.captions[selectedLang.name] || currentPreset.captions['English'];
-    return scriptMode === 'native' ? langData.native : langData.roman;
-  }, [customVideoUrl, customVideoName, currentPreset, selectedLang, scriptMode]);
+    return getCaptionForLanguage(
+      selectedLang.name,
+      selectedLang.native,
+      selectedPresetId,
+      scriptMode
+    );
+  }, [customVideoUrl, customVideoName, selectedLang, selectedPresetId, scriptMode]);
+
+  // Active word index calculated from video playback progress (0% - 100%)
+  const activeWordIndex = useMemo(() => {
+    if (!captionData.words.length) return 0;
+    const idx = Math.floor((progress / 100) * captionData.words.length);
+    return Math.min(idx, captionData.words.length - 1);
+  }, [progress, captionData.words.length]);
 
   return (
     <div id="playground" className="relative w-full max-w-[1150px] mx-auto mt-12 p-[2px] rounded-[28px] overflow-hidden bg-gradient-to-b from-[#222] via-[#111] to-[#0a0a0a] shadow-[0_0_100px_rgba(230,0,0,0.12)]">
@@ -450,6 +464,47 @@ export default function InteractiveLanguageDemo() {
 
             {/* Video Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40 pointer-events-none" />
+
+            {/* 🔥 HIGH-IMPACT STUDIO VIRAL CAPTION OVERLAY 🔥 */}
+            <div className="absolute bottom-16 sm:bottom-20 left-3 right-3 z-30 flex flex-col items-center justify-center pointer-events-none text-center px-2">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${selectedLang.name}-${scriptMode}`}
+                  initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="max-w-[96%] bg-black/85 backdrop-blur-md px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-2xl border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.85)] flex flex-col items-center"
+                >
+                  {/* Active Language Badge */}
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#E60000] animate-pulse shadow-[0_0_8px_#E60000]" />
+                    <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#FF4D4D]">
+                      {selectedLang.name} · {scriptMode === 'roman' ? 'Roman Script' : 'Native Script'}
+                    </span>
+                  </div>
+
+                  {/* Dynamic Word-by-Word Viral Subtitles with Real-Time Karaoke Sync */}
+                  <div className="text-[16px] sm:text-[20px] md:text-[22px] font-black tracking-tight leading-snug flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+                    {captionData.words.map((word, idx) => {
+                      const isWordActive = idx === activeWordIndex;
+                      return (
+                        <span
+                          key={idx}
+                          className={`transition-all duration-150 inline-block px-1.5 py-0.5 rounded-md ${
+                            isWordActive
+                              ? 'bg-[#E60000] text-white scale-110 shadow-[0_0_16px_rgba(230,0,0,0.9)] ring-1 ring-white/40'
+                              : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]'
+                          }`}
+                        >
+                          {word}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
 
             {/* Mute/Unmute Toggle Button */}
