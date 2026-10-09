@@ -1,6 +1,6 @@
 import { reportEdgeError } from "./report-error.ts";
 
-export type ServiceName = 'AssemblyAI' | 'ElevenLabs' | 'OpenAI' | 'Deepgram' | 'FFMPEG';
+export type ServiceName = 'AssemblyAI' | 'ElevenLabs' | 'OpenAI' | 'Deepgram' | 'FFMPEG' | 'Sarvam';
 
 export function getValidatedApiKey(service: ServiceName, envVarName: string, functionName: string): string {
   const key = (Deno.env.get(envVarName) || "").trim();
@@ -24,6 +24,7 @@ export function getValidatedApiKey(service: ServiceName, envVarName: string, fun
 
 export function getConfiguredApiKeys(functionName: string) {
   return {
+    sarvam: getValidatedApiKey('Sarvam', 'SARVAM_API_KEY', functionName),
     assemblyAi: getValidatedApiKey('AssemblyAI', 'ASSEMBLYAI_API_KEY', functionName),
     elevenLabs: getValidatedApiKey('ElevenLabs', 'ELEVENLABS_API_KEY', functionName),
     openAi: getValidatedApiKey('OpenAI', 'OPENAI_API_KEY', functionName),

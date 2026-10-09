@@ -34,6 +34,7 @@ export function getValidatedApiKey(service: ServiceName, envVarName: string): st
 
 export function getConfiguredApiKeys() {
   return {
+    sarvam: getValidatedApiKey('Sarvam', 'SARVAM_API_KEY'),
     assemblyAi: getValidatedApiKey('AssemblyAI', 'ASSEMBLYAI_API_KEY'),
     elevenLabs: getValidatedApiKey('ElevenLabs', 'ELEVENLABS_API_KEY'),
     openAi: getValidatedApiKey('OpenAI', 'OPENAI_API_KEY'),
