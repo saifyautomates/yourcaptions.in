@@ -195,7 +195,8 @@ export function DashboardTemplatesSection() {
           return (
             <div
               key={t.id}
-              className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-[#0E0E12] p-5 hover:border-[#E60000]/40 transition-all hover:shadow-[0_8px_24px_rgba(230,0,0,0.12)] overflow-hidden"
+              onClick={() => handleApply(t)}
+              className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-[#0E0E12] p-5 hover:border-[#E60000]/40 transition-all hover:shadow-[0_8px_24px_rgba(230,0,0,0.12)] overflow-hidden smooth-card gpu-accelerated cursor-pointer"
             >
               {/* Top metadata */}
               <div>
