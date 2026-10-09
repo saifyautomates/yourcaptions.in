@@ -402,23 +402,26 @@ export default function InteractiveLanguageDemo() {
     const found = syncedSegments.find((seg) => t >= seg.start && t <= seg.end);
     if (found) return found;
     if (t < syncedSegments[0].start) return syncedSegments[0];
+    // In small gaps between segments, stay on the segment that just played instead of flashing the last segment
+    const prev = [...syncedSegments].reverse().find((seg) => t >= seg.start);
+    if (prev) return prev;
     return syncedSegments[syncedSegments.length - 1];
   }, [currentTime, syncedSegments, captionData]);
 
   // Active word index calculated in real-time matching the voice
   const activeWordIndex = useMemo(() => {
-    if (!activeSegment?.words.length) return 0;
+    if (!activeSegment?.words.length) return -1;
     const t = currentTime;
     const idx = activeSegment.words.findIndex((w) => t >= w.start && t < w.end);
     if (idx !== -1) return idx;
-    if (t < activeSegment.words[0].start) return 0;
+    if (t < activeSegment.words[0].start) return -1;
     return activeSegment.words.length - 1;
   }, [currentTime, activeSegment]);
 
   // Slice words according to user's Words Per Section selection (1, 2, 3, 4, 5, or Auto)
   const visibleWordsData = useMemo(() => {
     if (!activeSegment?.words.length) {
-      return { words: [], activeIndex: 0, chunkKey: 'empty' };
+      return { words: [], activeIndex: -1, chunkKey: 'empty' };
     }
 
     const allWords = activeSegment.words;
@@ -442,7 +445,7 @@ export default function InteractiveLanguageDemo() {
     const currentChunk = chunks[chunkIdx];
 
     const wordIdx = currentChunk.findIndex((w) => t >= w.start && t < w.end);
-    const activeIdx = wordIdx !== -1 ? wordIdx : (t < currentChunk[0].start ? 0 : currentChunk.length - 1);
+    const activeIdx = wordIdx !== -1 ? wordIdx : (t < currentChunk[0].start ? -1 : currentChunk.length - 1);
 
     return {
       words: currentChunk,
@@ -683,17 +686,17 @@ export default function InteractiveLanguageDemo() {
 
             {/* 🔥 PURE FLOATING VIRAL CAPTIONS (TASTEFUL SIZE, PRECISE WORDS-PER-SECTION CHUNKING) 🔥 */}
             <div className="absolute bottom-22 sm:bottom-26 left-4 right-4 z-30 flex flex-col items-center justify-center pointer-events-none text-center px-2 select-none">
-              <AnimatePresence mode="wait">
+              <AnimatePresence>
                 <motion.div
                   key={`${selectedLang.name}-${scriptMode}-${currentTemplate.id}-${visibleWordsData.chunkKey}`}
-                  initial={{ opacity: 0, y: 5, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -5, scale: 0.98 }}
-                  transition={{ duration: 0.1, ease: "easeOut" }}
+                  initial={{ opacity: 0, scale: 0.97 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.97 }}
+                  transition={{ duration: 0.08, ease: "easeOut" }}
                   className={`max-w-[96%] flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-3 gap-y-1 sm:gap-y-1.5 ${currentTemplate.textClassName}`}
                 >
                   {visibleWordsData.words.map((wordObj, idx) => {
-                    const isWordActive = idx === visibleWordsData.activeIndex;
+                    const isWordActive = visibleWordsData.activeIndex !== -1 && idx === visibleWordsData.activeIndex;
                     return (
                       <span
                         key={idx}
@@ -775,7 +778,7 @@ export default function InteractiveLanguageDemo() {
                 {/* Native / Roman Universal Toggle Switcher */}
                 <div className="flex items-center gap-1 bg-black/85 backdrop-blur-xl border border-white/20 p-0.5 rounded-full shadow-2xl shrink-0">
                   <button
-                    onClick={() => { setScriptMode('native'); setIsMuted(false); if (!isPlaying && videoRef.current) { videoRef.current.play(); setIsPlaying(true); } }}
+                    onClick={() => setScriptMode('native')}
                     className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold transition-all ${
                       scriptMode === 'native'
                         ? 'bg-[#E60000] text-white shadow-md'
@@ -785,7 +788,7 @@ export default function InteractiveLanguageDemo() {
                     Native
                   </button>
                   <button
-                    onClick={() => { setScriptMode('roman'); setIsMuted(false); if (!isPlaying && videoRef.current) { videoRef.current.play(); setIsPlaying(true); } }}
+                    onClick={() => setScriptMode('roman')}
                     className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold transition-all ${
                       scriptMode === 'roman'
                         ? 'bg-[#E60000] text-white shadow-md'

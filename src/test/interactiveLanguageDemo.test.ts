@@ -132,14 +132,19 @@ describe('Interactive Language Demo Captions', () => {
       if (chunkIdx < 0) chunkIdx = chunks.length - 1;
       const currentChunk = chunks[chunkIdx];
       const wordIdx = currentChunk.findIndex((w) => currentTime >= w.start && currentTime < w.end);
-      const activeIdx = wordIdx !== -1 ? wordIdx : (currentTime < currentChunk[0].start ? 0 : currentChunk.length - 1);
+      const activeIdx = wordIdx !== -1 ? wordIdx : (currentTime < currentChunk[0].start ? -1 : currentChunk.length - 1);
       return { words: currentChunk, activeIndex: activeIdx };
     };
 
-    // 1 Word chunking test
+    // Before speech starts (<0.16s), activeIndex must be -1 (no premature lighting)
+    const preSpeechChunk = chunkWords(words, 1, 0.05);
+    expect(preSpeechChunk.activeIndex).toBe(-1);
+
+    // 1 Word chunking test during speech (t = 0.2s is within word 0)
     const oneWordChunk = chunkWords(words, 1, 0.2);
     expect(oneWordChunk.words.length).toBe(1);
     expect(oneWordChunk.words[0].word).toBe(words[0].word);
+    expect(oneWordChunk.activeIndex).toBe(0);
 
     // 2 Words chunking test
     const twoWordsChunk = chunkWords(words, 2, 0.2);
