@@ -94,6 +94,14 @@ CREATE POLICY "plan_limits_admin_write"
   USING (public.has_role(auth.uid(), 'admin'))
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
+ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS monthly_credits numeric DEFAULT 30;
+ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS max_video_minutes numeric DEFAULT 10;
+ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS max_projects integer DEFAULT 3;
+ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS max_team_members integer DEFAULT 1;
+ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS can_export_srt boolean DEFAULT true;
+ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS can_burn_captions boolean DEFAULT false;
+ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS can_dub boolean DEFAULT false;
+
 INSERT INTO public.plan_limits
   (plan, monthly_credits, max_video_minutes, max_projects, max_team_members,
    can_export_srt, can_burn_captions, can_dub)
