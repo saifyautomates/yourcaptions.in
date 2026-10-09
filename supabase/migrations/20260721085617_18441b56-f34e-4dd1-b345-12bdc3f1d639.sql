@@ -94,6 +94,7 @@ CREATE POLICY "plan_limits_admin_write"
   USING (public.has_role(auth.uid(), 'admin'))
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
+ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS display_name text DEFAULT 'Plan';
 ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS monthly_credits numeric DEFAULT 30;
 ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS max_video_minutes numeric DEFAULT 10;
 ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS max_projects integer DEFAULT 3;
@@ -102,15 +103,22 @@ ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS can_export_srt boolean D
 ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS can_burn_captions boolean DEFAULT false;
 ALTER TABLE public.plan_limits ADD COLUMN IF NOT EXISTS can_dub boolean DEFAULT false;
 
+DO $$
+BEGIN
+  ALTER TABLE public.plan_limits ALTER COLUMN display_name DROP NOT NULL;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+
 INSERT INTO public.plan_limits
-  (plan, monthly_credits, max_video_minutes, max_projects, max_team_members,
+  (plan, display_name, monthly_credits, max_video_minutes, max_projects, max_team_members,
    can_export_srt, can_burn_captions, can_dub)
 VALUES
-  ('starter',   30,  10,   3,  1,  true, false, false),
-  ('creator',  300,  60, 100, 10,  true, true,  false),
-  ('studio',  1000, 180, 999, 50,  true, true,  true)
+  ('starter', 'Starter',   30,  10,   3,  1,  true, false, false),
+  ('creator', 'Creator',  300,  60, 100, 10,  true, true,  false),
+  ('studio',  'Studio',  1000, 180, 999, 50,  true, true,  true)
 ON CONFLICT (plan) DO UPDATE
-  SET monthly_credits   = EXCLUDED.monthly_credits,
+  SET display_name      = COALESCE(EXCLUDED.display_name, public.plan_limits.display_name),
+      monthly_credits   = EXCLUDED.monthly_credits,
       max_video_minutes = EXCLUDED.max_video_minutes,
       max_projects      = EXCLUDED.max_projects,
       max_team_members  = EXCLUDED.max_team_members,
