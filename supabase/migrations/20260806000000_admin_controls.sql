@@ -10,6 +10,10 @@ CREATE TABLE IF NOT EXISTS credit_rates (
   updated_by       uuid REFERENCES auth.users(id)
 );
 
+ALTER TABLE credit_rates ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE credit_rates ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES auth.users(id);
+ALTER TABLE credit_rates ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
 -- Seed default rates
 INSERT INTO credit_rates (feature, credits_per_unit, unit, description) VALUES
   ('transcription',      1,  'minute', '1 credit per minute of video transcribed'),
