@@ -399,12 +399,15 @@ function AuditLogViewer() {
 }
 
 
+import { TemplatesManager } from "@/components/admin/TemplatesManager";
+
 export function AdminControlCenter() {
   return (
     <div className="admin-control-center max-w-7xl mx-auto p-6 bg-[#050505] min-h-screen">
       <AdminHeader />
-      <Tabs defaultValue="credit-rates">
-        <TabsList className="mb-6 flex space-x-2 bg-transparent">
+      <Tabs defaultValue="templates-manager">
+        <TabsList className="mb-6 flex flex-wrap gap-2 bg-transparent">
+          <TabsTrigger value="templates-manager" className="data-[state=active]:bg-[#E60000] data-[state=active]:text-white bg-[#111] text-[#888] rounded px-4 py-2">🎨 Templates (165)</TabsTrigger>
           <TabsTrigger value="credit-rates" className="data-[state=active]:bg-[#E60000] data-[state=active]:text-white bg-[#111] text-[#888] rounded px-4 py-2">💳 Credit Rates</TabsTrigger>
           <TabsTrigger value="plan-limits" className="data-[state=active]:bg-[#E60000] data-[state=active]:text-white bg-[#111] text-[#888] rounded px-4 py-2">📊 Plan Limits</TabsTrigger>
           <TabsTrigger value="plan-pricing" className="data-[state=active]:bg-[#E60000] data-[state=active]:text-white bg-[#111] text-[#888] rounded px-4 py-2">💰 Pricing</TabsTrigger>
@@ -413,6 +416,9 @@ export function AdminControlCenter() {
           <TabsTrigger value="audit-log" className="data-[state=active]:bg-[#E60000] data-[state=active]:text-white bg-[#111] text-[#888] rounded px-4 py-2">📋 Audit Log</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="templates-manager">
+          <TemplatesManager />
+        </TabsContent>
         <TabsContent value="credit-rates">
           <CreditRatesEditor />
         </TabsContent>
@@ -435,3 +441,4 @@ export function AdminControlCenter() {
     </div>
   )
 }
+

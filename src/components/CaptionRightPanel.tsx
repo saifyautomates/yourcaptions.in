@@ -9,7 +9,7 @@ import {
 import {
   CapStyle, CapTransition, DEFAULT_CAP_STYLE, FONT_OPTIONS, WEIGHT_OPTIONS, CAP_PRESETS,
   applyTextCase, captionSpanStyle, normalizeCapStyle,
-  PRESET_CATEGORIES, getPresetCategory, type PresetCategory,
+  PRESET_CATEGORIES, getPresetCategory, type PresetCategory, isTemplateDeleted,
 } from "@/lib/captionStyle";
 import { useFreeTemplates } from "@/hooks/useFreeTemplates";
 import { canUseTemplate } from "@/lib/templateGating";
@@ -730,18 +730,19 @@ const TemplatesTab = ({ s, onChange, onTemplateApplied }: { s: CapStyle; onChang
   // Available categories with counts (only for built-ins; "mine" tab skips categories).
   const categoryCounts = useMemo(() => {
     const counts = new Map<PresetCategory, number>();
-    for (const p of CAP_PRESETS) {
+    const activePresets = CAP_PRESETS.filter((p) => !isTemplateDeleted(p.name));
+    for (const p of activePresets) {
       const c = getPresetCategory(p);
       counts.set(c, (counts.get(c) ?? 0) + 1);
     }
-    counts.set("All", CAP_PRESETS.length);
+    counts.set("All", activePresets.length);
     return counts;
   }, []);
 
   const filtered = useMemo(() => {
     const list =
-      sub === "builtin" ? CAP_PRESETS :
-      sub === "favorites" ? CAP_PRESETS.filter((p) => favSet.has(p.name)) :
+      sub === "builtin" ? CAP_PRESETS.filter((p) => !isTemplateDeleted(p.name)) :
+      sub === "favorites" ? CAP_PRESETS.filter((p) => favSet.has(p.name) && !isTemplateDeleted(p.name)) :
       saved;
     const q = query.trim().toLowerCase();
     return list.filter((p) => {
@@ -750,6 +751,7 @@ const TemplatesTab = ({ s, onChange, onTemplateApplied }: { s: CapStyle; onChang
       return true;
     });
   }, [sub, query, category, saved, favSet]);
+
 
 
   const savePreset = () => {

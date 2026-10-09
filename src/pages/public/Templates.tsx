@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Search, Layers, Play, Check, ArrowRight, X, Flame, ShieldAlert, Cpu } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { CAP_PRESETS, DEFAULT_CAP_STYLE, type CapStyle } from "@/lib/captionStyle";
+import { CAP_PRESETS, DEFAULT_CAP_STYLE, isTemplateDeleted, type CapStyle } from "@/lib/captionStyle";
 
 const CATEGORIES = [
   "All",
   "Popular",
+  "Kalakar",
   "Behind you",
   "Bold & animated",
   "Clean",
@@ -27,6 +28,11 @@ const SIGNATURE_PACKS: Record<string, { label: string; badgeClass: string; icon:
     label: "Popular",
     badgeClass: "bg-amber-950/80 text-amber-300 border border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.35)]",
     icon: "⭐"
+  },
+  "Kalakar": {
+    label: "Kalakar",
+    badgeClass: "bg-amber-900/80 text-amber-200 border border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.35)]",
+    icon: "🎨"
   },
   "Behind you": {
     label: "Behind you",
@@ -97,12 +103,16 @@ export default function Templates() {
 
   const filteredTemplates = useMemo(() => {
     return CAP_PRESETS.filter((t) => {
+      // Exclude templates deleted / hidden by admin
+      if (isTemplateDeleted(t.name)) return false;
+
       const cat = t.category ? t.category.toLowerCase() : "";
       const name = t.name.toLowerCase();
 
       const matchesCategory =
         activeCategory === "All" ||
         (t.category && t.category.toLowerCase() === activeCategory.toLowerCase()) ||
+        (activeCategory === "Kalakar" && (cat === "kalakar" || name.startsWith("kalakar ·"))) ||
         (activeCategory === "Popular" && (cat === "popular" || name.includes("popular") || name.includes("glow") || name.includes("hormozi") || name.includes("beast"))) ||
         (activeCategory === "Behind you" && (cat === "behind you" || t.isBehindYou || name.includes("behind") || name.includes("cutout") || name.includes("reveal"))) ||
         (activeCategory === "Bold & animated" && (cat === "bold & animated" || cat.includes("bold") || cat.includes("animated") || name.includes("punch") || name.includes("masala") || name.includes("tabahi"))) ||
@@ -113,6 +123,7 @@ export default function Templates() {
         (activeCategory === "Dynamic Pop" && (cat === "dynamic pop" || name.includes("dynamic"))) ||
         (activeCategory === "Desi Viral" && (cat === "desi viral" || name.includes("desi"))) ||
         (activeCategory === "Creator Pro" && (cat === "creator pro" || name.includes("creator")));
+
 
       const matchesSearch =
         !searchQuery.trim() ||

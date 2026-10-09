@@ -9,11 +9,12 @@ import {
 } from "@/lib/captionStyle";
 
 describe("All Templates Exhaustive Verification (100% Reliability)", () => {
-  it("has exactly 122 top world-class presets (50 studio + 72 Captik templates)", () => {
-    expect(CAP_PRESETS.length).toBe(122);
+  it("has exactly 165 top world-class presets (50 studio + 72 Captik + 43 Kalakar templates)", () => {
+    expect(CAP_PRESETS.length).toBe(165);
+
+    const names = new Set(CAP_PRESETS.map((p) => p.name));
 
     // Verify signature Captik templates are present
-    const names = new Set(CAP_PRESETS.map((p) => p.name));
     expect(names.has("Captik · Captik Glow")).toBe(true);
     expect(names.has("Captik · Ali Abdaal")).toBe(true);
     expect(names.has("Captik · Captik Shadow")).toBe(true);
@@ -22,6 +23,18 @@ describe("All Templates Exhaustive Verification (100% Reliability)", () => {
     expect(names.has("Captik · Mr Beast Style 1")).toBe(true);
     expect(names.has("Captik · Tabahi")).toBe(true);
     expect(names.has("Captik · Swiss")).toBe(true);
+
+    // Verify signature Kalakar templates are present
+    expect(names.has("Kalakar · Lala")).toBe(true);
+    expect(names.has("Kalakar · IJ Template")).toBe(true);
+    expect(names.has("Kalakar · Delhi")).toBe(true);
+    expect(names.has("Kalakar · Double Trouble")).toBe(true);
+    expect(names.has("Kalakar · Kathmandu")).toBe(true);
+    expect(names.has("Kalakar · Goa")).toBe(true);
+    expect(names.has("Kalakar · Kalakar Motion")).toBe(true);
+    expect(names.has("Kalakar · Kalakar Glow")).toBe(true);
+    expect(names.has("Kalakar · Shamani")).toBe(true);
+    expect(names.has("Kalakar · Zero Gravity")).toBe(true);
   });
 
   it("verifies all 5 signature studio packs have authentic templates", () => {

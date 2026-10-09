@@ -1891,10 +1891,10 @@ export const SHORTS_REELS_TEMPLATE_PACK: { name: string; patch: Partial<CapStyle
 export const DIVEO_TEMPLATE_PACK = SHORTS_REELS_TEMPLATE_PACK;
 
 import { CAPTIK_72_PRESETS, type CaptikPresetItem } from "./captikPresets";
-export { CAPTIK_72_PRESETS, type CaptikPresetItem };
+import { KALAKAR_43_PRESETS, type KalakarPresetItem } from "./kalakarPresets";
+export { CAPTIK_72_PRESETS, type CaptikPresetItem, KALAKAR_43_PRESETS, type KalakarPresetItem };
 
-// Top World-Class Curated Presets: Signature 50 studio packs + All 72 Captik templates
-export const CAP_PRESETS: {
+export interface CapPresetEntry {
   name: string;
   patch: Partial<CapStyle>;
   category?: string;
@@ -1904,20 +1904,62 @@ export const CAP_PRESETS: {
   isNew?: boolean;
   video?: string;
   poster?: string;
-}[] = [
+  feature?: string;
+}
+
+// Full World-Class Presets Catalog:
+// 50 Studio Packs + 72 Captik Templates + 43 Kalakar Templates = 165 Templates Total
+export const ALL_RAW_PRESETS: CapPresetEntry[] = [
   ...KINETIC_TEMPLATE_PACK.map((s) => ({ ...s, category: "Kinetic Motion" as const })),
   ...SHORTS_REELS_TEMPLATE_PACK.map((s) => ({ ...s, category: "Shorts & Reels" as const })),
   ...DYNAMIC_POP_TEMPLATE_PACK.map((s) => ({ ...s, category: "Dynamic Pop" as const })),
   ...DESI_VIRAL_TEMPLATE_PACK.map((s) => ({ ...s, category: "Desi Viral" as const })),
   ...CREATOR_PRO_TEMPLATE_PACK.map((s) => ({ ...s, category: "Creator Pro" as const })),
   ...CAPTIK_72_PRESETS,
+  ...KALAKAR_43_PRESETS,
 ];
+
+// Admin template deletion / hide registry
+const DELETED_KEY = "admin:deleted_templates";
+export const getDeletedTemplateNames = (): string[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(DELETED_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const deleteTemplatePermanently = (name: string) => {
+  if (typeof window === "undefined") return;
+  const curr = new Set(getDeletedTemplateNames());
+  curr.add(name);
+  localStorage.setItem(DELETED_KEY, JSON.stringify(Array.from(curr)));
+  window.dispatchEvent(new Event("templates:updated"));
+};
+
+export const restoreTemplate = (name: string) => {
+  if (typeof window === "undefined") return;
+  const curr = new Set(getDeletedTemplateNames());
+  curr.delete(name);
+  localStorage.setItem(DELETED_KEY, JSON.stringify(Array.from(curr)));
+  window.dispatchEvent(new Event("templates:updated"));
+};
+
+export const isTemplateDeleted = (name: string): boolean => {
+  if (typeof window === "undefined") return false;
+  return getDeletedTemplateNames().includes(name);
+};
+
+export const CAP_PRESETS: CapPresetEntry[] = ALL_RAW_PRESETS;
 
 // Category derivation for the Templates picker. Explicit `category` wins; otherwise
 // we infer from the preset name using well-known keywords.
 export type PresetCategory =
   | "All"
   | "Popular"
+  | "Kalakar"
   | "Behind you"
   | "Bold & animated"
   | "Clean"
@@ -1930,7 +1972,6 @@ export type PresetCategory =
   | "Moonshot"
   | "Captions.ai"
   | "Captik"
-  | "Kalakar"
   | "Diveo"
   | "Built-in"
   | "Core Pack"
@@ -1946,6 +1987,7 @@ export type PresetCategory =
   | "News & Pro";
 
 const CATEGORY_RULES: { label: Exclude<PresetCategory, "All" | "Built-in">; test: RegExp }[] = [
+  { label: "Kalakar",        test: /kalakar|lala|dhaka|mumbai|kathmandu|karachi|islamabad|goa|ziada|mota/i },
   { label: "Behind you",     test: /behind|depth cutout|reveal|beacon|cove|driftwood|ellis|ferrier|garnet|hawser|ibis|jetty|keel|lanyard|mizzen|netting|outhaul|painter|quay|scupper|taffrail|underway|vang|windlass|yawl|abbey|effigy|font|hassock|iron|jamb|lintel|mullion/i },
   { label: "Property reels", test: /property|real estate|belfry|cloister|dovecote|gable/i },
   { label: "Bold & animated",test: /bold & animated|animated|punch|masala|tabahi|blockbuster|big red|scribble|interlock/i },
@@ -1955,7 +1997,7 @@ const CATEGORY_RULES: { label: Exclude<PresetCategory, "All" | "Built-in">; test
   { label: "Shorts & Reels", test: /reels|shorts|blitz|marker|diveo/i },
   { label: "Dynamic Pop",   test: /dynamic|classic pill|typewriter|captions\.ai/i },
   { label: "Desi Viral",    test: /desi|bhashini|hinglish|bollywood/i },
-  { label: "Creator Pro",   test: /creator|podcast|sharan|ranveer|shamani|kalakar/i },
+  { label: "Creator Pro",   test: /creator|podcast|sharan|ranveer|shamani/i },
   { label: "Karaoke",       test: /karaoke|sing|word[- ]?highlight|color[- ]?sweep/i },
   { label: "Neon & Glow",   test: /neon|glow|cyber|glitch|streamer/i },
   { label: "Cinematic",     test: /cinemat|luxury|serif|documentary|magnates|johnny|iman/i },
@@ -1976,6 +2018,7 @@ export const getPresetCategory = (p: { name: string; category?: string }): Prese
 export const PRESET_CATEGORIES: PresetCategory[] = [
   "All",
   "Popular",
+  "Kalakar",
   "Behind you",
   "Bold & animated",
   "Clean",
@@ -1991,6 +2034,7 @@ export const PRESET_CATEGORIES: PresetCategory[] = [
   "Retro & Fun",
   "News & Pro",
 ];
+
 
 
 // -----------------------------------------------------------------------------
@@ -2010,6 +2054,15 @@ export const FREE_PRESET_NAMES: readonly string[] = [
   "Creator · Ali Abdaal Studio",
   "Creator · Iman Gadzhi Luxury",
   "Reels · Cyber Neon Glow",
+  "Captik · Captik Glow",
+  "Captik · Ali Abdaal",
+  "Captik · Captik Shadow",
+  "Captik · Captik",
+  "Captik · Big Reveal",
+  "Kalakar · Kalakar",
+  "Kalakar · Clean Motion",
+  "Kalakar · Editing Skool",
+  "Kalakar · Kalakar Word",
 ];
 const FREE_SET = new Set(FREE_PRESET_NAMES.map((n) => n.toLowerCase()));
 export const isPresetFree = (name: string): boolean => FREE_SET.has(name.toLowerCase());
