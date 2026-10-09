@@ -9,7 +9,7 @@ import {
   Play, Trash2, ExternalLink, RefreshCw,
 } from "lucide-react";
 import { LanguagePicker } from "@/components/LanguagePicker";
-import { langName } from "@/lib/languages";
+import { isIndianLanguage, langName } from "@/lib/languages";
 import { invokeWithRetry } from "@/lib/invokeWithRetry";
 
 type ItemStatus =
@@ -88,7 +88,7 @@ const BatchUploads = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [sourceLang, setSourceLang] = useState("hi");
   const [targets, setTargets] = useState<string[]>([]);
-  const [provider, setProvider] = useState("assemblyai");
+  const [provider, setProvider] = useState("auto");
   const [running, setRunning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -177,11 +177,15 @@ const BatchUploads = () => {
 
       patch(id, { status: "creating", progress: 100 });
       const title = item.file.name.replace(/\.[^.]+$/, "").slice(0, 120) || "Untitled";
+      const resolvedProvider = provider === "auto"
+        ? (isIndianLanguage(sourceLang) ? "sarvam" : "deepgram")
+        : provider;
+
       const { data: proj, error: pErr } = await supabase.from("projects").insert({
         user_id: user.id,
         title,
         source_language: sourceLang,
-        provider,
+        provider: resolvedProvider,
         compare_mode: false,
         media_path: path,
         status: "processing",
@@ -197,7 +201,7 @@ const BatchUploads = () => {
 
       if (cancelledRef.current.has(id)) return;
       patch(id, { status: "queueing" });
-      await invokeWithRetry("transcribe", { body: { project_id: proj.id } }).catch(() => {});
+      await invokeWithRetry("transcribe", { body: { project_id: proj.id, provider: resolvedProvider } }).catch(() => {});
 
       patch(id, { status: "processing" });
     } catch (err: any) {
@@ -314,8 +318,9 @@ const BatchUploads = () => {
               disabled={running}
               className="w-full rounded-lg border border-border bg-input/60 px-3.5 py-2.5 text-sm disabled:opacity-60"
             >
-              <option value="assemblyai">AssemblyAI (recommended for Indian languages)</option>
-              <option value="deepgram">Model A</option>
+              <option value="auto">Auto-select (Sarvam AI for Indian, Deepgram for Foreign)</option>
+              <option value="sarvam">Sarvam AI (Indian Languages & Vernaculars)</option>
+              <option value="deepgram">Deepgram Nova-3 (Foreign & Multilingual)</option>
             </select>
           </div>
           <div className="sm:col-span-2">

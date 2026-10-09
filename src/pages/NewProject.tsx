@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { X, Volume2, Smile, Sparkles, Languages, Crown, Play, ChevronDown, Lock } from "lucide-react";
 import { LanguagePicker } from "@/components/LanguagePicker";
-import { langName } from "@/lib/languages";
+import { isIndianLanguage, langName } from "@/lib/languages";
 import { invokeWithRetry } from "@/lib/invokeWithRetry";
 
 type Stage = "picking" | "uploading" | "prepare" | "queueing";
@@ -99,9 +99,14 @@ const NewProject = () => {
 
   const pickFile = async (f: File) => {
     if (!user || !session) { toast.error("Please sign in first"); return; }
-    const MAX_BYTES = 1024 * 1024 * 1024; // 1 GB
-    if (f.size > MAX_BYTES) {
-      toast.error("File too large", { description: "Max size is 1 GB." });
+    const maxBytes = caps.maxUploadBytes || 250 * 1024 * 1024;
+    if (f.size > maxBytes) {
+      const maxFormatted = maxBytes >= 1024 * 1024 * 1024
+        ? `${Math.round(maxBytes / (1024 * 1024 * 1024))} GB`
+        : `${Math.round(maxBytes / (1024 * 1024))} MB`;
+      toast.error("File exceeds plan upload limit", {
+        description: `Your ${planId.toUpperCase()} plan allows uploads up to ${maxFormatted}. Upgrade for larger files.`,
+      });
       return;
     }
     setFile(f);
@@ -144,11 +149,14 @@ const NewProject = () => {
     if (!user || !file || !uploadedPath || !lang) return;
     setStage("queueing");
     try {
+      // Sarvam AI for Indian languages, Deepgram for foreign languages
+      const chosenProvider = isIndianLanguage(lang) ? "sarvam" : "deepgram";
+
       const { data: proj, error: pErr } = await supabase.from("projects").insert({
         user_id: user.id,
         title: file.name.replace(/\.[^.]+$/, ""),
         source_language: lang,
-        provider: "assemblyai",
+        provider: chosenProvider,
         media_path: uploadedPath,
         status: "processing",
       }).select("id").single();
@@ -159,13 +167,21 @@ const NewProject = () => {
         localStorage.setItem(`prepare:${proj.id}`, JSON.stringify({ script, translation, audioClean, emojis }));
       } catch { /* noop */ }
 
-      invokeWithRetry("transcribe", { body: { project_id: proj.id, script, translate_to_english: translation, audio_enhancement: audioClean, add_emojis: emojis } })
-        .catch(async (err: any) => {
-          const msg = err?.context?.text ? await err.context.text().catch(() => err?.message) : (err?.message ?? "Transcription failed to start");
-          console.error("[NewProject] transcribe invoke failed:", msg);
-          toast.error("Transcription failed to start", { description: String(msg).slice(0, 240) });
-          try { await supabase.from("projects").update({ status: "failed" }).eq("id", proj.id); } catch { /* noop */ }
-        });
+      invokeWithRetry("transcribe", {
+        body: {
+          project_id: proj.id,
+          provider: chosenProvider,
+          script,
+          translate_to_english: translation,
+          audio_enhancement: audioClean,
+          add_emojis: emojis,
+        },
+      }).catch(async (err: any) => {
+        const msg = err?.context?.text ? await err.context.text().catch(() => err?.message) : (err?.message ?? "Transcription failed to start");
+        console.error("[NewProject] transcribe invoke failed:", msg);
+        toast.error("Transcription failed to start", { description: String(msg).slice(0, 240) });
+        try { await supabase.from("projects").update({ status: "failed" }).eq("id", proj.id); } catch { /* noop */ }
+      });
       toast.success("Transcription started");
       navigate(`/dashboard/project/${proj.id}`);
 
@@ -177,13 +193,17 @@ const NewProject = () => {
 
   /* ---------- Empty state (rare — user hit /dashboard/new directly) ---------- */
   if (stage === "picking") {
+    const limitLabel = caps.maxUploadBytes >= 1024 * 1024 * 1024
+      ? `${Math.round(caps.maxUploadBytes / (1024 * 1024 * 1024))} GB`
+      : `${Math.round(caps.maxUploadBytes / (1024 * 1024))} MB`;
+
     return (
       <DashboardLayout>
         <div className="mx-auto max-w-xl">
           <h1 className="text-2xl font-semibold">Upload a video</h1>
           <p className="mt-1 text-sm text-muted-foreground">Pick a video file to caption.</p>
           <label className="mt-6 grid cursor-pointer place-items-center rounded-2xl border-2 border-dashed border-border/60 bg-card/40 p-12 text-center hover:border-primary/40">
-            <span className="text-sm">Click to select MP4 or MOV (up to 1 GB)</span>
+            <span className="text-sm">Click to select MP4 or MOV (up to {limitLabel})</span>
             <input type="file" accept="video/*,audio/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); }} />
           </label>
         </div>

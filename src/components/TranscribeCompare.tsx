@@ -14,9 +14,12 @@ const fmt = (s: number) => {
   return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 };
 
-const PROVIDERS: { id: "deepgram" | "assemblyai"; label: string; model: string }[] = [
-  { id: "deepgram", label: "Model A", model: "nova-2" },
-  { id: "assemblyai", label: "AssemblyAI", model: "best" },
+type ProviderId = "sarvam" | "deepgram" | "assemblyai";
+
+const PROVIDERS: { id: ProviderId; label: string; model: string }[] = [
+  { id: "sarvam", label: "Sarvam AI", model: "Saaras v2" },
+  { id: "deepgram", label: "Deepgram", model: "Nova-3" },
+  { id: "assemblyai", label: "AssemblyAI", model: "Universal-2" },
 ];
 
 // Pair segments by nearest start time.
@@ -68,11 +71,14 @@ export function TranscribeCompare({ projectId, sourceLanguage, compareMode, chos
     return m;
   }, [captions]);
 
-  const dg = byProvider.get("deepgram");
-  const aa = byProvider.get("assemblyai");
-  const rows = useMemo(() => pair(dg?.segments ?? [], aa?.segments ?? []), [dg, aa]);
+  const available = useMemo(() => Array.from(byProvider.keys()), [byProvider]);
+  const capA = byProvider.get("sarvam") ?? byProvider.get("deepgram") ?? byProvider.get(available[0] ?? "");
+  const capB = (capA?.provider === "sarvam" ? byProvider.get("deepgram") : byProvider.get("assemblyai"))
+    ?? byProvider.get(available.find((p) => p !== capA?.provider) ?? "");
 
-  const runProvider = async (id: "deepgram" | "assemblyai") => {
+  const rows = useMemo(() => pair(capA?.segments ?? [], capB?.segments ?? []), [capA, capB]);
+
+  const runProvider = async (id: ProviderId) => {
     if (running) return;
     setRunning(id);
     try {
@@ -94,7 +100,7 @@ export function TranscribeCompare({ projectId, sourceLanguage, compareMode, chos
     }
   };
 
-  const choose = async (id: "deepgram" | "assemblyai") => {
+  const choose = async (id: ProviderId) => {
     const { error } = await supabase.from("projects").update({ chosen_provider: id }).eq("id", projectId);
     if (error) { toast.error(error.message); return; }
     toast.success(`Using ${id} captions`);
@@ -165,7 +171,7 @@ export function TranscribeCompare({ projectId, sourceLanguage, compareMode, chos
               </button>
             </div>
           )}
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
             {PROVIDERS.map((p) => {
               const has = byProvider.has(p.id);
               const isChosen = chosenProvider === p.id;
@@ -204,9 +210,9 @@ export function TranscribeCompare({ projectId, sourceLanguage, compareMode, chos
         </SheetHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-3">
-          {!dg || !aa ? (
+          {!capA || !capB ? (
             <div className="p-8 text-center text-xs text-muted-foreground">
-              Run both providers above to see a segment-by-segment comparison.
+              Run at least two providers above to see a segment-by-segment comparison.
             </div>
           ) : (
             <table className="w-full text-xs">
@@ -313,7 +319,9 @@ export function TranscribeCompare({ projectId, sourceLanguage, compareMode, chos
                       <td className="py-2 pr-3" colSpan={2}>
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <span className="w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Model A</span>
+                            <span className="w-20 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground truncate">
+                              {PROVIDERS.find((p) => p.id === capA?.provider)?.label ?? "Primary"}
+                            </span>
                             <div className="min-w-0 flex-1">
                               {r.a ? (
                                 wordsA.length ? renderTrack(wordsA, wordsB, "hsl(var(--primary) / 0.85)") : (
@@ -329,7 +337,9 @@ export function TranscribeCompare({ projectId, sourceLanguage, compareMode, chos
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">AssemblyAI</span>
+                            <span className="w-20 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground truncate">
+                              {PROVIDERS.find((p) => p.id === capB?.provider)?.label ?? "Secondary"}
+                            </span>
                             <div className="min-w-0 flex-1">
                               {r.b ? (
                                 wordsB.length ? renderTrack(wordsB, wordsA, "rgb(59 130 246 / 0.85)") : (

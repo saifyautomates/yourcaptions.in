@@ -15,12 +15,41 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ASSEMBLYAI_KEY = Deno.env.get("ASSEMBLYAI_API_KEY");
 const DEEPGRAM_KEY = Deno.env.get("DEEPGRAM_API_KEY");
 const OPENAI_KEY = Deno.env.get("OPENAI_API_KEY");
+const SARVAM_KEY = Deno.env.get("SARVAM_API_KEY");
 import { FFMPEG_API_URL, FFMPEG_API_AUTH, getFfmpegHeaders, uploadToFfmpegApi, processFfmpegJob, processFfmpegDirect, processVideoAudio } from "../_shared/ffmpeg-api.ts";
 
-interface WordTiming { text: string; start: number; end: number; confidence?: number }
-interface Segment { start: number; end: number; text: string; words?: WordTiming[]; confidence?: number }
+interface WordTiming { text: string; start: number; end: number; confidence?: number; speaker?: string }
+interface Segment { start: number; end: number; text: string; words?: WordTiming[]; confidence?: number; speaker?: string }
 
 const VIDEO_EXT_RE = /\.(mp4|mov|m4v|webm|mkv|avi|wmv|flv)$/i;
+
+const SARVAM_LANG_MAP: Record<string, string> = {
+  "hi": "hi-IN", "hindi": "hi-IN", "hi-in": "hi-IN", "hi-latn": "hi-IN",
+  "bn": "bn-IN", "bengali": "bn-IN", "bn-in": "bn-IN",
+  "kn": "kn-IN", "kannada": "kn-IN", "kn-in": "kn-IN",
+  "ml": "ml-IN", "malayalam": "ml-IN", "ml-in": "ml-IN",
+  "mr": "mr-IN", "marathi": "mr-IN", "mr-in": "mr-IN",
+  "od": "od-IN", "odia": "od-IN", "or": "od-IN", "od-in": "od-IN",
+  "pa": "pa-IN", "punjabi": "pa-IN", "pa-in": "pa-IN",
+  "ta": "ta-IN", "tamil": "ta-IN", "ta-in": "ta-IN",
+  "te": "te-IN", "telugu": "te-IN", "te-in": "te-IN",
+  "gu": "gu-IN", "gujarati": "gu-IN", "gu-in": "gu-IN",
+  "en-in": "en-IN",
+  "ur": "ur-IN", "urdu": "ur-IN",
+  "as": "as-IN", "assamese": "as-IN",
+};
+
+export function isIndianLanguage(lang: string | null | undefined): boolean {
+  if (!lang) return false;
+  const l = lang.toLowerCase().trim();
+  const base = l.split("-")[0];
+  const indianCodes = new Set([
+    "hi", "bn", "kn", "ml", "mr", "od", "pa", "ta", "te", "gu",
+    "ur", "as", "sa", "bho", "mai", "awa", "raj", "kok", "sd", "ks", "ne",
+    "hinglish", "tanglish", "teluglish", "minglish", "gujlish", "kanglish", "manglish", "punglish"
+  ]);
+  return indianCodes.has(l) || indianCodes.has(base) || l.endsWith("-in");
+}
 
 async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   let timer: number | undefined;
@@ -47,7 +76,7 @@ const fmtSrt = (segs: Segment[]) =>
 
 // Group word-level timestamps into readable segments (sentence-ish, capped word count / duration).
 // Retains the per-word timings on each segment so the client can drive
-// accurate per-word highlight animation.
+// accurate per-word highlight animation and speaker diarization.
 function groupWords(words: WordTiming[]): Segment[] {
   const MAX_WORDS = 10;
   const MAX_DURATION = 6; // seconds
@@ -57,16 +86,21 @@ function groupWords(words: WordTiming[]): Segment[] {
     if (!cur.length) return;
     const withConf = cur.filter((w) => typeof w.confidence === "number");
     const segConf = withConf.length ? withConf.reduce((a, b) => a + (b.confidence ?? 0), 0) / withConf.length : undefined;
+    const speaker = cur[0]?.speaker;
     out.push({
       start: cur[0].start,
       end: cur[cur.length - 1].end,
       text: cur.map((w) => w.text).join(" ").replace(/\s+([,.!?।])/g, "$1"),
-      words: cur.map((w) => ({ text: w.text, start: w.start, end: w.end, confidence: w.confidence })),
+      words: cur.map((w) => ({ text: w.text, start: w.start, end: w.end, confidence: w.confidence, speaker: w.speaker })),
       confidence: segConf,
+      speaker,
     });
     cur = [];
   };
   for (const w of words) {
+    if (cur.length && cur[0].speaker && w.speaker && cur[0].speaker !== w.speaker) {
+      flush();
+    }
     cur.push(w);
     const dur = w.end - cur[0].start;
     const endsSentence = /[.!?।]$/.test(w.text);
@@ -140,7 +174,7 @@ async function transcribeDeepgram(input: { blob?: Blob; url?: string }, lang: st
     punctuate: "true",
     paragraphs: "true",
     smart_format: "true",
-    diarize: "false",
+    diarize: "true",
     utterances: "true",
   });
   if (mapped) params.set("language", mapped);
@@ -177,14 +211,83 @@ async function transcribeDeepgram(input: { blob?: Blob; url?: string }, lang: st
 function parseDeepgramJson(j: any): Segment[] {
   const alt = j.results?.channels?.[0]?.alternatives?.[0];
   const rawWords: WordTiming[] = (alt?.words ?? []).map((w: any) => ({
-    start: w.start, end: w.end, text: w.punctuated_word ?? w.word,
+    start: Number(w.start ?? 0),
+    end: Number(w.end ?? 0),
+    text: String(w.punctuated_word ?? w.word ?? "").trim(),
     confidence: typeof w.confidence === "number" ? w.confidence : undefined,
-  }));
+    speaker: w.speaker !== undefined ? `Speaker ${Number(w.speaker) + 1}` : undefined,
+  })).filter((w: WordTiming) => w.text);
   if (rawWords.length) return groupWords(rawWords);
   const paras = alt?.paragraphs?.paragraphs ?? [];
   return paras.flatMap((p: any) =>
-    (p.sentences ?? []).map((s: any) => ({ start: s.start, end: s.end, text: s.text })),
+    (p.sentences ?? []).map((s: any) => ({
+      start: Number(s.start ?? 0),
+      end: Number(s.end ?? 0),
+      text: String(s.text ?? "").trim(),
+      speaker: s.speaker !== undefined ? `Speaker ${Number(s.speaker) + 1}` : undefined,
+    })),
   );
+}
+
+async function transcribeSarvam(blob: Blob, filename: string, lang: string): Promise<Segment[]> {
+  if (!SARVAM_KEY) throw new Error("SARVAM_API_KEY not configured");
+  const norm = (lang || "").toLowerCase().trim();
+  const langCode = SARVAM_LANG_MAP[norm] || SARVAM_LANG_MAP[norm.split("-")[0]] || "hi-IN";
+
+  const fd = new FormData();
+  fd.append("file", blob, filename || "audio.mp3");
+  fd.append("model", "saaras:v2");
+  fd.append("language_code", langCode);
+  fd.append("with_timestamps", "true");
+
+  const res = await fetch("https://api.sarvam.ai/speech-to-text", {
+    method: "POST",
+    headers: {
+      "api-subscription-key": SARVAM_KEY,
+    },
+    body: fd,
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.warn(`Sarvam v2 failed (${res.status}): ${errText}, attempting v1 fallback`);
+    const fd2 = new FormData();
+    fd2.append("file", blob, filename || "audio.mp3");
+    fd2.append("model", "saaras:v1");
+    fd2.append("language_code", langCode);
+    fd2.append("with_timestamps", "true");
+    const res2 = await fetch("https://api.sarvam.ai/speech-to-text", {
+      method: "POST",
+      headers: { "api-subscription-key": SARVAM_KEY },
+      body: fd2,
+    });
+    if (!res2.ok) {
+      throw new Error(`Sarvam STT failed: ${res2.status} ${await res2.text()}`);
+    }
+    return parseSarvamJson(await res2.json());
+  }
+
+  const data = await res.json();
+  return parseSarvamJson(data);
+}
+
+function parseSarvamJson(j: any): Segment[] {
+  const wordsList = j.timestamps?.words ?? j.words ?? [];
+  const rawWords: WordTiming[] = wordsList.map((w: any) => ({
+    start: typeof w.start_time_seconds === "number" ? w.start_time_seconds : Number(w.start ?? 0),
+    end: typeof w.end_time_seconds === "number" ? w.end_time_seconds : Number(w.end ?? 0),
+    text: String(w.word ?? w.text ?? "").trim(),
+    speaker: w.speaker_id || (w.speaker !== undefined ? `Speaker ${w.speaker}` : undefined),
+    confidence: typeof w.confidence === "number" ? w.confidence : undefined,
+  })).filter((w: WordTiming) => w.text);
+
+  if (rawWords.length) return groupWords(rawWords);
+
+  const transcript = String(j.transcript || j.text || "").trim();
+  if (transcript) {
+    return [{ start: 0, end: 1, text: transcript }];
+  }
+  return [];
 }
 
 // OpenAI Whisper v3 (whisper-1 endpoint, uses large-v3 backing model).
@@ -247,6 +350,7 @@ async function extractAudioMp3(blob: Blob, filename: string): Promise<{ blob: Bl
 
 async function runTranscription(project_id: string, providerOverride: string | undefined, jobId: string) {
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
+  const admin = makeAdmin();
   const setProgress = progressWriter(supabase, jobId);
   try {
     await startJob(supabase, jobId, "Loading media");
@@ -260,12 +364,16 @@ async function runTranscription(project_id: string, providerOverride: string | u
     if (signErr) console.warn("transcribe: createSignedUrl failed", signErr.message);
     const mediaUrl = signed?.signedUrl;
 
-    const provider = providerOverride ?? project.provider;
+    const isIndian = isIndianLanguage(project.source_language);
+    let requestedProvider = providerOverride ?? project.provider;
+    if (!requestedProvider || requestedProvider === "auto" || requestedProvider === "assemblyai") {
+      requestedProvider = isIndian ? "sarvam" : "deepgram";
+    }
+
     const origName = project.media_path.split("/").pop() ?? "audio.mp3";
     const isVideoFile = VIDEO_EXT_RE.test(origName);
 
-    // Only download + FFmpeg-extract if we'll fall through to Whisper
-    // (those need the raw bytes). Deepgram + AssemblyAI take a URL directly.
+    // Only download + FFmpeg-extract if we'll fall through to Whisper or Sarvam
     let lazyAudio: { blob: Blob; filename: string } | null = null;
     const ensureAudio = async () => {
       if (lazyAudio) return lazyAudio;
@@ -284,21 +392,36 @@ async function runTranscription(project_id: string, providerOverride: string | u
       return lazyAudio;
     };
 
-    await setProgress(30, `Transcribing with ${provider}`);
+    await setProgress(30, `Transcribing with ${requestedProvider}`);
 
-    // Prefer Deepgram (fastest URL-based) → AssemblyAI (URL) → Whisper.
-    const chain: string[] = [provider];
-    for (const p of ["deepgram", "assemblyai", "whisper"]) {
+    // Intelligent fallback chain:
+    // Indian languages: Sarvam (primary) -> Deepgram -> Whisper -> AssemblyAI
+    // Foreign languages: Deepgram (primary) -> AssemblyAI -> Whisper -> Sarvam
+    const chain: string[] = [requestedProvider];
+    const preferredOrder = isIndian
+      ? ["sarvam", "deepgram", "whisper", "assemblyai"]
+      : ["deepgram", "assemblyai", "whisper", "sarvam"];
+    for (const p of preferredOrder) {
       if (!chain.includes(p)) chain.push(p);
     }
 
     let segments: Segment[] = [];
-    let usedProvider = provider;
+    let usedProvider = requestedProvider;
     let lastErr: unknown = null;
     for (const p of chain) {
       try {
-        await setProgress(p === "deepgram" ? 34 : p === "assemblyai" ? 48 : p === "whisper" ? 62 : 70, `Transcribing with ${p}`);
-        if (p === "deepgram" && DEEPGRAM_KEY) {
+        await setProgress(
+          p === "sarvam" ? 34 : p === "deepgram" ? 44 : p === "assemblyai" ? 54 : p === "whisper" ? 64 : 70,
+          `Transcribing with ${p}`
+        );
+        if (p === "sarvam" && SARVAM_KEY) {
+          const a = await ensureAudio();
+          segments = await withTimeout(
+            transcribeSarvam(a.blob, a.filename, project.source_language),
+            240_000,
+            "Sarvam transcription"
+          );
+        } else if (p === "deepgram" && DEEPGRAM_KEY) {
           segments = mediaUrl
             ? await withTimeout(transcribeDeepgram({ url: mediaUrl }, project.source_language), 240_000, "Deepgram transcription")
             : await withTimeout(transcribeDeepgram({ blob: (await ensureAudio()).blob }, project.source_language), 240_000, "Deepgram transcription");

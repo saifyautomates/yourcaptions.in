@@ -135,7 +135,7 @@ export const CAPABILITIES: Record<PlanId, PlanCapabilities> = {
     maxExportResolution: "1080p",
     monthlyMinutes: 120,
     watermarkRequired: false,
-    canTranslate: true,
+    canTranslate: false,
     canSpeakerDetect: false,
     canCustomBrand: false,
     maxBrandKits: 0,

@@ -50,8 +50,8 @@ const PasteSubtitlesDialog = lazy(() => import("@/components/PasteSubtitlesDialo
 const ProcessingStatusPanel = lazy(() => import("@/components/ProcessingStatusPanel"));
 
 
-interface WordTiming { text: string; start: number; end: number; confidence?: number }
-interface Segment { start: number; end: number; text: string; confidence?: number; words?: WordTiming[]; }
+interface WordTiming { text: string; start: number; end: number; confidence?: number; speaker?: string }
+interface Segment { start: number; end: number; text: string; confidence?: number; words?: WordTiming[]; speaker?: string }
 interface Caption { id: string; language: string; provider: string | null; segments: Segment[]; srt_text: string | null; }
 interface Project { id: string; title: string; status: string; source_language: string; media_path: string | null; error_message: string | null; provider: string; compare_mode: boolean; chosen_provider: string | null; }
 
@@ -59,6 +59,7 @@ import { LANGUAGES_TUPLE as LANGS } from "@/lib/languages";
 import { useCredits } from "@/hooks/useCredits";
 import UpgradeCTA from "@/components/UpgradeCTA";
 import { usePlanInfo } from "@/hooks/usePlanInfo";
+import { getPlanCapabilities } from "@/lib/plans";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useFreeTemplates } from "@/hooks/useFreeTemplates";
 import { canUseTemplate } from "@/lib/templateGating";
@@ -3294,7 +3295,8 @@ const ProjectView = () => {
   });
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [activeTemplateName, setActiveTemplateName] = useState<string | null>(null);
-  const { isPaid } = usePlanInfo();
+  const { isPaid, planId } = usePlanInfo();
+  const caps = getPlanCapabilities(planId);
   const { isAdmin } = useIsAdmin();
   const { names: freeTemplateNames } = useFreeTemplates();
   const { toast: notifyToast } = useToast();
@@ -4247,8 +4249,12 @@ const ProjectView = () => {
 
   const handleReplaceMedia = async (file: File) => {
     if (!id || !project || !user || replacing) return;
-    if (file.size > 1024 * 1024 * 1024) {
-      toast.error("File too large", { description: "Max size is 1 GB." });
+    const maxBytes = caps.maxUploadBytes || 250 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      const maxFormatted = maxBytes >= 1024 * 1024 * 1024
+        ? `${Math.round(maxBytes / (1024 * 1024 * 1024))} GB`
+        : `${Math.round(maxBytes / (1024 * 1024))} MB`;
+      toast.error("File exceeds plan limit", { description: `Your ${planId.toUpperCase()} plan allows uploads up to ${maxFormatted}.` });
       return;
     }
     setReplacing(true);
@@ -4387,10 +4393,22 @@ const ProjectView = () => {
         onQuickExport={async (r) => {
           if (quickBusy) return;
           gateDownload(async () => {
+            if (caps.maxExportResolution === "720p" && r !== "720p") {
+              toast.error("Resolution locked", { description: "Your Free plan allows up to 720p. Upgrade to export in 1080p or 4K." });
+              return;
+            }
+            if (caps.maxExportResolution === "1080p" && (r === "4k" || r === "1440p")) {
+              toast.error("4K Export locked", { description: "Your Editor plan allows up to 1080p. Upgrade to Creator or Studio for stunning 4K exports." });
+              return;
+            }
             setQuickBusy(true);
             try {
               await (await loadQuickExport())({
-                mediaUrl, segs, capStyle,
+                mediaUrl, segs,
+                capStyle: {
+                  ...capStyle,
+                  ...(caps.watermarkRequired ? { watermark: true } : {}),
+                },
                 title: project?.title ?? "captioned-video",
                 resolution: r,
               });

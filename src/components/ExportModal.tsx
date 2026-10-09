@@ -152,7 +152,13 @@ export default function ExportModal({ open, onClose, mediaUrl, segs, capStyle, t
       setStage("encoding");
 
       const out = await exportVideoFast({
-        mediaUrl, segs, capStyle, resolution: res,
+        mediaUrl,
+        segs,
+        capStyle: {
+          ...capStyle,
+          ...(caps.watermarkRequired ? { watermark: true } : {}),
+        },
+        resolution: res,
         fps: settings.fps,
         bitrate: settings.bitrate,
         preferredCodec: codec,

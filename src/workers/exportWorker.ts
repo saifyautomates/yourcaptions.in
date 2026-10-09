@@ -276,6 +276,52 @@ async function initEncoders(msg: InitMsg) {
   }
 }
 
+const drawWatermark = (c: OffscreenCanvasRenderingContext2D, W: number, H: number, scale: number) => {
+  c.save();
+  const text = "YourCaptions.in";
+  const fontSize = Math.max(13, Math.round(16 * scale));
+  c.font = `600 ${fontSize}px system-ui, -apple-system, sans-serif`;
+  c.textBaseline = "middle";
+  c.textAlign = "left";
+
+  const paddingX = Math.round(11 * scale);
+  const paddingY = Math.round(6 * scale);
+  const dotRadius = Math.round(3.5 * scale);
+  const dotSpacing = Math.round(7 * scale);
+  const textWidth = c.measureText(text).width;
+  const pillW = textWidth + paddingX * 2 + dotRadius * 2 + dotSpacing;
+  const pillH = fontSize + paddingY * 2;
+
+  // Place at bottom-right safe corner
+  const marginX = Math.round(W * 0.04);
+  const marginY = Math.round(H * 0.04);
+  const x = W - marginX - pillW;
+  const y = H - marginY - pillH;
+
+  // Pill backdrop: dark translucent with subtle border
+  drawRoundedRect(c, x, y, pillW, pillH, pillH / 2);
+  c.fillStyle = "rgba(10, 10, 12, 0.75)";
+  c.fill();
+  c.strokeStyle = "rgba(255, 255, 255, 0.14)";
+  c.lineWidth = Math.max(1, Math.round(1 * scale));
+  c.stroke();
+
+  // Red accent dot
+  const dotX = x + paddingX + dotRadius;
+  const dotY = y + pillH / 2;
+  c.beginPath();
+  c.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
+  c.fillStyle = "#E60000";
+  c.fill();
+
+  // Watermark text
+  const textX = dotX + dotRadius + dotSpacing;
+  c.fillStyle = "rgba(255, 255, 255, 0.9)";
+  c.fillText(text, textX, dotY);
+
+  c.restore();
+};
+
 function handleFrame(vf: VideoFrame, timeSec: number) {
   if (!cfg || !ctx || !videoEncoder || !canvas) { vf.close(); return; }
   const { width: W, height: H } = cfg;
@@ -291,6 +337,10 @@ function handleFrame(vf: VideoFrame, timeSec: number) {
     const seg = cfg.segs[idx];
     const shown = getVisibleWords(seg.text, seg.start, seg.end, timeSec, cfg.capStyle.wordsPerChunk, seg.words);
     drawCaption(ctx, W, H, drawParams.capScale, shown.words, shown.activeIndex, cfg.capStyle);
+  }
+
+  if ((cfg.capStyle as any)?.watermark) {
+    drawWatermark(ctx, W, H, drawParams.capScale);
   }
 
   const outFrame = new VideoFrame(canvas as any, {

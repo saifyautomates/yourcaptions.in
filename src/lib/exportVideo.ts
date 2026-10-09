@@ -268,6 +268,48 @@ export async function exportVideoWithCaptions(opts: ExportOptions): Promise<{ bl
 
   recorder.start(1000);
 
+const drawWatermark = (c: CanvasRenderingContext2D, W: number, H: number, scale: number) => {
+  c.save();
+  const text = "YourCaptions.in";
+  const fontSize = Math.max(13, Math.round(16 * scale));
+  c.font = `600 ${fontSize}px system-ui, -apple-system, sans-serif`;
+  c.textBaseline = "middle";
+  c.textAlign = "left";
+
+  const paddingX = Math.round(11 * scale);
+  const paddingY = Math.round(6 * scale);
+  const dotRadius = Math.round(3.5 * scale);
+  const dotSpacing = Math.round(7 * scale);
+  const textWidth = c.measureText(text).width;
+  const pillW = textWidth + paddingX * 2 + dotRadius * 2 + dotSpacing;
+  const pillH = fontSize + paddingY * 2;
+
+  const marginX = Math.round(W * 0.04);
+  const marginY = Math.round(H * 0.04);
+  const x = W - marginX - pillW;
+  const y = H - marginY - pillH;
+
+  drawRoundedRect(c, x, y, pillW, pillH, pillH / 2);
+  c.fillStyle = "rgba(10, 10, 12, 0.75)";
+  c.fill();
+  c.strokeStyle = "rgba(255, 255, 255, 0.14)";
+  c.lineWidth = Math.max(1, Math.round(1 * scale));
+  c.stroke();
+
+  const dotX = x + paddingX + dotRadius;
+  const dotY = y + pillH / 2;
+  c.beginPath();
+  c.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
+  c.fillStyle = "#E60000";
+  c.fill();
+
+  const textX = dotX + dotRadius + dotSpacing;
+  c.fillStyle = "rgba(255, 255, 255, 0.9)";
+  c.fillText(text, textX, dotY);
+
+  c.restore();
+};
+
   const draw = () => {
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, W, H);
@@ -278,6 +320,9 @@ export async function exportVideoWithCaptions(opts: ExportOptions): Promise<{ bl
       const seg = segs[idx];
       const shown = getVisibleChunk(seg.text, seg.start, seg.end, t, capStyle.wordsPerChunk);
       drawCaption(ctx, W, H, capScale, shown, capStyle);
+    }
+    if ((capStyle as any)?.watermark) {
+      drawWatermark(ctx, W, H, capScale);
     }
     if (onProgress && video.duration > 0) onProgress(Math.min(1, t / video.duration));
   };

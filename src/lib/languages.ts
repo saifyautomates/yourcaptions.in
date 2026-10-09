@@ -318,3 +318,29 @@ export function searchLanguages(query: string, pool: Language[] = LANGUAGES): La
     return hay.includes(q);
   });
 }
+
+export function isIndianLanguage(lang: string | null | undefined): boolean {
+  if (!lang) return false;
+  const l = lang.toLowerCase().trim();
+  const base = l.split("-")[0];
+  const item = LANG_BY_CODE[lang] || LANG_BY_CODE[l] || LANG_BY_CODE[base];
+  if (item?.region === "India") return true;
+
+  const byName = LANGUAGES.find((x) => x.name.toLowerCase() === l || (x.native && x.native.toLowerCase() === l));
+  if (byName?.region === "India") return true;
+
+  const indianCodes = new Set([
+    "hi", "bn", "kn", "ml", "mr", "od", "or", "pa", "ta", "te", "gu",
+    "ur", "as", "sa", "bho", "mai", "awa", "raj", "kok", "sd", "ks", "ne",
+    "kfa", "beo", "bfq", "mbf", "hlb", "spv", "sjp", "swv", "wtm", "mpt",
+    "noe", "bfy", "him", "gbm", "kum", "anp", "bnd", "mni", "sat", "doi",
+    "brx", "mag", "hne", "gom", "tcy", "kha", "lus", "grt", "nag", "sck",
+    "gon", "kru", "mwr", "bpy", "lep",
+    "hindi", "bengali", "tamil", "telugu", "marathi", "gujarati", "kannada",
+    "malayalam", "punjabi", "urdu", "odia", "assamese", "bhojpuri", "rajasthani",
+    "sanskrit", "maithili", "konkani",
+    "hinglish", "tanglish", "teluglish", "minglish", "gujlish", "kanglish", "manglish", "punglish"
+  ]);
+  return indianCodes.has(l) || indianCodes.has(base) || l.endsWith("-in");
+}
+

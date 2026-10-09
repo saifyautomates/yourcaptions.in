@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { usePlanInfo } from "@/hooks/usePlanInfo";
+import { getPlanCapabilities } from "@/lib/plans";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -55,6 +58,8 @@ const humanSize = (bytes?: number | null) => {
 
 const AssetLibrary = () => {
   const { user } = useAuth();
+  const { planId } = usePlanInfo();
+  const caps = getPlanCapabilities(planId);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(0);
@@ -128,6 +133,32 @@ const AssetLibrary = () => {
       return;
     }
     const category = detectCategory(file);
+
+    // Feature gating strictly matching pricing tiers
+    if (category === "font" && planId === "starter") {
+      toast.error("Custom fonts require the Editor plan or higher", {
+        description: "Upgrade your plan to upload and burn custom brand fonts.",
+      });
+      return;
+    }
+
+    if ((category === "logo" || category === "preset") && !caps.canCustomBrand) {
+      toast.error("Brand Kits require the Creator or Studio plan", {
+        description: "Upgrade to Creator to create and manage reusable Brand Kits.",
+      });
+      return;
+    }
+
+    if (category === "logo" || category === "preset") {
+      const currentBrandKits = assets.filter((a) => a.category === "logo" || a.category === "preset").length;
+      if (currentBrandKits >= caps.maxBrandKits) {
+        toast.error(`Brand Kit limit reached (${caps.maxBrandKits})`, {
+          description: `Your ${planId.toUpperCase()} plan allows up to ${caps.maxBrandKits} brand kit assets. Upgrade to Studio for unlimited brand kits.`,
+        });
+        return;
+      }
+    }
+
     const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = `${user.id}/${crypto.randomUUID()}-${safe}`;
     const { error: upErr } = await supabase.storage.from("assets").upload(path, file, {
@@ -270,14 +301,29 @@ const AssetLibrary = () => {
       <div className="mx-auto max-w-6xl space-y-6">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold">Asset library</h1>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-3xl font-semibold">Brand Kits & Asset Library</h1>
+              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary uppercase tracking-wide">
+                {planId}
+              </span>
+            </div>
             <p className="mt-1 text-muted-foreground">
-              Upload fonts, logos, images, and caption presets — then reuse them across projects.
+              Upload fonts, logos, watermarks, and caption presets — apply them seamlessly across all projects.
             </p>
           </div>
-          <div className="text-xs text-muted-foreground">
-            <b className="text-foreground">{assets.length}</b> asset{assets.length === 1 ? "" : "s"} ·{" "}
-            {humanSize(assets.reduce((s, a) => s + (a.size_bytes ?? 0), 0))}
+          <div className="flex items-center gap-4">
+            {!caps.canCustomBrand && (
+              <Link
+                to="/pricing"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20"
+              >
+                <Sparkles className="h-3.5 w-3.5" /> Upgrade for Brand Kits
+              </Link>
+            )}
+            <div className="text-xs text-muted-foreground">
+              <b className="text-foreground">{assets.length}</b> asset{assets.length === 1 ? "" : "s"} ·{" "}
+              {humanSize(assets.reduce((s, a) => s + (a.size_bytes ?? 0), 0))}
+            </div>
           </div>
         </header>
 
