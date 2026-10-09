@@ -3,7 +3,7 @@ export const SEO_CONFIG = {
   siteUrl: 'https://yourcaptions.com',
   alternateUrl: 'https://yourcaptions.in',
   defaultTitle: 'yourcaptions — AI Caption Studio for Indian Creators',
-  defaultDescription: 'Auto-generate accurate captions in Hindi, Urdu, Arabic, English and 100+ languages. Frame-accurate timing, AI dubbing, one-click export. Trusted by 10,000+ creators.',
+  defaultDescription: 'Auto-generate accurate captions in Hindi, Urdu, Arabic, English and 100+ languages. Frame-accurate timing, 165+ viral presets, one-click 4K export. Trusted by 10,000+ creators.',
   defaultKeywords: [
     'caption generator', 'AI captions', 'auto captions', 'subtitle generator',
     'automatic subtitles', 'video captions', 'caption maker',
@@ -27,9 +27,9 @@ export const PAGE_SEO: Record<string, any> = {
     canonical: 'https://yourcaptions.com/',
   },
   features: {
-    title: 'Features — AI Transcription, Caption Editor, Dubbing & More | yourcaptions',
-    description: 'Frame-accurate AI transcription in 100+ languages. Visual caption editor. AI voice dubbing. One-click 4K export. Everything creators need.',
-    keywords: ['AI transcription', 'caption editor', 'voice dubbing', 'subtitle maker features'],
+    title: 'Features — AI Transcription, Caption Editor, 165+ Presets & 4K Export | yourcaptions',
+    description: 'Frame-accurate AI transcription in 100+ languages. Visual caption editor with 165+ viral presets. One-click 4K MP4 and SRT export. Everything creators need.',
+    keywords: ['AI transcription', 'caption editor', 'caption presets', 'subtitle maker features', '4k video export'],
     canonical: 'https://yourcaptions.com/features',
   },
   pricing: {

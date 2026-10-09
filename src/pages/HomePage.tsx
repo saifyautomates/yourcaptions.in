@@ -83,7 +83,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.45 }}
             className="mt-6 text-[15px] md:text-[18px] text-[#888] max-w-[540px] leading-[1.65]"
           >
-            The AI caption studio built for creators who speak every language. Frame-accurate timing. Native-quality dubbing. Minutes, not days.
+            The AI caption studio built for creators who speak every language. Frame-accurate timing. 165+ viral presets. Minutes, not days.
           </motion.p>
 
           <motion.div 
@@ -328,56 +328,10 @@ export default function HomePage() {
             },
             {
               n: "03",
-              t: "AI Voice Dubbing",
-              d: "Clone any voice. Translate to any language. Sounds completely human.",
-              m: "🗣️ 100+ voices",
-              rev: false,
-              visual: (
-                <div className="w-full h-full p-6 flex flex-col justify-between bg-gradient-to-br from-[#12121A] to-[#0A0A0E] text-left">
-                  <div className="flex items-center justify-between border-b border-[#222] pb-3">
-                    <span className="text-[12px] font-bold text-white tracking-wide">Neural Multi-Language Dub</span>
-                    <span className="text-[11px] font-semibold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/30">
-                      Zero Lip Lag
-                    </span>
-                  </div>
-
-                  {/* Multi-language voice chips */}
-                  <div className="space-y-2 my-2">
-                    {[
-                      { lang: "Original Voice (English)", pitch: "100% Match", flag: "🇺🇸", active: true },
-                      { lang: "AI Dubbed: Hindi (Bollywood)", pitch: "Native Tone", flag: "🇮🇳", active: true },
-                      { lang: "AI Dubbed: Spanish (Castilian)", pitch: "Ultra Crisp", flag: "🇪🇸", active: false },
-                    ].map((v, idx) => (
-                      <div
-                        key={idx}
-                        className={`flex items-center justify-between p-2.5 rounded-xl border ${
-                          idx === 1
-                            ? "bg-[#E60000]/10 border-[#E60000]/40 text-white"
-                            : "bg-[#0E0E14] border-[#1F1F2A] text-[#888]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-[16px]">{v.flag}</span>
-                          <span className="text-[12px] font-semibold">{v.lang}</span>
-                        </div>
-                        <span className="text-[11px] font-mono text-[#00E5FF]">{v.pitch}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between text-[11px] text-[#666] pt-1">
-                    <span>Natural emotion &amp; breath retention</span>
-                    <span className="text-[#E60000] font-bold">100+ Voices</span>
-                  </div>
-                </div>
-              ),
-            },
-            {
-              n: "04",
               t: "One-Click Export",
               d: "Burn captions into video. Export MP4, SRT, VTT, TXT. 4K supported on Pro plans.",
               m: "🎬 4K support",
-              rev: true,
+              rev: false,
               visual: (
                 <div className="w-full h-full p-6 flex flex-col justify-between bg-gradient-to-br from-[#12121A] to-[#0A0A0E] text-left">
                   <div className="flex items-center justify-between border-b border-[#222] pb-3">

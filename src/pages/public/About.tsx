@@ -67,7 +67,7 @@ export default function About() {
           <div className="space-y-6 text-[17px] leading-[1.8] text-[#888]">
             <p>We were creators first. Every reel, every podcast cut, every ad — captions took longer than the edit itself.</p>
             <p>Existing tools were expensive, English-first, and never nailed the timing on Hindi, Punjabi, or Tamil. So we built one that does.</p>
-            <p>Today, Yourcaptions.in powers thousands of creators across 100+ languages — with word-level control, on-brand templates, and instant dubbing.</p>
+            <p>Today, Yourcaptions.in powers thousands of creators across 100+ languages — with word-level control, on-brand templates, and one-click 4K export.</p>
           </div>
         </Reveal>
       </section>

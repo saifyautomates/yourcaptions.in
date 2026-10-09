@@ -7,44 +7,37 @@ const features: F[] = [
   {
     n: "01",
     name: "Instant Transcription",
-    desc: "Upload any video. Word-perfect captions in under 2 minutes. 100+ languages detected automatically.",
+    desc: "Upload any video. Word-perfect captions in under 2 minutes. 100+ languages detected automatically with Sarvam & Deepgram.",
     pill: "⚡ 2 min avg",
     mock: <MockWaveform />,
   },
   {
     n: "02",
     name: "Visual Caption Editor",
-    desc: "Style every word. Drag anything. See live on canvas. Ghost effects, keyword highlights, RTL support.",
+    desc: "Style every word. Drag anything. See live on canvas. Ghost effects, keyword highlights, active word glow.",
     pill: "🎨 Live canvas",
     mock: <MockEditor />,
   },
   {
     n: "03",
-    name: "AI Voice Dubbing",
-    desc: "Clone any voice. Translate. Dub in any language. Indistinguishable from human.",
-    pill: "🌐 100+ langs",
-    mock: <MockDub />,
+    name: "Template Library",
+    desc: `${CAP_PRESETS.length}+ curated caption styles from top YouTube and Instagram creators including Hormozi, MrBeast, and Kalakar.`,
+    pill: `✨ ${CAP_PRESETS.length}+ styles`,
+    mock: <MockTemplates />,
   },
   {
     n: "04",
     name: "Burn & Export",
-    desc: "Burn styled captions permanently. Export MP4, SRT, VTT, TXT in one click.",
-    pill: "📤 4 formats",
+    desc: "Burn styled captions permanently with hardware acceleration. Export MP4, SRT, VTT, TXT in one click. 4K supported.",
+    pill: "🎬 4K support",
     mock: <MockExport />,
   },
   {
     n: "05",
-    name: "Team Collaboration",
-    desc: "Invite your editor. Share projects. Comment on captions. Ship together.",
-    pill: "👥 Unlimited seats",
-    mock: <MockTeam />,
-  },
-  {
-    n: "06",
-    name: "Template Library",
-    desc: `${CAP_PRESETS.length}+ curated caption styles from top YouTube and Instagram creators.`,
-    pill: `✨ ${CAP_PRESETS.length}+ styles`,
-    mock: <MockTemplates />,
+    name: "AI Audio Enhancement",
+    desc: "Studio-grade audio cleanup. Remove background noise and boost speech clarity automatically.",
+    pill: "🎙️ Studio sound",
+    mock: <MockAudioCleaner />,
   },
 ];
 
@@ -118,6 +111,7 @@ function MockWaveform() {
     </div>
   );
 }
+
 function MockEditor() {
   return (
     <div className="grid h-full grid-cols-[1fr_140px] gap-3">
@@ -135,23 +129,7 @@ function MockEditor() {
     </div>
   );
 }
-function MockDub() {
-  return (
-    <div className="flex h-full flex-col justify-between">
-      <div className="flex items-center gap-2 text-[13px]"><span className="text-[#E60000]">●</span> <span className="text-white">Voice cloning</span></div>
-      <div className="flex items-center justify-center gap-1">
-        {Array.from({ length: 32 }).map((_, i) => (
-          <div key={i} className="w-1 rounded bg-[#E60000]/70" style={{ height: `${10 + Math.sin(i * 0.6) * 30 + 20}px` }} />
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-2 text-[11px]">
-        {["EN", "HI", "ES", "FR", "AR", "JA", "KO", "DE"].map((l) => (
-          <span key={l} className="rounded border border-[#2A2A2A] px-2 py-1 text-[#888]">{l}</span>
-        ))}
-      </div>
-    </div>
-  );
-}
+
 function MockExport() {
   return (
     <div className="flex h-full flex-col justify-between">
@@ -167,24 +145,7 @@ function MockExport() {
     </div>
   );
 }
-function MockTeam() {
-  return (
-    <div className="flex h-full flex-col justify-between">
-      <div className="flex -space-x-2">
-        {["S", "A", "R", "K"].map((l, i) => (
-          <div key={i} className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0D0D0D] bg-[#E60000] text-[12px] font-bold text-white">{l}</div>
-        ))}
-      </div>
-      <div className="space-y-2">
-        {["Reel 01 · Shared", "Podcast · In review", "Ad cut · Live"].map((p, i) => (
-          <div key={i} className="flex items-center justify-between rounded border border-[#2A2A2A] bg-[#141414] px-3 py-2 text-[13px]">
-            <span className="text-white">{p}</span><span className="text-[#E60000]">●</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+
 function MockTemplates() {
   return (
     <div className="grid h-full grid-cols-3 gap-2">
@@ -193,6 +154,39 @@ function MockTemplates() {
           <span style={{ color: i % 2 === 0 ? "#E60000" : "#fff" }}>Style {i + 1}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+function MockAudioCleaner() {
+  return (
+    <div className="flex h-full flex-col justify-between">
+      <div className="flex items-center justify-between border-b border-[#222] pb-2 text-[12px]">
+        <span className="font-semibold text-white">AI Vocal Isolation</span>
+        <span className="rounded bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">Active</span>
+      </div>
+      <div className="space-y-3">
+        <div>
+          <div className="text-[10px] font-mono text-[#777] mb-1">ORIGINAL AUDIO (NOISY / ROOM ECHO)</div>
+          <div className="flex items-center gap-1 h-6">
+            {Array.from({ length: 32 }).map((_, i) => (
+              <div key={i} className="w-1 rounded-full bg-[#555]/50" style={{ height: `${20 + (i % 5) * 15}%` }} />
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] font-mono text-[#00E5FF] mb-1">ENHANCED AUDIO (STUDIO CLARITY)</div>
+          <div className="flex items-center gap-1 h-8">
+            {Array.from({ length: 32 }).map((_, i) => (
+              <div key={i} className="w-1 rounded-full bg-gradient-to-t from-[#E60000] to-[#FF4D4D]" style={{ height: `${15 + Math.abs(Math.sin(i * 0.4)) * 80}%` }} />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between text-[11px] text-[#888] pt-1">
+        <span>Background hum eliminated</span>
+        <span className="text-white font-medium">96 kHz Quality</span>
+      </div>
     </div>
   );
 }

@@ -36,7 +36,7 @@ export function PublicFooter() {
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-[#B8B8B8]">
-              AI captions, translation and dubbing.
+              AI captions, styling and one-click export.
               <br />Built for creators who speak every language.
             </p>
             <div className="mt-6 flex gap-4">
