@@ -1,3 +1,6 @@
+DROP FUNCTION IF EXISTS public.reserve_credits(uuid, numeric, uuid, text, jsonb);
+DROP FUNCTION IF EXISTS public.reserve_credits;
+
 CREATE OR REPLACE FUNCTION public.reserve_credits(p_user_id uuid, p_amount numeric, p_reference_id uuid DEFAULT NULL::uuid, p_reference_type text DEFAULT NULL::text, p_metadata jsonb DEFAULT NULL::jsonb)
  RETURNS boolean
  LANGUAGE plpgsql
@@ -97,6 +100,11 @@ BEGIN
 END;
 $$;
 
+DO $$
+BEGIN
+  PERFORM cron.unschedule('refund_stuck_jobs_cron');
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 SELECT cron.schedule('refund_stuck_jobs_cron', '*/5 * * * *', 'SELECT public.refund_stuck_jobs()');
 
 -- BUG: Plan credits reset on wrong date (1st of month instead of billing anniversary)
@@ -119,6 +127,11 @@ BEGIN
 END;
 $$;
 
+DO $$
+BEGIN
+  PERFORM cron.unschedule('reset_plan_credits_cron');
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 SELECT cron.schedule('reset_plan_credits_cron', '0 0 * * *', 'SELECT public.reset_plan_credits()');
 
 
