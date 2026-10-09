@@ -9,8 +9,19 @@ import {
 } from "@/lib/captionStyle";
 
 describe("All Templates Exhaustive Verification (100% Reliability)", () => {
-  it("has exactly 50 top world-class presets", () => {
-    expect(CAP_PRESETS.length).toBe(50);
+  it("has exactly 122 top world-class presets (50 studio + 72 Captik templates)", () => {
+    expect(CAP_PRESETS.length).toBe(122);
+
+    // Verify signature Captik templates are present
+    const names = new Set(CAP_PRESETS.map((p) => p.name));
+    expect(names.has("Captik · Captik Glow")).toBe(true);
+    expect(names.has("Captik · Ali Abdaal")).toBe(true);
+    expect(names.has("Captik · Captik Shadow")).toBe(true);
+    expect(names.has("Captik · Big Reveal")).toBe(true);
+    expect(names.has("Captik · Hormozi Style")).toBe(true);
+    expect(names.has("Captik · Mr Beast Style 1")).toBe(true);
+    expect(names.has("Captik · Tabahi")).toBe(true);
+    expect(names.has("Captik · Swiss")).toBe(true);
   });
 
   it("verifies all 5 signature studio packs have authentic templates", () => {

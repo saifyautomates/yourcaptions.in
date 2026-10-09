@@ -563,11 +563,11 @@ const LineStylingDrawer = ({ segIdx, capStyle, setCapStyle, onClose }: {
   const [query, setQuery] = useState("");
   const tpls = useMemo(() => {
     const wanted = new Set(LINE_STYLE_TEMPLATES);
-    const list = CAP_PRESETS.filter((p) => wanted.has(p.name));
+    const list = CAP_PRESETS.filter((p) => wanted.has(p.name) || (p.cleanName && wanted.has(p.cleanName)));
     // Preserve reference order.
-    return LINE_STYLE_TEMPLATES.map((n) => list.find((p) => p.name === n)).filter(Boolean) as typeof CAP_PRESETS;
- 
+    return LINE_STYLE_TEMPLATES.map((n) => list.find((p) => p.name === n || p.cleanName === n)).filter(Boolean) as typeof CAP_PRESETS;
   }, []);
+
   const filteredTpls = query ? tpls.filter((t) => t.name.toLowerCase().includes(query.toLowerCase())) : tpls;
 
   return (

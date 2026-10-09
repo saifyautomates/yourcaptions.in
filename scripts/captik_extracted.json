@@ -1,0 +1,578 @@
+[
+  {
+    "id": "captik_glow",
+    "name": "Captik Glow",
+    "video": "/previews/t/captik_glow.mp4",
+    "poster": "/previews/p/captik_glow.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "ali_abdaal",
+    "name": "Ali Abdaal",
+    "video": "/previews/t/ali_abdaal.mp4",
+    "poster": "/previews/p/ali_abdaal.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "captik_shadow",
+    "name": "Captik Shadow",
+    "video": "/previews/t/captik_shadow.mp4",
+    "poster": "/previews/p/captik_shadow.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "captik",
+    "name": "Captik",
+    "video": "/previews/t/captik.mp4",
+    "poster": "/previews/p/captik.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "clean_motion",
+    "name": "Clean Motion",
+    "video": "/previews/t/clean_motion.mp4",
+    "poster": "/previews/p/clean_motion.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "bubble",
+    "name": "Bubble Style",
+    "video": "/previews/t/bubble.mp4",
+    "poster": "/previews/p/bubble.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "hormozi",
+    "name": "Hormozi Style",
+    "video": "/previews/t/hormozi.mp4",
+    "poster": "/previews/p/hormozi.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "boxed",
+    "name": "Editing Skool",
+    "video": "/previews/t/boxed.mp4",
+    "poster": "/previews/p/boxed.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "mrbeast",
+    "name": "Mr Beast Style 1",
+    "video": "/previews/t/mrbeast.mp4",
+    "poster": "/previews/p/mrbeast.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "mr_beast_2",
+    "name": "Mr Beast Style 2",
+    "video": "/previews/t/mr_beast_2.mp4",
+    "poster": "/previews/p/mr_beast_2.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "iman_gadzhi",
+    "name": "Iman Gadzhi",
+    "video": "/previews/t/iman_gadzhi.mp4",
+    "poster": "/previews/p/iman_gadzhi.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "prism",
+    "name": "Devin Jatho",
+    "video": "/previews/t/prism.mp4",
+    "poster": "/previews/p/prism.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "highlighted_word",
+    "name": "Highlighted Word",
+    "video": "/previews/t/highlighted_word.mp4",
+    "poster": "/previews/p/highlighted_word.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "clean_glow",
+    "name": "Clean Glow Style",
+    "video": "/previews/t/clean_glow.mp4",
+    "poster": "/previews/p/clean_glow.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "captik_clean",
+    "name": "Captik Clean",
+    "video": "/previews/t/captik_clean.mp4",
+    "poster": "/previews/p/captik_clean.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "black_punch",
+    "name": "Black Punch",
+    "video": "/previews/t/black_punch.mp4",
+    "poster": "/previews/p/black_punch.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "captik_word",
+    "name": "Captik Word",
+    "video": "/previews/t/captik_word.mp4",
+    "poster": "/previews/p/captik_word.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "pixelated",
+    "name": "Pixelated Word",
+    "video": "/previews/t/pixelated.mp4",
+    "poster": "/previews/p/pixelated.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "liquid_glass",
+    "name": "Liquid Glass",
+    "video": "/previews/t/liquid_glass.mp4",
+    "poster": "/previews/p/liquid_glass.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "tabahi",
+    "name": "Tabahi",
+    "video": "/previews/t/tabahi.mp4",
+    "poster": "/previews/p/tabahi.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "deep_glow",
+    "name": "Deep Glow",
+    "video": "/previews/t/deep_glow.mp4",
+    "poster": "/previews/p/deep_glow.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "seedha_saadha",
+    "name": "Seedha Saadha",
+    "video": "/previews/t/seedha_saadha.mp4",
+    "poster": "/previews/p/seedha_saadha.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "thora_cinematic",
+    "name": "Thora Cinematic",
+    "video": "/previews/t/thora_cinematic.mp4",
+    "poster": "/previews/p/thora_cinematic.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "delhi",
+    "name": "Delhi",
+    "video": "/previews/t/delhi.mp4",
+    "poster": "/previews/p/delhi.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "illusion",
+    "name": "Illusion",
+    "video": "/previews/t/illusion.mp4",
+    "poster": "/previews/p/illusion.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "editor_masala",
+    "name": "Editor Masala",
+    "video": "/previews/t/editor_masala.mp4",
+    "poster": "/previews/p/editor_masala.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "aura",
+    "name": "Aura",
+    "video": "/previews/t/aura.mp4",
+    "poster": "/previews/p/aura.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "aura_helvetica",
+    "name": "Swiss",
+    "video": "/previews/t/aura_helvetica.mp4",
+    "poster": "/previews/p/aura_helvetica.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "big_reveal",
+    "name": "Big Reveal",
+    "video": "/previews/t/big_reveal.mp4",
+    "poster": "/previews/p/big_reveal.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "big_red",
+    "name": "The Big Red",
+    "video": "/previews/t/big_red.mp4",
+    "poster": "/previews/p/big_red.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "scribble",
+    "name": "Scribble",
+    "video": "/previews/t/scribble.mp4",
+    "poster": "/previews/p/scribble.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "archives",
+    "name": "Archives",
+    "video": "/previews/t/archives.mp4",
+    "poster": "/previews/p/archives.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "blockbuster",
+    "name": "Blockbuster",
+    "video": "/previews/t/blockbuster.mp4",
+    "poster": "/previews/p/blockbuster.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "journal",
+    "name": "Journal",
+    "video": "/previews/t/journal.mp4",
+    "poster": "/previews/p/journal.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "interlock",
+    "name": "Interlock",
+    "video": "/previews/t/interlock.mp4",
+    "poster": "/previews/p/interlock.webp",
+    "isBehindYou": false,
+    "isNew": false
+  },
+  {
+    "id": "look_anchorage",
+    "name": "Anchorage",
+    "video": "/previews/t/look_anchorage.mp4",
+    "poster": "/previews/p/look_anchorage.webp",
+    "isBehindYou": false,
+    "isNew": true
+  },
+  {
+    "id": "look_beacon",
+    "name": "Beacon",
+    "video": "/previews/t/look_beacon.mp4",
+    "poster": "/previews/p/look_beacon.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_cove",
+    "name": "Cove",
+    "video": "/previews/t/look_cove.mp4",
+    "poster": "/previews/p/look_cove.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_driftwood",
+    "name": "Driftwood",
+    "video": "/previews/t/look_driftwood.mp4",
+    "poster": "/previews/p/look_driftwood.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_ellis",
+    "name": "Ellis",
+    "video": "/previews/t/look_ellis.mp4",
+    "poster": "/previews/p/look_ellis.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_ferrier",
+    "name": "Ferrier",
+    "video": "/previews/t/look_ferrier.mp4",
+    "poster": "/previews/p/look_ferrier.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_garnet",
+    "name": "Garnet",
+    "video": "/previews/t/look_garnet.mp4",
+    "poster": "/previews/p/look_garnet.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_hawser",
+    "name": "Hawser",
+    "video": "/previews/t/look_hawser.mp4",
+    "poster": "/previews/p/look_hawser.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_ibis",
+    "name": "Ibis",
+    "video": "/previews/t/look_ibis.mp4",
+    "poster": "/previews/p/look_ibis.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_jetty",
+    "name": "Jetty",
+    "video": "/previews/t/look_jetty.mp4",
+    "poster": "/previews/p/look_jetty.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_keel",
+    "name": "Keel",
+    "video": "/previews/t/look_keel.mp4",
+    "poster": "/previews/p/look_keel.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_lanyard",
+    "name": "Lanyard",
+    "video": "/previews/t/look_lanyard.mp4",
+    "poster": "/previews/p/look_lanyard.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_mizzen",
+    "name": "Mizzen",
+    "video": "/previews/t/look_mizzen.mp4",
+    "poster": "/previews/p/look_mizzen.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_netting",
+    "name": "Netting",
+    "video": "/previews/t/look_netting.mp4",
+    "poster": "/previews/p/look_netting.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_outhaul",
+    "name": "Outhaul",
+    "video": "/previews/t/look_outhaul.mp4",
+    "poster": "/previews/p/look_outhaul.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_painter",
+    "name": "Painter",
+    "video": "/previews/t/look_painter.mp4",
+    "poster": "/previews/p/look_painter.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_quay",
+    "name": "Quay",
+    "video": "/previews/t/look_quay.mp4",
+    "poster": "/previews/p/look_quay.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_rudder",
+    "name": "Rudder",
+    "video": "/previews/t/look_rudder.mp4",
+    "poster": "/previews/p/look_rudder.webp",
+    "isBehindYou": false,
+    "isNew": true
+  },
+  {
+    "id": "look_scupper",
+    "name": "Scupper",
+    "video": "/previews/t/look_scupper.mp4",
+    "poster": "/previews/p/look_scupper.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_taffrail",
+    "name": "Taffrail",
+    "video": "/previews/t/look_taffrail.mp4",
+    "poster": "/previews/p/look_taffrail.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_underway",
+    "name": "Underway",
+    "video": "/previews/t/look_underway.mp4",
+    "poster": "/previews/p/look_underway.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_vang",
+    "name": "Vang",
+    "video": "/previews/t/look_vang.mp4",
+    "poster": "/previews/p/look_vang.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_windlass",
+    "name": "Windlass",
+    "video": "/previews/t/look_windlass.mp4",
+    "poster": "/previews/p/look_windlass.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_yawl",
+    "name": "Yawl",
+    "video": "/previews/t/look_yawl.mp4",
+    "poster": "/previews/p/look_yawl.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_abbey",
+    "name": "Abbey",
+    "video": "/previews/t/look_abbey.mp4",
+    "poster": "/previews/p/look_abbey.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_belfry",
+    "name": "Belfry",
+    "video": "/previews/t/look_belfry.mp4",
+    "poster": "/previews/p/look_belfry.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_cloister",
+    "name": "Cloister",
+    "video": "/previews/t/look_cloister.mp4",
+    "poster": "/previews/p/look_cloister.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_dovecote",
+    "name": "Dovecote",
+    "video": "/previews/t/look_dovecote.mp4",
+    "poster": "/previews/p/look_dovecote.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_effigy",
+    "name": "Effigy",
+    "video": "/previews/t/look_effigy.mp4",
+    "poster": "/previews/p/look_effigy.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_font",
+    "name": "Font",
+    "video": "/previews/t/look_font.mp4",
+    "poster": "/previews/p/look_font.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_gable",
+    "name": "Gable",
+    "video": "/previews/t/look_gable.mp4",
+    "poster": "/previews/p/look_gable.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_hassock",
+    "name": "Hassock",
+    "video": "/previews/t/look_hassock.mp4",
+    "poster": "/previews/p/look_hassock.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_iron",
+    "name": "Iron",
+    "video": "/previews/t/look_iron.mp4",
+    "poster": "/previews/p/look_iron.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_jamb",
+    "name": "Jamb",
+    "video": "/previews/t/look_jamb.mp4",
+    "poster": "/previews/p/look_jamb.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_keystone",
+    "name": "Keystone",
+    "video": "/previews/t/look_keystone.mp4",
+    "poster": "/previews/p/look_keystone.webp",
+    "isBehindYou": false,
+    "isNew": true
+  },
+  {
+    "id": "look_lintel",
+    "name": "Lintel",
+    "video": "/previews/t/look_lintel.mp4",
+    "poster": "/previews/p/look_lintel.webp",
+    "isBehindYou": true,
+    "isNew": false
+  },
+  {
+    "id": "look_mullion",
+    "name": "Mullion",
+    "video": "/previews/t/look_mullion.mp4",
+    "poster": "/previews/p/look_mullion.webp",
+    "isBehindYou": true,
+    "isNew": false
+  }
+]

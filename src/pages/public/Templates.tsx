@@ -8,21 +8,46 @@ import { CAP_PRESETS, DEFAULT_CAP_STYLE, type CapStyle } from "@/lib/captionStyl
 
 const CATEGORIES = [
   "All",
+  "Popular",
+  "Behind you",
+  "Bold & animated",
+  "Clean",
+  "Property reels",
   "Kinetic Motion",
   "Shorts & Reels",
   "Dynamic Pop",
   "Desi Viral",
   "Creator Pro",
-  "YT Creators",
-  "Ultimate",
-  "Cinematic",
-  "Podcast",
-  "Bold & Impact",
   "Neon & Glow",
-  "Minimal"
+  "Cinematic",
 ] as const;
 
 const SIGNATURE_PACKS: Record<string, { label: string; badgeClass: string; icon: string }> = {
+  "Popular": {
+    label: "Popular",
+    badgeClass: "bg-amber-950/80 text-amber-300 border border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.35)]",
+    icon: "⭐"
+  },
+  "Behind you": {
+    label: "Behind you",
+    badgeClass: "bg-blue-950/80 text-blue-300 border border-blue-500/50 shadow-[0_0_12px_rgba(59,130,246,0.35)]",
+    icon: "👤"
+  },
+  "Bold & animated": {
+    label: "Bold & animated",
+    badgeClass: "bg-rose-950/80 text-rose-300 border border-rose-500/50 shadow-[0_0_12px_rgba(244,63,94,0.35)]",
+    icon: "⚡"
+  },
+  "Clean": {
+    label: "Clean",
+    badgeClass: "bg-slate-900/80 text-slate-300 border border-slate-500/50 shadow-[0_0_12px_rgba(148,163,184,0.35)]",
+    icon: "✨"
+  },
+  "Property reels": {
+    label: "Property reels",
+    badgeClass: "bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.35)]",
+    icon: "🏠"
+  },
   "Kinetic Motion": {
     label: "Kinetic Motion",
     badgeClass: "bg-cyan-950/80 text-cyan-300 border border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.35)]",
@@ -78,6 +103,11 @@ export default function Templates() {
       const matchesCategory =
         activeCategory === "All" ||
         (t.category && t.category.toLowerCase() === activeCategory.toLowerCase()) ||
+        (activeCategory === "Popular" && (cat === "popular" || name.includes("popular") || name.includes("glow") || name.includes("hormozi") || name.includes("beast"))) ||
+        (activeCategory === "Behind you" && (cat === "behind you" || t.isBehindYou || name.includes("behind") || name.includes("cutout") || name.includes("reveal"))) ||
+        (activeCategory === "Bold & animated" && (cat === "bold & animated" || cat.includes("bold") || cat.includes("animated") || name.includes("punch") || name.includes("masala") || name.includes("tabahi"))) ||
+        (activeCategory === "Clean" && (cat === "clean" || cat.includes("minimal") || name.includes("clean") || name.includes("abdaal") || name.includes("swiss"))) ||
+        (activeCategory === "Property reels" && (cat === "property reels" || name.includes("belfry") || name.includes("cloister") || name.includes("gable"))) ||
         (activeCategory === "Kinetic Motion" && (cat === "kinetic motion" || name.includes("kinetic"))) ||
         (activeCategory === "Shorts & Reels" && (cat === "shorts & reels" || name.includes("reels"))) ||
         (activeCategory === "Dynamic Pop" && (cat === "dynamic pop" || name.includes("dynamic"))) ||
@@ -92,6 +122,7 @@ export default function Templates() {
       return matchesCategory && matchesSearch;
     });
   }, [activeCategory, searchQuery]);
+
 
   const apply = (templateName: string) => {
     if (!user) {
@@ -169,7 +200,7 @@ export default function Templates() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#666] w-4 h-4" />
           <input
             type="text"
-            placeholder="Search 50+ styles (e.g. Hormozi, Neon, Karaoke, 3D Depth, Minimal)..."
+            placeholder="Search 120+ styles (e.g. Captik Glow, Ali Abdaal, Big Reveal, Hormozi, MrBeast)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-[#0E0E14] border border-[#222] focus:border-[#E60000] rounded-full pl-11 pr-5 py-3 text-[14px] text-white placeholder-[#555] outline-none shadow-xl transition-colors"
@@ -223,6 +254,10 @@ export default function Templates() {
               t.category === "Dynamic Pop" || t.name.toLowerCase().startsWith("dynamic ·") ? "Dynamic Pop" :
               t.category === "Desi Viral" || t.name.toLowerCase().startsWith("desi ·") ? "Desi Viral" :
               t.category === "Creator Pro" || t.name.toLowerCase().startsWith("creator ·") ? "Creator Pro" :
+              t.category === "Popular" ? "Popular" :
+              t.category === "Clean" ? "Clean" :
+              t.category === "Bold & animated" ? "Bold & animated" :
+              t.category === "Property reels" ? "Property reels" :
               null;
             const packInfo = packKey ? SIGNATURE_PACKS[packKey] : null;
 
@@ -240,15 +275,22 @@ export default function Templates() {
                   {/* Subtle noise/grid in card */}
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02)_0,transparent_70%)] pointer-events-none" />
 
-                  {/* Signature Pack Badge */}
-                  {packInfo && (
+                  {/* Badge */}
+                  {t.isBehindYou ? (
+                    <div className="absolute top-3 left-3 z-20">
+                      <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 bg-amber-500 text-black shadow-md font-sans">
+                        <span>👤</span>
+                        <span>Behind you</span>
+                      </span>
+                    </div>
+                  ) : packInfo ? (
                     <div className="absolute top-3 left-3 z-20">
                       <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 ${packInfo.badgeClass}`}>
                         <span>{packInfo.icon}</span>
                         <span>{packInfo.label}</span>
                       </span>
                     </div>
-                  )}
+                  ) : null}
 
                   {/* Live Karaoke Animated Words */}
                   <div className="relative z-10 flex flex-wrap items-center justify-center gap-1.5 px-2 text-center">

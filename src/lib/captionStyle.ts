@@ -1890,19 +1890,38 @@ export const SHORTS_REELS_TEMPLATE_PACK: { name: string; patch: Partial<CapStyle
 ];
 export const DIVEO_TEMPLATE_PACK = SHORTS_REELS_TEMPLATE_PACK;
 
-// Top 50 World-Class Curated Presets (10 per category)
-export const CAP_PRESETS: { name: string; patch: Partial<CapStyle>; category?: string }[] = [
+import { CAPTIK_72_PRESETS, type CaptikPresetItem } from "./captikPresets";
+export { CAPTIK_72_PRESETS, type CaptikPresetItem };
+
+// Top World-Class Curated Presets: Signature 50 studio packs + All 72 Captik templates
+export const CAP_PRESETS: {
+  name: string;
+  patch: Partial<CapStyle>;
+  category?: string;
+  id?: string;
+  cleanName?: string;
+  isBehindYou?: boolean;
+  isNew?: boolean;
+  video?: string;
+  poster?: string;
+}[] = [
   ...KINETIC_TEMPLATE_PACK.map((s) => ({ ...s, category: "Kinetic Motion" as const })),
   ...SHORTS_REELS_TEMPLATE_PACK.map((s) => ({ ...s, category: "Shorts & Reels" as const })),
   ...DYNAMIC_POP_TEMPLATE_PACK.map((s) => ({ ...s, category: "Dynamic Pop" as const })),
   ...DESI_VIRAL_TEMPLATE_PACK.map((s) => ({ ...s, category: "Desi Viral" as const })),
   ...CREATOR_PRO_TEMPLATE_PACK.map((s) => ({ ...s, category: "Creator Pro" as const })),
+  ...CAPTIK_72_PRESETS,
 ];
 
 // Category derivation for the Templates picker. Explicit `category` wins; otherwise
 // we infer from the preset name using well-known keywords.
 export type PresetCategory =
   | "All"
+  | "Popular"
+  | "Behind you"
+  | "Bold & animated"
+  | "Clean"
+  | "Property reels"
   | "Kinetic Motion"
   | "Shorts & Reels"
   | "Dynamic Pop"
@@ -1927,18 +1946,23 @@ export type PresetCategory =
   | "News & Pro";
 
 const CATEGORY_RULES: { label: Exclude<PresetCategory, "All" | "Built-in">; test: RegExp }[] = [
+  { label: "Behind you",     test: /behind|depth cutout|reveal|beacon|cove|driftwood|ellis|ferrier|garnet|hawser|ibis|jetty|keel|lanyard|mizzen|netting|outhaul|painter|quay|scupper|taffrail|underway|vang|windlass|yawl|abbey|effigy|font|hassock|iron|jamb|lintel|mullion/i },
+  { label: "Property reels", test: /property|real estate|belfry|cloister|dovecote|gable/i },
+  { label: "Bold & animated",test: /bold & animated|animated|punch|masala|tabahi|blockbuster|big red|scribble|interlock/i },
+  { label: "Clean",          test: /clean|minimal|swiss|journal|anchorage|saadha|seedha/i },
+  { label: "Popular",        test: /popular|glow|abdaal|shadow|captik|bubble|hormozi|boxed|beast|gadzhi|prism/i },
   { label: "Kinetic Motion", test: /kinetic|viral flow|3d depth|moonshot/i },
   { label: "Shorts & Reels", test: /reels|shorts|blitz|marker|diveo/i },
   { label: "Dynamic Pop",   test: /dynamic|classic pill|typewriter|captions\.ai/i },
-  { label: "Desi Viral",    test: /desi|bhashini|hinglish|bollywood|captik/i },
-  { label: "Creator Pro",   test: /creator|podcast|hormozi|sharan|ranveer|shamani|kalakar/i },
+  { label: "Desi Viral",    test: /desi|bhashini|hinglish|bollywood/i },
+  { label: "Creator Pro",   test: /creator|podcast|sharan|ranveer|shamani|kalakar/i },
   { label: "Karaoke",       test: /karaoke|sing|word[- ]?highlight|color[- ]?sweep/i },
   { label: "Neon & Glow",   test: /neon|glow|cyber|glitch|streamer/i },
   { label: "Cinematic",     test: /cinemat|luxury|serif|documentary|magnates|johnny|iman/i },
   { label: "Retro & Fun",   test: /8[- ]?bit|arcade|comic|bubble|pastel|typewriter|mechanical|fredoka|bangers/i },
   { label: "News & Pro",    test: /news|b2b|professional|educator|breaking|ticker|physics|guruji|dhruv/i },
-  { label: "Bold & Impact", test: /bold|impact|pop|punch|beast|hormozi|action|maximum|carry|ishow|kai|zoom/i },
-  { label: "Minimal",       test: /minimal|clean|dark mode|dan koe|ali abdaal|soft|casual/i },
+  { label: "Bold & Impact", test: /bold|impact|pop|punch|beast|action|maximum|carry|ishow|kai|zoom/i },
+  { label: "Minimal",       test: /minimal|clean|dark mode|dan koe|soft|casual/i },
 ];
 
 export const getPresetCategory = (p: { name: string; category?: string }): PresetCategory => {
@@ -1951,24 +1975,23 @@ export const getPresetCategory = (p: { name: string; category?: string }): Prese
 
 export const PRESET_CATEGORIES: PresetCategory[] = [
   "All",
+  "Popular",
+  "Behind you",
+  "Bold & animated",
+  "Clean",
+  "Property reels",
   "Kinetic Motion",
   "Shorts & Reels",
   "Dynamic Pop",
   "Desi Viral",
   "Creator Pro",
-  "Ultimate",
-  "YT Creators",
-  "Built-in",
-  "Core Pack",
-  "Creators",
-  "Bold & Impact",
-  "Minimal",
   "Neon & Glow",
   "Cinematic",
   "Karaoke",
   "Retro & Fun",
   "News & Pro",
 ];
+
 
 // -----------------------------------------------------------------------------
 // Free vs Premium templates
