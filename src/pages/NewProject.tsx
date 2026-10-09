@@ -77,6 +77,16 @@ const NewProject = () => {
   const [audioClean, setAudioClean] = useState(false);
   const [emojis, setEmojis] = useState(false);
 
+  const [selectedTemplate] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get("applyTemplate");
+    if (fromUrl) {
+      localStorage.setItem("captions:appliedTemplate", fromUrl);
+      return fromUrl;
+    }
+    return localStorage.getItem("captions:appliedTemplate");
+  });
+
   const xhrRef = useRef<XMLHttpRequest | null>(null);
   const cancelledRef = useRef(false);
 
@@ -200,6 +210,12 @@ const NewProject = () => {
     return (
       <DashboardLayout>
         <div className="mx-auto max-w-xl">
+          {selectedTemplate && (
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Style Pre-selected: <strong>"{selectedTemplate}"</strong></span>
+            </div>
+          )}
           <h1 className="text-2xl font-semibold">Upload a video</h1>
           <p className="mt-1 text-sm text-muted-foreground">Pick a video file to caption.</p>
           <label className="mt-6 grid cursor-pointer place-items-center rounded-2xl border-2 border-dashed border-border/60 bg-card/40 p-12 text-center hover:border-primary/40">
@@ -246,6 +262,12 @@ const NewProject = () => {
   return (
     <DashboardLayout>
       <BackdropModal title="Prepare Your Media" subtitle="Select a language to transcribe your media." onClose={cancel}>
+        {selectedTemplate && (
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Preset: <strong>"{selectedTemplate}"</strong> (will be auto-applied in editor)</span>
+          </div>
+        )}
         {/* Video preview */}
         <div className="mt-6 overflow-hidden rounded-xl border border-border bg-black">
           <div className="relative aspect-video">

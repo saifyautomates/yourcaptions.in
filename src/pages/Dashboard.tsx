@@ -45,12 +45,17 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [appliedTemplateName, setAppliedTemplateName] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("applyTemplate") || localStorage.getItem("captions:appliedTemplate");
+  });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const applyTemplate = params.get("applyTemplate");
     if (applyTemplate) {
       localStorage.setItem("captions:appliedTemplate", applyTemplate);
+      setAppliedTemplateName(applyTemplate);
       toast.success(`Selected "${applyTemplate}"! Upload or open a project to style your video.`);
     }
   }, []);
@@ -174,7 +179,10 @@ export default function Dashboard() {
                 ))}
               </motion.div>
             ) : (
-              <ProjectsEmptyState onAction={() => navigate('/dashboard/new')} />
+              <ProjectsEmptyState
+                onAction={() => navigate('/dashboard/new')}
+                actionLabel={appliedTemplateName ? `Upload Video with "${appliedTemplateName}"` : "Upload Video"}
+              />
             )}
           </div>
 

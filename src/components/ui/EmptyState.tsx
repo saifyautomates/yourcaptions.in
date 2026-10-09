@@ -50,13 +50,13 @@ export function EmptyState({
   );
 }
 
-export function ProjectsEmptyState({ onAction }: { onAction: () => void }) {
+export function ProjectsEmptyState({ onAction, actionLabel }: { onAction: () => void; actionLabel?: string }) {
   return (
     <EmptyState
       icon={<FileVideo size={32} />}
       title="No projects yet"
       description="Upload your first video to generate AI-powered captions instantly."
-      actionLabel="Upload Video"
+      actionLabel={actionLabel || "Upload Video"}
       onAction={onAction}
     />
   );

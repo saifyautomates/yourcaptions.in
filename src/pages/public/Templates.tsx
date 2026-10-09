@@ -138,12 +138,13 @@ export default function Templates() {
 
 
   const apply = (templateName: string) => {
+    localStorage.setItem("captions:appliedTemplate", templateName);
+    toast.success(`Selected "${templateName}"! Upload your video to apply it.`);
     if (!user) {
-      toast.info("Sign in to apply this template to your video project");
-      nav(`/login?next=/templates`);
+      nav(`/login?next=/dashboard/new?applyTemplate=${encodeURIComponent(templateName)}`);
       return;
     }
-    nav(`/dashboard?applyTemplate=${encodeURIComponent(templateName)}`);
+    nav(`/dashboard/new?applyTemplate=${encodeURIComponent(templateName)}`);
   };
 
   // Words for the interactive modal
