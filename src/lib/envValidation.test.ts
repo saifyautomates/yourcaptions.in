@@ -27,6 +27,11 @@ describe('envValidation', () => {
 
   it('should log an error to errorMonitor if the key is missing', () => {
     delete process.env['DEEPGRAM_API_KEY'];
+    delete process.env['VITE_DEEPGRAM_API_KEY'];
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      delete (import.meta.env as any)['DEEPGRAM_API_KEY'];
+      delete (import.meta.env as any)['VITE_DEEPGRAM_API_KEY'];
+    }
     const key = getValidatedApiKey('Deepgram', 'DEEPGRAM_API_KEY');
     
     expect(key).toBe('');
