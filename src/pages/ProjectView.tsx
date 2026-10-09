@@ -4470,6 +4470,8 @@ const ProjectView = () => {
             capStyle={capStyle}
             title={project?.title ?? "captioned-video"}
             onDownloadCaptions={download}
+            videoDurationSec={duration}
+            projectId={id}
           />
         )}
 

@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Download, Loader2, X, FileVideo, FileText, Clock, Timer, StopCircle, AlertTriangle, Info, Settings2, ChevronDown, Lock } from "lucide-react";
+import { Download, Loader2, X, FileVideo, FileText, Clock, Timer, StopCircle, AlertTriangle, Info, Settings2, ChevronDown, Lock, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FuturisticLoader } from "@/components/FuturisticLoader";
 import { toast } from "sonner";
 import { usePlanInfo } from "@/hooks/usePlanInfo";
 import { getPlanCapabilities } from "@/lib/plans";
+import { isAudioEnhanced } from "@/lib/audioEnhancer";
 import {
   ExportResolution, RESOLUTION_DIMS, triggerDownload,
 } from "@/lib/exportVideo";
@@ -32,6 +33,7 @@ interface Props {
   onDownloadCaptions: (fmt: "srt" | "vtt") => void;
   /** Source duration in seconds, used for file-size estimates. */
   videoDurationSec?: number;
+  projectId?: string;
 }
 
 const RES_ORDER: ExportResolution[] = ["720p", "1080p", "1440p", "4k"];
@@ -50,7 +52,7 @@ const fmtDuration = (ms: number) => {
   return `${m}:${String(r).padStart(2, "0")}`;
 };
 
-export default function ExportModal({ open, onClose, mediaUrl, segs, capStyle, title, onDownloadCaptions, videoDurationSec }: Props) {
+export default function ExportModal({ open, onClose, mediaUrl, segs, capStyle, title, onDownloadCaptions, videoDurationSec, projectId }: Props) {
   const { planId } = usePlanInfo();
   const caps = getPlanCapabilities(planId);
   const maxRes = caps.maxExportResolution;
@@ -61,6 +63,7 @@ export default function ExportModal({ open, onClose, mediaUrl, segs, capStyle, t
   const [res, setRes] = useState<ExportResolution>(initialRes);
   const [preset, setPreset] = useState<PresetKey>("balanced");
   const [settings, setSettings] = useState<EncodeSettings>(() => applyPreset("balanced", "1080p"));
+  const [enhanceAudio, setEnhanceAudio] = useState<boolean>(() => isAudioEnhanced(projectId));
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -162,6 +165,7 @@ export default function ExportModal({ open, onClose, mediaUrl, segs, capStyle, t
         fps: settings.fps,
         bitrate: settings.bitrate,
         preferredCodec: codec,
+        enhanceAudio,
         filename: (title || "captioned-video").replace(/[^\w\-]+/g, "_") + "-" + res,
         signal: ctrl.signal,
         onPath: (p) => telemetry.markPath(p),
@@ -285,6 +289,40 @@ export default function ExportModal({ open, onClose, mediaUrl, segs, capStyle, t
                 );
               })}
             </div>
+          </div>
+
+          {/* AI Audio Enhancement Toggle */}
+          <div className="flex items-center justify-between rounded-lg border border-border/80 bg-input/20 p-3">
+            <div className="flex items-center gap-2.5">
+              <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${enhanceAudio ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-muted text-muted-foreground"}`}>
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] font-semibold text-foreground">AI Audio Enhancement</span>
+                  {enhanceAudio && (
+                    <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-bold text-emerald-400 border border-emerald-500/30">
+                      STUDIO CLEAN
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-muted-foreground">Studio noise reduction, vocal clarity &amp; auto-levelling in export</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setEnhanceAudio(!enhanceAudio)}
+              disabled={busy}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                enhanceAudio ? "bg-emerald-500" : "bg-muted"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                  enhanceAudio ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
           </div>
 
           <div>

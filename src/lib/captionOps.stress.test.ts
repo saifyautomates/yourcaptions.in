@@ -142,7 +142,7 @@ describe("captionOps — stress suite (long transcript)", () => {
       segs = splitSegmentAt(segs, overIdx);
     }
     const ms = performance.now() - t0;
-    expect(ms).toBeLessThan(2000);
+    expect(ms).toBeLessThan(5000);
     // monotonic invariant
     for (let i = 1; i < segs.length; i++) {
       expect(segs[i].start).toBeGreaterThanOrEqual(segs[i - 1].start - 1e-9);

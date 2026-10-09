@@ -21,6 +21,8 @@ import {
 } from "./exportVideo";
 import { demuxDecodeMp4, isDemuxDecodeSupported } from "./demuxDecode";
 
+import { enhanceAudioBuffer } from "./audioEnhancer";
+
 export { triggerDownload, RESOLUTION_DIMS };
 export type { ExportResolution, Segment };
 
@@ -49,6 +51,8 @@ export interface FastExportOptions {
   preferredCodec?: string;
   /** User-chosen bitrate override in bits/second. */
   bitrate?: number;
+  /** Apply studio-grade AI audio noise reduction and vocal enhancement to audio track. */
+  enhanceAudio?: boolean;
   onProgress?: (pct: number) => void;
   signal?: AbortSignal;
   /** Reported once the exporter commits to demux-decode or realtime-playback. */
@@ -100,7 +104,14 @@ export async function exportVideoFast(opts: FastExportOptions): Promise<{ blob: 
   const sourceH = video.videoHeight || H;
 
   // Decode audio up front (small enough for typical caption workflows)
-  const audio = await decodeAudio(mediaUrl);
+  let audio = await decodeAudio(mediaUrl);
+  if (audio && opts.enhanceAudio) {
+    try {
+      audio = await enhanceAudioBuffer(audio);
+    } catch (e) {
+      console.warn("[export] Audio enhancement failed, proceeding with original audio track:", e);
+    }
+  }
 
   const worker = new Worker(new URL("../workers/exportWorker.ts", import.meta.url), { type: "module" });
 

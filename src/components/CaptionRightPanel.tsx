@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { isAudioEnhanced, setAudioEnhanced, LiveAudioEnhancer } from "@/lib/audioEnhancer";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, ChevronUp, RotateCcw, Type, LayoutTemplate, Zap, AudioLines,
@@ -1103,79 +1104,133 @@ const TransitionsTab = ({ s, set }: {
 
 /* -------------------- AI Audio tab (rebuilt) -------------------- */
 
-const AudioTab = () => {
+const AudioTab = ({ projectId, videoRef }: { projectId?: string; videoRef?: React.RefObject<HTMLVideoElement> }) => {
   const [busy, setBusy] = useState(false);
-  const [enhanced, setEnhanced] = useState(false);
-  const clean = async () => {
+  const [enhanced, setEnhanced] = useState(() => isAudioEnhanced(projectId));
+  const enhancerRef = useRef<LiveAudioEnhancer | null>(null);
+
+  useEffect(() => {
+    const video = videoRef?.current;
+    if (video) {
+      if (!enhancerRef.current) {
+        enhancerRef.current = new LiveAudioEnhancer(video);
+      } else {
+        enhancerRef.current.attach(video);
+      }
+      enhancerRef.current.setEnabled(enhanced);
+    }
+    return () => {
+      enhancerRef.current?.detach();
+      enhancerRef.current = null;
+    };
+  }, [videoRef, enhanced]);
+
+  const toggleClean = async () => {
     if (busy) return;
     setBusy(true);
     try {
-      // Placeholder for backend audio-enhance job. For now, simulate a
-      // real request delay and mark the track as enhanced so the UI
-      // reflects that the action ran.
-      await new Promise((r) => setTimeout(r, 1600));
-      setEnhanced(true);
+      const next = !enhanced;
+      setEnhanced(next);
+      setAudioEnhanced(projectId, next);
+      if (enhancerRef.current) {
+        enhancerRef.current.setEnabled(next);
+      }
       const { toast } = await import("sonner");
-      toast.success("Audio enhanced — background noise reduced.");
-    } catch (e) {
+      if (next) {
+        toast.success("Studio Audio Enhancement Active", {
+          description: "Noise reduction, vocal clarity boost & auto-levelling applied.",
+        });
+      } else {
+        toast.info("Raw audio restored", {
+          description: "Studio DSP enhancement disabled.",
+        });
+      }
+    } catch {
       const { toast } = await import("sonner");
-      toast.error("Couldn't enhance audio. Try again.");
+      toast.error("Couldn't toggle audio enhancement.");
     } finally {
       setBusy(false);
     }
   };
+
   const goUpgrade = () => { window.location.href = "/pricing"; };
 
   return (
-    <div className="px-4 py-5">
-      <div className="rounded-2xl border border-border bg-gradient-to-b from-card/60 to-card/20 p-5 text-center">
+    <div className="px-4 py-5 space-y-4">
+      <div className={`rounded-2xl border transition-all duration-300 p-5 text-center ${
+        enhanced
+          ? "border-emerald-500/40 bg-gradient-to-b from-emerald-950/20 via-card/50 to-card/20 shadow-[0_0_30px_rgba(16,185,129,0.08)]"
+          : "border-border bg-gradient-to-b from-card/60 to-card/20"
+      }`}>
         <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[12px] font-semibold text-primary">
-          <Sparkles className="h-3 w-3" /> AI-Powered
+          <Sparkles className="h-3 w-3" /> AI-Powered Studio DSP
         </div>
         <h4 className="text-lg font-semibold text-foreground">Audio Enhancement</h4>
         <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-          Clean up your audio, Remove Background<br />
-          Noise &amp; Enhance Overall Audio Quality.
+          Studio-grade vocal isolation, background noise<br />
+          suppression &amp; speech clarity optimization.
         </p>
-        <p className="mt-2 text-[13px] italic text-muted-foreground/80">
-          Audio Enhancement Removes<br />Background Music as well!
-        </p>
+
+        {/* Live Status Pill */}
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold border transition ${
+            enhanced
+              ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
+              : "bg-muted/40 border-border text-muted-foreground"
+          }`}>
+            <span className={`h-2 w-2 rounded-full ${enhanced ? "bg-emerald-400 animate-pulse" : "bg-muted-foreground/60"}`} />
+            {enhanced ? "STUDIO ENHANCEMENT ACTIVE" : "RAW CAMERA AUDIO"}
+          </span>
+        </div>
+
         <button
-          onClick={clean}
+          onClick={toggleClean}
           disabled={busy}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 text-[14px] font-semibold text-primary-foreground shadow-md shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-70"
+          className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg py-3 text-[14px] font-semibold shadow-md transition disabled:opacity-70 ${
+            enhanced
+              ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/30"
+              : "bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/20"
+          }`}
         >
           <Volume2 className="h-4 w-4" />
-          {busy ? "Cleaning audio…" : enhanced ? "Re-clean Audio" : "Clean Audio"}
+          {busy ? "Processing…" : enhanced ? "Switch to Raw Audio" : "Clean & Enhance Audio"}
           <Wand2 className="h-4 w-4" />
-
         </button>
-        <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-1.5 text-left text-[13px] text-muted-foreground">
-          <div className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> Noise Reduction</div>
-          <div className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> Voice Enhancement</div>
-          <div className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> Real-time Processing</div>
+
+        {/* Feature status badges */}
+        <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-2 text-left text-[12px]">
+          <div className="flex items-center gap-1.5 text-foreground/80">
+            <span className={`h-1.5 w-1.5 rounded-full ${enhanced ? "bg-emerald-400" : "bg-muted-foreground"}`} />
+            Noise Reduction (85Hz Cut)
+          </div>
+          <div className="flex items-center gap-1.5 text-foreground/80">
+            <span className={`h-1.5 w-1.5 rounded-full ${enhanced ? "bg-emerald-400" : "bg-muted-foreground"}`} />
+            Vocal Presence (+3.5 dB)
+          </div>
+          <div className="flex items-center gap-1.5 text-foreground/80">
+            <span className={`h-1.5 w-1.5 rounded-full ${enhanced ? "bg-emerald-400" : "bg-muted-foreground"}`} />
+            Hiss Eliminator (11.5 kHz)
+          </div>
+          <div className="flex items-center gap-1.5 text-foreground/80">
+            <span className={`h-1.5 w-1.5 rounded-full ${enhanced ? "bg-emerald-400" : "bg-muted-foreground"}`} />
+            Auto Level Normalizer
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between rounded-xl border border-border bg-card/40 px-4 py-3">
+      <div className="flex items-center justify-between rounded-xl border border-border bg-card/40 px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-warning/20 text-warning">
             <Zap className="h-4 w-4" />
           </span>
           <div>
-            <div className="text-[13px] font-semibold text-foreground">Remaining Credits</div>
-            <div className="text-[12px] text-muted-foreground">2 credits available</div>
+            <div className="text-[13px] font-semibold text-foreground">Audio Processing</div>
+            <div className="text-[12px] text-muted-foreground">High fidelity studio export</div>
           </div>
         </div>
         <button onClick={goUpgrade} className="rounded-md bg-primary/90 px-2.5 py-1.5 text-[13px] font-semibold text-primary-foreground hover:bg-primary">
-          Upgrade
+          Plans
         </button>
-
-      </div>
-
-      <div className="mt-4 rounded-xl border border-dashed border-border/60 bg-muted/10 p-3 text-center text-[13px] text-muted-foreground">
-        <Lock className="mx-auto mb-1 h-3.5 w-3.5" />
-        AI Voiceover & Dubbing in 40+ desi voices — coming soon.
       </div>
     </div>
   );
@@ -1233,7 +1288,7 @@ export const CaptionRightPanel = ({ value, onChange, projectId, videoRef, onTemp
         {tab === "music" && (!projectId || !videoRef) && (
           <div className="p-6 text-center text-[13px] text-muted-foreground">Music editor unavailable in this view.</div>
         )}
-        {tab === "audio" && <AudioTab />}
+        {tab === "audio" && <AudioTab projectId={projectId} videoRef={videoRef} />}
       </div>
     </aside>
   );
