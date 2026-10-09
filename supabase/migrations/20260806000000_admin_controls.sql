@@ -57,6 +57,28 @@ CREATE TABLE IF NOT EXISTS plan_limits (
   updated_by            uuid REFERENCES auth.users(id)
 );
 
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS display_name text;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS monthly_credits integer DEFAULT 60;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS max_video_minutes integer DEFAULT 2;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS max_file_size_mb integer DEFAULT 500;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS storage_gb integer DEFAULT 5;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS max_team_members integer DEFAULT 1;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS can_burn_captions boolean DEFAULT false;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS can_dub boolean DEFAULT false;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS can_clone_voice boolean DEFAULT false;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS can_lip_sync boolean DEFAULT false;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS can_generate_video boolean DEFAULT false;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS can_use_api boolean DEFAULT false;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS can_audio_only_upload boolean DEFAULT false;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS can_green_screen boolean DEFAULT false;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS can_upload_custom_font boolean DEFAULT false;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS max_export_resolution text DEFAULT '720p';
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS max_export_fps integer DEFAULT 30;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS watermark_forced boolean DEFAULT true;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS priority_render boolean DEFAULT false;
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+ALTER TABLE plan_limits ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES auth.users(id);
+
 INSERT INTO plan_limits (plan, display_name, monthly_credits, max_video_minutes, max_file_size_mb, storage_gb, max_team_members, can_burn_captions, can_dub, can_clone_voice, can_lip_sync, can_generate_video, can_use_api, can_audio_only_upload, can_green_screen, can_upload_custom_font, max_export_resolution, max_export_fps, watermark_forced, priority_render) VALUES
   ('free',    'Free',    60,   2,   500,    5,   1,  false, false, false, false, false, false, false, false, false, '720p',  30, true,  false),
   ('editor',  'Editor',  300,  10,  2000,   20,  1,  true,  false, false, false, false, false, false, false, true,  '1080p', 30, false, false),
