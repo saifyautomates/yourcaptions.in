@@ -205,6 +205,7 @@ export default function InteractiveLanguageDemo() {
   // Caption Template Style State
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('hormozi');
   const [isTemplateMenuOpen, setIsTemplateMenuOpen] = useState(false);
+  const [wordsPerChunk, setWordsPerChunk] = useState<number | 'auto'>('auto');
 
   const currentTemplate = useMemo(() => {
     return DEMO_CAPTION_TEMPLATES.find((t) => t.id === selectedTemplateId) || DEFAULT_DEMO_TEMPLATE;
@@ -413,6 +414,42 @@ export default function InteractiveLanguageDemo() {
     if (t < activeSegment.words[0].start) return 0;
     return activeSegment.words.length - 1;
   }, [currentTime, activeSegment]);
+
+  // Slice words according to user's Words Per Section selection (1, 2, 3, 4, 5, or Auto)
+  const visibleWordsData = useMemo(() => {
+    if (!activeSegment?.words.length) {
+      return { words: [], activeIndex: 0, chunkKey: 'empty' };
+    }
+
+    const allWords = activeSegment.words;
+    if (wordsPerChunk === 'auto' || typeof wordsPerChunk !== 'number' || wordsPerChunk <= 0 || wordsPerChunk >= allWords.length) {
+      return {
+        words: allWords,
+        activeIndex: activeWordIndex,
+        chunkKey: `${activeSegment.id}-all`,
+      };
+    }
+
+    const n = wordsPerChunk;
+    const chunks: Array<typeof allWords> = [];
+    for (let i = 0; i < allWords.length; i += n) {
+      chunks.push(allWords.slice(i, i + n));
+    }
+
+    const t = currentTime;
+    let chunkIdx = chunks.findIndex((c) => t < c[c.length - 1].end + 0.04);
+    if (chunkIdx < 0) chunkIdx = chunks.length - 1;
+    const currentChunk = chunks[chunkIdx];
+
+    const wordIdx = currentChunk.findIndex((w) => t >= w.start && t < w.end);
+    const activeIdx = wordIdx !== -1 ? wordIdx : (t < currentChunk[0].start ? 0 : currentChunk.length - 1);
+
+    return {
+      words: currentChunk,
+      activeIndex: activeIdx,
+      chunkKey: `${activeSegment.id}-chunk-${chunkIdx}`,
+    };
+  }, [activeSegment, wordsPerChunk, currentTime, activeWordIndex]);
 
   return (
     <div id="playground" className="relative w-full max-w-[1150px] mx-auto mt-12 p-[2px] rounded-[28px] overflow-hidden bg-gradient-to-b from-[#222] via-[#111] to-[#0a0a0a] shadow-[0_0_100px_rgba(230,0,0,0.12)]">
@@ -644,19 +681,19 @@ export default function InteractiveLanguageDemo() {
               </div>
             </div>
 
-            {/* 🔥 PURE FLOATING VIRAL CAPTIONS (ZERO BOX CONTAINER, PRECISE REAL-TIME VOICE SYNC) 🔥 */}
-            <div className="absolute bottom-16 sm:bottom-20 left-4 right-4 z-30 flex flex-col items-center justify-center pointer-events-none text-center px-2 select-none">
+            {/* 🔥 PURE FLOATING VIRAL CAPTIONS (TASTEFUL SIZE, PRECISE WORDS-PER-SECTION CHUNKING) 🔥 */}
+            <div className="absolute bottom-22 sm:bottom-26 left-4 right-4 z-30 flex flex-col items-center justify-center pointer-events-none text-center px-2 select-none">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={`${selectedLang.name}-${scriptMode}-${currentTemplate.id}-${activeSegment.id}`}
-                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                  key={`${selectedLang.name}-${scriptMode}-${currentTemplate.id}-${visibleWordsData.chunkKey}`}
+                  initial={{ opacity: 0, y: 5, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.98 }}
-                  transition={{ duration: 0.12, ease: "easeOut" }}
-                  className={`max-w-[96%] flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 gap-y-1.5 sm:gap-y-2.5 ${currentTemplate.textClassName}`}
+                  exit={{ opacity: 0, y: -5, scale: 0.98 }}
+                  transition={{ duration: 0.1, ease: "easeOut" }}
+                  className={`max-w-[96%] flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-3 gap-y-1 sm:gap-y-1.5 ${currentTemplate.textClassName}`}
                 >
-                  {activeSegment.words.map((wordObj, idx) => {
-                    const isWordActive = idx === activeWordIndex;
+                  {visibleWordsData.words.map((wordObj, idx) => {
+                    const isWordActive = idx === visibleWordsData.activeIndex;
                     return (
                       <span
                         key={idx}
@@ -694,7 +731,7 @@ export default function InteractiveLanguageDemo() {
             </div>
 
             {/* Video Timeline Scrubber */}
-            <div className="absolute bottom-12 left-4 right-4 z-30 pointer-events-none">
+            <div className="absolute bottom-16 left-3 right-3 z-30 pointer-events-none">
               <div className="w-full bg-white/20 h-1 rounded-full overflow-hidden">
                 <div 
                   className="bg-[#E60000] h-full transition-all duration-100 ease-linear shadow-[0_0_10px_#E60000]"
@@ -703,13 +740,65 @@ export default function InteractiveLanguageDemo() {
               </div>
             </div>
 
-            {/* Bottom Controls: Quick Template Switcher Pills + Native / Roman Switcher */}
+            {/* Bottom Controls Bar: Row 1 Words Option & Script, Row 2 Templates */}
             <div 
-              className="absolute bottom-3 left-3 right-3 z-30 flex items-center justify-between gap-2 pointer-events-auto"
+              className="absolute bottom-2 left-2 right-2 z-30 flex flex-col gap-1.5 pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Quick Template Switcher Pills */}
-              <div className="flex items-center gap-1 bg-black/80 backdrop-blur-xl border border-white/15 p-1 rounded-full shadow-2xl overflow-x-auto no-scrollbar max-w-[65%] sm:max-w-[72%]">
+              {/* Row 1: Words Section Selector (1, 2, 3, 4, 5 words option) + Native / Roman */}
+              <div className="flex items-center justify-between gap-2 px-0.5">
+                {/* Words Per Section (1 2 3 4 5 Words) */}
+                <div className="flex items-center gap-1 bg-black/85 backdrop-blur-xl border border-white/20 px-2 py-0.5 rounded-full shadow-2xl">
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-zinc-300 mr-0.5 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E60000] animate-pulse" />
+                    Words:
+                  </span>
+                  {(['auto', 1, 2, 3, 4, 5] as const).map((cnt) => {
+                    const isActive = wordsPerChunk === cnt;
+                    return (
+                      <button
+                        key={cnt}
+                        onClick={() => setWordsPerChunk(cnt)}
+                        className={`px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold transition-all ${
+                          isActive
+                            ? 'bg-[#E60000] text-white shadow-[0_0_12px_rgba(230,0,0,0.7)] scale-105'
+                            : 'text-zinc-400 hover:text-white hover:bg-white/10'
+                        }`}
+                        title={cnt === 'auto' ? 'Natural sentence words' : `Show exactly ${cnt} word${cnt > 1 ? 's' : ''} on screen`}
+                      >
+                        {cnt === 'auto' ? 'Auto' : `${cnt}W`}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Native / Roman Universal Toggle Switcher */}
+                <div className="flex items-center gap-1 bg-black/85 backdrop-blur-xl border border-white/20 p-0.5 rounded-full shadow-2xl shrink-0">
+                  <button
+                    onClick={() => { setScriptMode('native'); setIsMuted(false); if (!isPlaying && videoRef.current) { videoRef.current.play(); setIsPlaying(true); } }}
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold transition-all ${
+                      scriptMode === 'native'
+                        ? 'bg-[#E60000] text-white shadow-md'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    Native
+                  </button>
+                  <button
+                    onClick={() => { setScriptMode('roman'); setIsMuted(false); if (!isPlaying && videoRef.current) { videoRef.current.play(); setIsPlaying(true); } }}
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold transition-all ${
+                      scriptMode === 'roman'
+                        ? 'bg-[#E60000] text-white shadow-md'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    Roman
+                  </button>
+                </div>
+              </div>
+
+              {/* Row 2: Quick Template Switcher Pills */}
+              <div className="flex items-center gap-1 bg-black/80 backdrop-blur-xl border border-white/15 p-1 rounded-full shadow-2xl overflow-x-auto no-scrollbar">
                 {DEMO_CAPTION_TEMPLATES.map((tpl) => {
                   const isTplActive = tpl.id === selectedTemplateId;
                   return (
@@ -724,34 +813,10 @@ export default function InteractiveLanguageDemo() {
                       title={tpl.description}
                     >
                       <span>{tpl.icon}</span>
-                      <span className="hidden sm:inline">{tpl.label}</span>
+                      <span>{tpl.label}</span>
                     </button>
                   );
                 })}
-              </div>
-
-              {/* Native / Roman Universal Toggle Switcher */}
-              <div className="flex items-center gap-1 bg-black/80 backdrop-blur-xl border border-white/15 p-1 rounded-full shadow-2xl shrink-0">
-                <button
-                  onClick={() => { setScriptMode('native'); setIsMuted(false); if (!isPlaying && videoRef.current) { videoRef.current.play(); setIsPlaying(true); } }}
-                  className={`px-3 py-1 rounded-full text-[11px] sm:text-[12px] font-bold transition-all ${
-                    scriptMode === 'native'
-                      ? 'bg-[#E60000] text-white shadow-md'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  Native
-                </button>
-                <button
-                  onClick={() => { setScriptMode('roman'); setIsMuted(false); if (!isPlaying && videoRef.current) { videoRef.current.play(); setIsPlaying(true); } }}
-                  className={`px-3 py-1 rounded-full text-[11px] sm:text-[12px] font-bold transition-all ${
-                    scriptMode === 'roman'
-                      ? 'bg-[#E60000] text-white shadow-md'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  Roman
-                </button>
               </div>
             </div>
           </div>
