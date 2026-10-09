@@ -162,7 +162,19 @@ CREATE TABLE IF NOT EXISTS system_settings (
   updated_by   uuid REFERENCES auth.users(id)
 );
 
-INSERT INTO system_settings (key, value, description) VALUES
+ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS key text;
+ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS setting_key text;
+
+DO $$
+BEGIN
+  UPDATE system_settings SET key = setting_key WHERE key IS NULL AND setting_key IS NOT NULL;
+  UPDATE system_settings SET setting_key = key WHERE setting_key IS NULL AND key IS NOT NULL;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+
+INSERT INTO system_settings (key, setting_key, value, description)
+SELECT s.k, s.k, s.v::jsonb, s.d
+FROM (VALUES
   ('maintenance_mode',      'false',                       'Show maintenance page to all users'),
   ('announcement_bar',      '{"enabled": false, "text": "", "type": "info", "link": "", "link_text": ""}', 'Top banner shown on all pages'),
   ('max_upload_size_mb',    '500',                         'Maximum file upload size in MB'),
@@ -171,7 +183,11 @@ INSERT INTO system_settings (key, value, description) VALUES
   ('referral_credits',      '50',                          'Credits given for referral'),
   ('support_email',         '"support@Yourcaptions.in"',  'Support contact email'),
   ('min_app_version',       '"1.0.0"',                     'Minimum required app version')
-ON CONFLICT (key) DO NOTHING;
+) AS s(k, v, d)
+WHERE NOT EXISTS (
+  SELECT 1 FROM system_settings 
+  WHERE key = s.k OR setting_key = s.k
+);
 
 -- ============================================
 -- ADMIN AUDIT LOG (every admin action logged)
