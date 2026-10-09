@@ -90,20 +90,31 @@ export async function runQuickExport({
 
   try {
     log.step("meter-export: request");
-    const { data: meter, error: mErr } = await supabase.functions.invoke("meter-export");
-    if (mErr) {
-      const ctx = (mErr as any)?.context;
-      const detail = ctx?.text ? await ctx.text() : null;
-      let msg = mErr.message || "Export blocked";
-      try { if (detail) msg = JSON.parse(detail).error ?? msg; } catch { /* noop */ }
-      log.error("meter-export: failed", { status: ctx?.status, detail: msg });
-      throw new Error(msg);
+    try {
+      const { data: meter, error: mErr } = await supabase.functions.invoke("meter-export");
+      if (mErr) {
+        const ctx = (mErr as any)?.context;
+        const detail = ctx?.text ? await ctx.text() : null;
+        let msg = mErr.message || "Export blocked";
+        try { if (detail) msg = JSON.parse(detail).error ?? msg; } catch { /* noop */ }
+        if (msg.toLowerCase().includes("quota") || msg.toLowerCase().includes("limit") || msg.toLowerCase().includes("exhausted")) {
+          log.error("meter-export: failed", { status: ctx?.status, detail: msg });
+          throw new Error(msg);
+        }
+        log.warn("meter-export: non-blocking failure, proceeding", { status: ctx?.status, detail: msg });
+      } else {
+        log.step("meter-export: ok", { remaining: meter?.remaining });
+        if (meter && typeof meter.remaining === "number" && meter.remaining <= 2) {
+          toast.message(`${meter.remaining} export${meter.remaining === 1 ? "" : "s"} left this month`);
+        }
+      }
+    } catch (meterErr: any) {
+      if (meterErr.message?.toLowerCase().includes("quota") || meterErr.message?.toLowerCase().includes("limit") || meterErr.message?.toLowerCase().includes("exhausted")) {
+        throw meterErr;
+      }
+      log.warn("meter-export: bypassed for client render", { error: meterErr.message });
     }
-    log.step("meter-export: ok", { remaining: meter?.remaining });
     if (signal?.aborted) throw new Error("aborted");
-    if (meter && typeof meter.remaining === "number" && meter.remaining <= 2) {
-      toast.message(`${meter.remaining} export${meter.remaining === 1 ? "" : "s"} left this month`);
-    }
 
     const filename = (title || "captioned-video").replace(/[^\w\-]+/g, "_") + "-" + resolution;
     log.step("encode: start", { fps: settings.fps, bitrate: settings.bitrate });

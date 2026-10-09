@@ -288,6 +288,25 @@ export default function InteractiveLanguageDemo() {
     }
   };
 
+  // Ensure video actually plays on mount and whenever preset or play state changes
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isPlaying) {
+      video.play().catch(() => {
+        // Autoplay policy fallback: mute and play
+        video.muted = true;
+        setIsMuted(true);
+        video.play().catch(() => {
+          setIsPlaying(false);
+        });
+      });
+    } else {
+      video.pause();
+    }
+  }, [isPlaying, selectedPresetId, customVideoUrl, videoSourceIndex]);
+
   const handleVideoError = () => {
     if (!customVideoUrl && videoSourceIndex < currentPreset.sources.length - 1) {
       setVideoSourceIndex((prev) => prev + 1);
@@ -513,12 +532,13 @@ export default function InteractiveLanguageDemo() {
           >
             {!videoFailed ? (
               <video
-                key={customVideoUrl || selectedPresetId}
+                key={`${customVideoUrl || selectedPresetId}-${videoSourceIndex}`}
                 ref={videoRef}
                 autoPlay
                 loop
                 muted={isMuted}
                 playsInline
+                preload="auto"
                 onError={handleVideoError}
                 className="absolute inset-0 w-full h-full object-cover"
                 src={customVideoUrl || currentPreset.sources[videoSourceIndex]}
@@ -538,6 +558,18 @@ export default function InteractiveLanguageDemo() {
                   </div>
                   <p className="text-white font-extrabold text-sm tracking-wide">Interactive Caption Video Player</p>
                   <p className="text-[#888] text-xs mt-1">Live voice & subtitle sync demonstration</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setVideoFailed(false);
+                      setVideoSourceIndex(0);
+                      setIsPlaying(true);
+                    }}
+                    className="mt-3 px-3.5 py-1.5 bg-[#E60000] hover:bg-[#ff1a1a] text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 mx-auto pointer-events-auto"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Reload Video
+                  </button>
                 </div>
               </div>
             )}

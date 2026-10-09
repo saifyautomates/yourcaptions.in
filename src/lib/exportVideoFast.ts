@@ -87,10 +87,11 @@ export async function exportVideoFast(opts: FastExportOptions): Promise<{ blob: 
   const { w: W, h: H } = RESOLUTION_DIMS[resolution];
   const bitrate = opts.bitrate ?? bitrateFor(W, H);
 
-  // Hidden video element — needed on main thread to source frames
   const video = document.createElement("video");
   video.src = mediaUrl;
-  video.crossOrigin = "anonymous";
+  if (!mediaUrl.startsWith("blob:") && !mediaUrl.startsWith("data:")) {
+    video.crossOrigin = "anonymous";
+  }
   video.muted = true; // audio comes through decodeAudioData
   video.playsInline = true;
   video.preload = "auto";

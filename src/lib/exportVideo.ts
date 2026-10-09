@@ -202,10 +202,11 @@ export async function exportVideoWithCaptions(opts: ExportOptions): Promise<{ bl
   const { mediaUrl, segs, capStyle, resolution, onProgress, signal } = opts;
   const { w: W, h: H } = RESOLUTION_DIMS[resolution];
 
-  // Hidden video element (own instance so we don't fight the editor's <video>)
   const video = document.createElement("video");
   video.src = mediaUrl;
-  video.crossOrigin = "anonymous";
+  if (!mediaUrl.startsWith("blob:") && !mediaUrl.startsWith("data:")) {
+    video.crossOrigin = "anonymous";
+  }
   video.muted = false;
   video.playsInline = true;
   video.preload = "auto";

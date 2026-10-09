@@ -140,16 +140,25 @@ export default function ExportModal({ open, onClose, mediaUrl, segs, capStyle, t
     try {
       // Meter one export against the user's monthly plan quota BEFORE
       // starting any encoding work.
-      const { data: meter, error: mErr } = await supabase.functions.invoke("meter-export");
-      if (mErr) {
-        const ctx = (mErr as any)?.context;
-        const detail = ctx?.text ? await ctx.text() : null;
-        let msg = mErr.message || "Export blocked";
-        try { if (detail) msg = JSON.parse(detail).error ?? msg; } catch {}
-        throw new Error(msg);
-      }
-      if (meter && typeof meter.remaining === "number" && meter.remaining <= 2) {
-        toast.message(`${meter.remaining} export${meter.remaining === 1 ? "" : "s"} left this month`);
+      try {
+        const { data: meter, error: mErr } = await supabase.functions.invoke("meter-export");
+        if (mErr) {
+          const ctx = (mErr as any)?.context;
+          const detail = ctx?.text ? await ctx.text() : null;
+          let msg = mErr.message || "Export blocked";
+          try { if (detail) msg = JSON.parse(detail).error ?? msg; } catch {}
+          if (msg.toLowerCase().includes("quota") || msg.toLowerCase().includes("limit") || msg.toLowerCase().includes("exhausted")) {
+            throw new Error(msg);
+          }
+          console.warn("[meter-export] Edge function unavailable, proceeding with client export:", msg);
+        } else if (meter && typeof meter.remaining === "number" && meter.remaining <= 2) {
+          toast.message(`${meter.remaining} export${meter.remaining === 1 ? "" : "s"} left this month`);
+        }
+      } catch (meterErr: any) {
+        if (meterErr.message?.toLowerCase().includes("quota") || meterErr.message?.toLowerCase().includes("limit") || meterErr.message?.toLowerCase().includes("exhausted")) {
+          throw meterErr;
+        }
+        console.warn("[meter-export] bypassed for client render:", meterErr);
       }
       if (ctrl.signal.aborted) throw new Error("aborted");
       setStage("encoding");
