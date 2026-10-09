@@ -8,12 +8,15 @@ const corsHeaders = {
 // Full plan upgrades (subscription-style).
 // Keys will be matched as `${plan}_${billing}` (e.g. creator_monthly)
 const PLANS: Record<string, { amount: number }> = {
-  creator_monthly: { amount: 79900 },
-  creator_yearly: { amount: 699000 },
-  creator_annual: { amount: 699000 }, // alias for yearly
-  studio_monthly: { amount: 199900 },
-  studio_yearly: { amount: 1799000 },
-  studio_annual: { amount: 1799000 }, // alias for yearly
+  editor_monthly: { amount: 49900 },
+  editor_yearly: { amount: 499200 },
+  editor_annual: { amount: 499200 },
+  creator_monthly: { amount: 99900 },
+  creator_yearly: { amount: 999600 },
+  creator_annual: { amount: 999600 },
+  studio_monthly: { amount: 259900 },
+  studio_yearly: { amount: 2599200 },
+  studio_annual: { amount: 2599200 },
 };
 
 const TOPUPS: Record<string, { amount: number; seconds: number; label: string }> = {
