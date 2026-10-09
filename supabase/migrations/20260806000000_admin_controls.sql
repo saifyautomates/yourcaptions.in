@@ -1,7 +1,7 @@
 -- ============================================
 -- CREDIT RATES (admin editable)
 -- ============================================
-CREATE TABLE credit_rates (
+CREATE TABLE IF NOT EXISTS credit_rates (
   feature          text PRIMARY KEY,
   credits_per_unit numeric NOT NULL,
   unit             text NOT NULL DEFAULT 'minute',
@@ -22,12 +22,13 @@ INSERT INTO credit_rates (feature, credits_per_unit, unit, description) VALUES
   ('avatar_generation',  5,  'image',  '5 credits flat per avatar image'),
   ('video_generation',   20, 'video',  '20 credits flat per generated video'),
   ('background_removal', 2,  'image',  '2 credits flat per image'),
-  ('translation',        1,  'minute', '1 credit per minute of transcript translated');
+  ('translation',        1,  'minute', '1 credit per minute of transcript translated')
+ON CONFLICT (feature) DO NOTHING;
 
 -- ============================================
 -- PLAN LIMITS (admin editable)
 -- ============================================
-CREATE TABLE plan_limits (
+CREATE TABLE IF NOT EXISTS plan_limits (
   plan                  text PRIMARY KEY,
   display_name          text NOT NULL,
   monthly_credits       integer NOT NULL,
@@ -52,16 +53,19 @@ CREATE TABLE plan_limits (
   updated_by            uuid REFERENCES auth.users(id)
 );
 
-INSERT INTO plan_limits VALUES
+INSERT INTO plan_limits (plan, display_name, monthly_credits, max_video_minutes, max_file_size_mb, storage_gb, max_team_members, can_burn_captions, can_dub, can_clone_voice, can_lip_sync, can_generate_video, can_use_api, can_audio_only_upload, can_green_screen, can_upload_custom_font, max_export_resolution, max_export_fps, watermark_forced, priority_render) VALUES
   ('free',    'Free',    60,   2,   500,    5,   1,  false, false, false, false, false, false, false, false, false, '720p',  30, true,  false),
   ('editor',  'Editor',  300,  10,  2000,   20,  1,  true,  false, false, false, false, false, false, false, true,  '1080p', 30, false, false),
   ('creator', 'Creator', 1000, 30,  10000,  60,  3,  true,  true,  true,  true,  false, false, true,  true,  true,  '4k',    60, false, false),
-  ('studio',  'Studio',  5000, 999, 999999, 150, 999,true,  true,  true,  true,  true,  true,  true,  true,  true,  '4k',    60, false, true);
+  ('studio',  'Studio',  5000, 999, 999999, 150, 999,true,  true,  true,  true,  true,  true,  true,  true,  true,  '4k',    60, false, true)
+ON CONFLICT (plan) DO NOTHING;
 
 -- ============================================
 -- PLAN PRICING (admin editable)
 -- ============================================
-CREATE TABLE plan_pricing (
+-- PLAN PRICING (admin editable)
+-- ============================================
+CREATE TABLE IF NOT EXISTS plan_pricing (
   id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   plan                text NOT NULL REFERENCES plan_limits(plan),
   currency            text NOT NULL, -- 'INR' or 'USD'
@@ -86,12 +90,13 @@ INSERT INTO plan_pricing (plan, currency, monthly_price, yearly_price, yearly_to
   ('studio',  'INR', 2599, 2166, 25992, 3400, 2833),
   ('editor',  'USD', 6,    5,    60,    8,    7),
   ('creator', 'USD', 12,   10,   120,   15,   12),
-  ('studio',  'USD', 30,   25,   300,   40,   33);
+  ('studio',  'USD', 30,   25,   300,   40,   33)
+ON CONFLICT (plan, currency) DO NOTHING;
 
 -- ============================================
 -- FEATURE FLAGS (admin editable)
 -- ============================================
-CREATE TABLE feature_flags (
+CREATE TABLE IF NOT EXISTS feature_flags (
   feature_name         text PRIMARY KEY,
   display_name         text NOT NULL,
   description          text,
@@ -117,12 +122,13 @@ INSERT INTO feature_flags (feature_name, display_name, description, enabled_glob
   ('api_access',         'API Access',           'REST API for developers',         true, '{studio}'),
   ('green_screen',       'Green Screen',         'Chroma key export',               true, '{creator,studio}'),
   ('srt_export',         'SRT Export',           'Export SRT subtitle files',       true, '{}'),
-  ('tts',                'Text to Speech',       'AI text to speech',               true, '{editor,creator,studio}');
+  ('tts',                'Text to Speech',       'AI text to speech',               true, '{editor,creator,studio}')
+ON CONFLICT (feature_name) DO NOTHING;
 
 -- ============================================
 -- SYSTEM SETTINGS (admin editable)
 -- ============================================
-CREATE TABLE system_settings (
+CREATE TABLE IF NOT EXISTS system_settings (
   key          text PRIMARY KEY,
   value        jsonb NOT NULL,
   description  text,
@@ -138,12 +144,13 @@ INSERT INTO system_settings (key, value, description) VALUES
   ('free_trial_credits',    '60',                          'Credits given on signup'),
   ('referral_credits',      '50',                          'Credits given for referral'),
   ('support_email',         '"support@Yourcaptions.in"',  'Support contact email'),
-  ('min_app_version',       '"1.0.0"',                     'Minimum required app version');
+  ('min_app_version',       '"1.0.0"',                     'Minimum required app version')
+ON CONFLICT (key) DO NOTHING;
 
 -- ============================================
 -- ADMIN AUDIT LOG (every admin action logged)
 -- ============================================
-CREATE TABLE admin_audit_log (
+CREATE TABLE IF NOT EXISTS admin_audit_log (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   admin_id     uuid NOT NULL REFERENCES auth.users(id),
   admin_email  text NOT NULL,
@@ -219,8 +226,17 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 REVOKE EXECUTE ON FUNCTION update_admin_table_timestamp FROM PUBLIC;
 
+DROP TRIGGER IF EXISTS credit_rates_timestamp ON credit_rates;
 CREATE TRIGGER credit_rates_timestamp BEFORE UPDATE ON credit_rates FOR EACH ROW EXECUTE FUNCTION update_admin_table_timestamp();
+
+DROP TRIGGER IF EXISTS plan_limits_timestamp ON plan_limits;
 CREATE TRIGGER plan_limits_timestamp BEFORE UPDATE ON plan_limits FOR EACH ROW EXECUTE FUNCTION update_admin_table_timestamp();
+
+DROP TRIGGER IF EXISTS plan_pricing_timestamp ON plan_pricing;
 CREATE TRIGGER plan_pricing_timestamp BEFORE UPDATE ON plan_pricing FOR EACH ROW EXECUTE FUNCTION update_admin_table_timestamp();
+
+DROP TRIGGER IF EXISTS feature_flags_timestamp ON feature_flags;
 CREATE TRIGGER feature_flags_timestamp BEFORE UPDATE ON feature_flags FOR EACH ROW EXECUTE FUNCTION update_admin_table_timestamp();
+
+DROP TRIGGER IF EXISTS system_settings_timestamp ON system_settings;
 CREATE TRIGGER system_settings_timestamp BEFORE UPDATE ON system_settings FOR EACH ROW EXECUTE FUNCTION update_admin_table_timestamp();
