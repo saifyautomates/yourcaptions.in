@@ -45,4 +45,39 @@ describe('Interactive Language Demo Captions', () => {
     expect(hindiNative.text).toContain('स्वागत');
     expect(hindiRoman.text).toContain('swagat');
   });
+
+  it('provides rich caption templates with distinct styling classes and badges', async () => {
+    const { DEMO_CAPTION_TEMPLATES, DEFAULT_DEMO_TEMPLATE } = await import('@/lib/demoTemplates');
+    expect(DEMO_CAPTION_TEMPLATES.length).toBeGreaterThanOrEqual(8);
+    expect(DEFAULT_DEMO_TEMPLATE.id).toBe('hormozi');
+
+    const hormozi = DEMO_CAPTION_TEMPLATES.find((t) => t.id === 'hormozi');
+    expect(hormozi).toBeDefined();
+    expect(hormozi?.activeWordClassName).toContain('#FFE600');
+    expect(hormozi?.badgeText).toContain('HORMOZI');
+
+    const mrbeast = DEMO_CAPTION_TEMPLATES.find((t) => t.id === 'mrbeast');
+    expect(mrbeast).toBeDefined();
+    expect(mrbeast?.activeWordClassName).toContain('#22C55E');
+    expect(mrbeast?.badgeText).toContain('MRBEAST');
+
+    const cyberNeon = DEMO_CAPTION_TEMPLATES.find((t) => t.id === 'cyber-neon');
+    expect(cyberNeon).toBeDefined();
+    expect(cyberNeon?.activeWordClassName).toContain('#FF007A');
+    expect(cyberNeon?.badgeText).toContain('CYBER NEON');
+
+    const redBox = DEMO_CAPTION_TEMPLATES.find((t) => t.id === 'red-box');
+    expect(redBox).toBeDefined();
+    expect(redBox?.activeWordClassName).toContain('#E60000');
+
+    // Ensure all templates have valid non-empty container & word classes
+    for (const tpl of DEMO_CAPTION_TEMPLATES) {
+      expect(tpl.id).toBeTruthy();
+      expect(tpl.label).toBeTruthy();
+      expect(tpl.containerClassName).toBeTruthy();
+      expect(tpl.textClassName).toBeTruthy();
+      expect(tpl.activeWordClassName).toBeTruthy();
+      expect(tpl.badgeText).toBeTruthy();
+    }
+  });
 });

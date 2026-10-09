@@ -1,8 +1,9 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Check, Volume2, VolumeX, Sparkles, Search, Play, Pause, Captions, Upload, Video, Mic, RefreshCw } from 'lucide-react';
+import { Check, Volume2, VolumeX, Sparkles, Search, Play, Pause, Captions, Upload, Video, Mic, RefreshCw, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LANGUAGES as ALL_LANGUAGES } from '@/lib/languages';
 import { getCaptionForLanguage } from '@/lib/demoCaptions';
+import { DEMO_CAPTION_TEMPLATES, DEFAULT_DEMO_TEMPLATE, type DemoCaptionTemplate } from '@/lib/demoTemplates';
 
 
 export interface LanguageInfo {
@@ -200,6 +201,24 @@ export default function InteractiveLanguageDemo() {
   const [customVideoName, setCustomVideoName] = useState<string | null>(null);
   const [videoSourceIndex, setVideoSourceIndex] = useState(0);
   const [videoFailed, setVideoFailed] = useState(false);
+
+  // Caption Template Style State
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('hormozi');
+  const [isTemplateMenuOpen, setIsTemplateMenuOpen] = useState(false);
+
+  const currentTemplate = useMemo(() => {
+    return DEMO_CAPTION_TEMPLATES.find((t) => t.id === selectedTemplateId) || DEFAULT_DEMO_TEMPLATE;
+  }, [selectedTemplateId]);
+
+  const handleSelectTemplate = (tpl: DemoCaptionTemplate) => {
+    setSelectedTemplateId(tpl.id);
+    setIsTemplateMenuOpen(false);
+    try {
+      localStorage.setItem('captions:appliedTemplate', tpl.name);
+    } catch {
+      /* noop */
+    }
+  };
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -465,27 +484,97 @@ export default function InteractiveLanguageDemo() {
             {/* Video Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40 pointer-events-none" />
 
-            {/* 🔥 HIGH-IMPACT STUDIO VIRAL CAPTION OVERLAY 🔥 */}
+            {/* ✨ INTERACTIVE CAPTION TEMPLATE SELECTOR (Top Left) ✨ */}
+            <div className="absolute top-4 left-4 z-40" onClick={(e) => e.stopPropagation()}>
+              <div className="relative">
+                <button
+                  onClick={() => setIsTemplateMenuOpen((prev) => !prev)}
+                  className="bg-black/75 hover:bg-black/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 hover:border-white/40 text-white flex items-center gap-1.5 text-[11px] sm:text-[12px] font-bold shadow-xl transition-all active:scale-95 group"
+                  title="Select Caption Template Style"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#E60000]" />
+                  <span className="text-zinc-400 font-medium hidden xs:inline">Style:</span>
+                  <span className="text-white font-extrabold flex items-center gap-1">
+                    <span>{currentTemplate.icon}</span>
+                    <span>{currentTemplate.label}</span>
+                  </span>
+                  <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ${isTemplateMenuOpen ? 'rotate-180 text-white' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                <AnimatePresence>
+                  {isTemplateMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -6, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-10 left-0 w-64 sm:w-72 bg-[#0c0c0e]/95 backdrop-blur-xl border border-white/20 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-50 space-y-1"
+                    >
+                      <div className="px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
+                        <span>Caption Templates</span>
+                        <span className="text-[9px] bg-white/10 px-1.5 py-0.5 rounded text-zinc-300">8 Styles</span>
+                      </div>
+                      <div className="max-h-[260px] overflow-y-auto custom-scrollbar space-y-1 pr-1">
+                        {DEMO_CAPTION_TEMPLATES.map((tpl) => {
+                          const isTplActive = tpl.id === selectedTemplateId;
+                          return (
+                            <button
+                              key={tpl.id}
+                              onClick={() => handleSelectTemplate(tpl)}
+                              className={`w-full text-left px-2.5 py-2 rounded-xl flex items-center justify-between text-xs transition-all ${
+                                isTplActive
+                                  ? 'bg-white/15 text-white font-black border border-white/20'
+                                  : 'text-zinc-300 hover:bg-white/10 hover:text-white border border-transparent'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className="text-base">{tpl.icon}</span>
+                                <div>
+                                  <div className="font-bold flex items-center gap-1.5 text-white">
+                                    <span>{tpl.label}</span>
+                                    {isTplActive && (
+                                      <span className="text-[9px] bg-[#E60000] text-white px-1.5 py-0.2 rounded-full font-extrabold">Active</span>
+                                    )}
+                                  </div>
+                                  <div className="text-[10px] text-zinc-400 truncate max-w-[170px]">{tpl.description}</div>
+                                </div>
+                              </div>
+                              {isTplActive && <Check className="w-3.5 h-3.5 text-[#E60000] shrink-0" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* 🔥 HIGH-IMPACT STUDIO VIRAL CAPTION OVERLAY WITH DYNAMIC TEMPLATE STYLING 🔥 */}
             <div className="absolute bottom-16 sm:bottom-20 left-3 right-3 z-30 flex flex-col items-center justify-center pointer-events-none text-center px-2">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={`${selectedLang.name}-${scriptMode}`}
+                  key={`${selectedLang.name}-${scriptMode}-${currentTemplate.id}`}
                   initial={{ opacity: 0, y: 12, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
-                  className="max-w-[96%] bg-black/85 backdrop-blur-md px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-2xl border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.85)] flex flex-col items-center"
+                  className={`max-w-[96%] px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-2xl flex flex-col items-center transition-all duration-200 ${currentTemplate.containerClassName}`}
                 >
-                  {/* Active Language Badge */}
+                  {/* Active Template & Language Badge */}
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <span className="w-2 h-2 rounded-full bg-[#E60000] animate-pulse shadow-[0_0_8px_#E60000]" />
-                    <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#FF4D4D]">
-                      {selectedLang.name} · {scriptMode === 'roman' ? 'Roman Script' : 'Native Script'}
+                    <span
+                      className="w-2 h-2 rounded-full animate-pulse"
+                      style={{ backgroundColor: currentTemplate.dotColor, boxShadow: `0 0 8px ${currentTemplate.dotColor}` }}
+                    />
+                    <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider ${currentTemplate.badgeClassName}`}>
+                      {currentTemplate.badgeText} · {selectedLang.name} · {scriptMode === 'roman' ? 'Roman Script' : 'Native Script'}
                     </span>
                   </div>
 
-                  {/* Dynamic Word-by-Word Viral Subtitles with Real-Time Karaoke Sync */}
-                  <div className="text-[16px] sm:text-[20px] md:text-[22px] font-black tracking-tight leading-snug flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+                  {/* Dynamic Word-by-Word Viral Subtitles with Real-Time Karaoke Sync in currentTemplate Style */}
+                  <div className={`text-[16px] sm:text-[20px] md:text-[22px] leading-snug flex flex-wrap items-center justify-center gap-x-2 gap-y-1 ${currentTemplate.textClassName}`}>
                     {captionData.words.map((word, idx) => {
                       const isWordActive = idx === activeWordIndex;
                       return (
@@ -493,8 +582,8 @@ export default function InteractiveLanguageDemo() {
                           key={idx}
                           className={`transition-all duration-150 inline-block px-1.5 py-0.5 rounded-md ${
                             isWordActive
-                              ? 'bg-[#E60000] text-white scale-110 shadow-[0_0_16px_rgba(230,0,0,0.9)] ring-1 ring-white/40'
-                              : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]'
+                              ? currentTemplate.activeWordClassName
+                              : currentTemplate.inactiveWordClassName
                           }`}
                         >
                           {word}
@@ -505,7 +594,6 @@ export default function InteractiveLanguageDemo() {
                 </motion.div>
               </AnimatePresence>
             </div>
-
 
             {/* Mute/Unmute Toggle Button */}
             <button
@@ -526,7 +614,6 @@ export default function InteractiveLanguageDemo() {
               </div>
             </div>
 
-
             {/* Video Timeline Scrubber */}
             <div className="absolute bottom-12 left-4 right-4 z-30 pointer-events-none">
               <div className="w-full bg-white/20 h-1 rounded-full overflow-hidden">
@@ -537,31 +624,56 @@ export default function InteractiveLanguageDemo() {
               </div>
             </div>
 
-            {/* Native / Roman Universal Toggle Switcher */}
+            {/* Bottom Controls: Quick Template Switcher Pills + Native / Roman Switcher */}
             <div 
-              className="absolute bottom-3 z-30 flex items-center gap-1.5 bg-black/80 backdrop-blur-xl border border-white/15 p-1 rounded-full shadow-2xl"
+              className="absolute bottom-3 left-3 right-3 z-30 flex items-center justify-between gap-2 pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <button
-                onClick={() => { setScriptMode('native'); setIsMuted(false); if (!isPlaying && videoRef.current) { videoRef.current.play(); setIsPlaying(true); } }}
-                className={`px-3.5 py-1 rounded-full text-[12px] font-bold transition-all ${
-                  scriptMode === 'native'
-                    ? 'bg-[#E60000] text-white shadow-md'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Native
-              </button>
-              <button
-                onClick={() => { setScriptMode('roman'); setIsMuted(false); if (!isPlaying && videoRef.current) { videoRef.current.play(); setIsPlaying(true); } }}
-                className={`px-3.5 py-1 rounded-full text-[12px] font-bold transition-all ${
-                  scriptMode === 'roman'
-                    ? 'bg-[#E60000] text-white shadow-md'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Roman
-              </button>
+              {/* Quick Template Switcher Pills */}
+              <div className="flex items-center gap-1 bg-black/80 backdrop-blur-xl border border-white/15 p-1 rounded-full shadow-2xl overflow-x-auto no-scrollbar max-w-[65%] sm:max-w-[72%]">
+                {DEMO_CAPTION_TEMPLATES.map((tpl) => {
+                  const isTplActive = tpl.id === selectedTemplateId;
+                  return (
+                    <button
+                      key={tpl.id}
+                      onClick={() => handleSelectTemplate(tpl)}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all flex items-center gap-1 ${
+                        isTplActive
+                          ? 'bg-white text-black shadow-md font-extrabold scale-105'
+                          : 'text-zinc-400 hover:text-white hover:bg-white/10'
+                      }`}
+                      title={tpl.description}
+                    >
+                      <span>{tpl.icon}</span>
+                      <span className="hidden sm:inline">{tpl.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Native / Roman Universal Toggle Switcher */}
+              <div className="flex items-center gap-1 bg-black/80 backdrop-blur-xl border border-white/15 p-1 rounded-full shadow-2xl shrink-0">
+                <button
+                  onClick={() => { setScriptMode('native'); setIsMuted(false); if (!isPlaying && videoRef.current) { videoRef.current.play(); setIsPlaying(true); } }}
+                  className={`px-3 py-1 rounded-full text-[11px] sm:text-[12px] font-bold transition-all ${
+                    scriptMode === 'native'
+                      ? 'bg-[#E60000] text-white shadow-md'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  Native
+                </button>
+                <button
+                  onClick={() => { setScriptMode('roman'); setIsMuted(false); if (!isPlaying && videoRef.current) { videoRef.current.play(); setIsPlaying(true); } }}
+                  className={`px-3 py-1 rounded-full text-[11px] sm:text-[12px] font-bold transition-all ${
+                    scriptMode === 'roman'
+                      ? 'bg-[#E60000] text-white shadow-md'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  Roman
+                </button>
+              </div>
             </div>
           </div>
         </div>
