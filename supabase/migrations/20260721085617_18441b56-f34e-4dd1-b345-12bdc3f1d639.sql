@@ -84,9 +84,11 @@ GRANT ALL                             ON public.plan_limits TO service_role;
 
 ALTER TABLE public.plan_limits ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "plan_limits_public_read" ON public.plan_limits;
 CREATE POLICY "plan_limits_public_read"
   ON public.plan_limits FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "plan_limits_admin_write" ON public.plan_limits;
 CREATE POLICY "plan_limits_admin_write"
   ON public.plan_limits FOR ALL
   USING (public.has_role(auth.uid(), 'admin'))
