@@ -331,6 +331,24 @@ async function extractAudioMp3(blob: Blob, filename: string): Promise<{ blob: Bl
     return { blob, filename };
   }
   try {
+    if (/api\.ffmpeg-api\.com/i.test(FFMPEG_API_URL)) {
+      const videoPath = await uploadToFfmpegApi("video.mp4", blob);
+      const downloadUrl = await processFfmpegJob(
+        [{ file_path: videoPath }],
+        [{
+          file: "output.mp3",
+          maps: ["0:a:0?"],
+          options: ["-vn", "-acodec", "libmp3lame", "-ab", "128k", "-ar", "16000", "-ac", "1"]
+        }]
+      );
+      const outRes = await fetch(downloadUrl);
+      if (!outRes.ok) throw new Error(`FFmpeg MP3 download failed: ${outRes.status}`);
+      const audio = await outRes.blob();
+      if (audio.size >= 512) {
+        return { blob: new Blob([audio], { type: "audio/mpeg" }), filename: filename.replace(/\.[^.]+$/, "") + ".mp3" };
+      }
+    }
+
     const fd = new FormData();
     fd.append("file", blob, filename);
     fd.append("command", "-i input -vn -acodec libmp3lame -ab 128k -ar 16000 -ac 1 output.mp3");
