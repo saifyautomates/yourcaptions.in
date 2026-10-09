@@ -1,5 +1,5 @@
-// Kalakar-style app shell.
-// Left rail: Home, Recent Projects, Tutorials, Manage Subscription, Manage
+// Studio-grade creator app shell.
+// 240px dark sidebar, top bar with breadcrumbs and user avatar, main content. Subscription, Manage
 // Plugins, Help & Support. Persistent FREE / MONTHLY usage card at the bottom
 // with Storage / Transcription / Audio Clean bars + Upgrade Now.
 

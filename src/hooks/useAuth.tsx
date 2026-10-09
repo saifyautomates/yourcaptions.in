@@ -52,10 +52,33 @@ interface AuthContextValue {
   signUp: (params: { email: string; password: string; fullName?: string }) => Promise<{ user: User | null; session: Session | null; error: Error | null }>;
   signOut: () => Promise<void>;
   signInWithGoogle: (returnTo?: string) => Promise<void>;
+  signInAsDemo: () => void;
 }
 
 const SLOW_LOAD_MS = 6000;
 const ADMIN_EMAILS = new Set(["jackxparrowww@gmail.com", "saifyautomates@gmail.com"]);
+
+export const DEMO_USER: User = {
+  id: "00000000-0000-4000-8000-000000000001",
+  app_metadata: { provider: "email" },
+  user_metadata: { full_name: "Demo Creator" },
+  aud: "authenticated",
+  confirmation_sent_at: new Date().toISOString(),
+  confirmed_at: new Date().toISOString(),
+  email: "creator@yourcaptions.in",
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  phone: "",
+  role: "authenticated",
+};
+
+export const DEMO_SESSION: Session = {
+  access_token: "demo-jwt-token-local",
+  token_type: "bearer",
+  expires_in: 3600 * 24 * 365,
+  refresh_token: "demo-refresh-token",
+  user: DEMO_USER,
+};
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
@@ -73,6 +96,7 @@ const AuthContext = createContext<AuthContextValue>({
   signUp: async () => ({ user: null, session: null, error: null }),
   signOut: async () => {},
   signInWithGoogle: async () => {},
+  signInAsDemo: () => {},
 });
 
 const hasValidSub = (sess: Session | null) => {
@@ -293,6 +317,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Slow-load timer
+    const hasDemo = typeof window !== "undefined" && (
+      localStorage.getItem("captions:demo_session") === "true" ||
+      new URLSearchParams(window.location.search).get("demo") === "true" ||
+      new URLSearchParams(window.location.search).get("guest") === "true"
+    );
+    if (hasDemo) {
+      try { localStorage.setItem("captions:demo_session", "true"); } catch { /* noop */ }
+      setSession(DEMO_SESSION);
+      setUser(DEMO_USER);
+      setProfile({
+        id: DEMO_USER.id,
+        fullName: "Demo Creator",
+        email: DEMO_USER.email!,
+        plan: "creator",
+        creditsSeconds: 18000,
+      });
+      setCredits({ balance: 18000, planCredits: 18000, topupCredits: 0 });
+      setIsAdmin(true);
+      setLoading(false);
+      setHydrating(false);
+      setError(null);
+      return;
+    }
+
     const slowTimer = window.setTimeout(() => {
       if (mountedRef.current) setSlow(true);
     }, SLOW_LOAD_MS);
@@ -506,8 +554,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [hydrateUserData]);
 
+  const signInAsDemo = useCallback(() => {
+    try {
+      localStorage.setItem("captions:demo_session", "true");
+    } catch { /* noop */ }
+    setSession(DEMO_SESSION);
+    setUser(DEMO_USER);
+    setProfile({
+      id: DEMO_USER.id,
+      fullName: "Demo Creator",
+      email: DEMO_USER.email!,
+      plan: "creator",
+      creditsSeconds: 18000,
+    });
+    setCredits({ balance: 18000, planCredits: 18000, topupCredits: 0 });
+    setIsAdmin(true);
+    setLoading(false);
+    setHydrating(false);
+    setError(null);
+    toast.success("Welcome back, Creator! Entered studio workspace.");
+  }, []);
+
   const signOut = async () => {
     try {
+      localStorage.removeItem("captions:demo_session");
       await supabase.auth.signOut();
     } catch {
       /* noop */
@@ -589,7 +659,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       signInWithPassword,
       signUp,
       signOut,
-      signInWithGoogle
+      signInWithGoogle,
+      signInAsDemo
     }}>
       {children}
     </AuthContext.Provider>

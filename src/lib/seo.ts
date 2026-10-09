@@ -9,8 +9,8 @@ export const SEO_CONFIG = {
     'automatic subtitles', 'video captions', 'caption maker',
     'Hindi caption generator', 'Urdu subtitle generator', 'Indian language captions',
     'Hinglish captions', 'Hindi subtitle maker', 'caption generator Hindi',
-    'CapCut captions alternative', 'Kalakar alternative', 'Captions.ai alternative India',
-    'Opus Clip alternative India', 'best caption app India',
+    'best caption app India', 'AI auto subtitle generator', 'reels caption maker',
+    'shorts subtitle studio', 'best auto caption generator India',
     'how to add captions to video', 'automatic caption generator free',
     'caption generator for YouTube', 'caption generator for Instagram reels',
     'caption generator for TikTok', 'SRT file generator', 'burn captions into video'
@@ -39,7 +39,7 @@ export const PAGE_SEO: Record<string, any> = {
     canonical: 'https://yourcaptions.com/pricing',
   },
   templates: {
-    title: '50+ Caption Templates — Hormozi, MrBeast, Minimal & More | yourcaptions',
+    title: '50+ Caption Templates — Hormozi, Kinetic, 3D Depth, Neon & More | yourcaptions',
     description: 'Professional caption templates used by top creators. Apply in one click. Fully customizable fonts, colors, animations.',
     keywords: ['caption templates', 'subtitle templates', 'Hormozi caption style', 'MrBeast caption style'],
     canonical: 'https://yourcaptions.com/templates',

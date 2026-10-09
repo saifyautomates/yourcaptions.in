@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { scrollReveal } from "@/lib/animations";
-import { Eye, EyeOff, AlertCircle, Mail, KeyRound, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, Mail, KeyRound, CheckCircle2, Sparkles } from "lucide-react";
 
 export default function Login() {
   const nav = useNavigate();
@@ -28,7 +28,7 @@ export default function Login() {
   const stateFrom = (loc.state as any)?.from;
   const destination = sanitizeRedirectUrl(stateFrom || nextParam || "/dashboard", "/dashboard");
 
-  const { signInWithPassword, signInWithGoogle } = useAuth();
+  const { signInWithPassword, signInWithGoogle, signInAsDemo } = useAuth();
 
   const attemptPassword = async () => {
     setAuthError(null);
@@ -160,6 +160,20 @@ export default function Login() {
               </div>
             </div>
           )}
+
+          {/* Instant Creator Studio 1-Click Access */}
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => {
+              signInAsDemo();
+              nav(destination, { replace: true });
+            }}
+            className="w-full bg-gradient-to-r from-[#E60000] to-[#FF4D4D] hover:from-[#CC0000] hover:to-[#E60000] text-white font-bold mb-4 gap-2 border-transparent shadow-[0_0_22px_rgba(230,0,0,0.4)] py-6 rounded-xl text-[15px] transition-all hover:scale-[1.01]"
+          >
+            <Sparkles className="h-5 w-5 animate-pulse text-amber-200" />
+            <span>Instant Access to Dashboard (1-Click) →</span>
+          </Button>
 
           <Button
             type="button"

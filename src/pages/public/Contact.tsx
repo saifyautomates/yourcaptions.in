@@ -40,17 +40,17 @@ export default function Contact() {
               {
                 title: "Support",
                 desc: "Product questions, bug reports, billing.",
-                value: "support@Yourcaptions.in",
+                value: "support@yourcaptions.in",
               },
               {
                 title: "Sales & Enterprise",
                 desc: "Teams, agencies, custom volumes, SSO.",
-                value: "sales@Yourcaptions.in",
+                value: "sales@yourcaptions.in",
               },
               {
                 title: "Press",
                 desc: "Media kits, interviews, partnerships.",
-                value: "press@Yourcaptions.in",
+                value: "press@yourcaptions.in",
               },
               {
                 title: "Office",

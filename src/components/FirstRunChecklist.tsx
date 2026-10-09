@@ -74,7 +74,7 @@ export function FirstRunChecklist({ projectCount }: Props) {
 
   const steps = [
     { done: step1, icon: Upload, title: "Upload your first video", hint: "MP4 or MOV, up to 1 GB." },
-    { done: step2, icon: Palette, title: "Pick a caption template", hint: "100+ styles — Hormozi, MrBeast, and more." },
+    { done: step2, icon: Palette, title: "Pick a caption template", hint: "50+ styles — Hormozi, MrBeast, Neon Glow, 3D Depth & more." },
     { done: step3, icon: Download, title: "Export & download", hint: "One click to 1080p or 4K MP4." },
   ];
   const doneCount = steps.filter((s) => s.done).length;

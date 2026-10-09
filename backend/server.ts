@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import express from 'express';
 import cors from 'cors';
 import { createProxyMiddleware } from 'http-proxy-middleware';
@@ -37,7 +37,7 @@ async function loadEdgeFunctions() {
       if (fs.existsSync(indexPath)) {
         try {
           (globalThis as any).__latestHandler = null;
-          await import(indexPath);
+          await import(pathToFileURL(indexPath).href);
           
           if ((globalThis as any).__latestHandler) {
             registeredFunctions.set(entry.name, (globalThis as any).__latestHandler);

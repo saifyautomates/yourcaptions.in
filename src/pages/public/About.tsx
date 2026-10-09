@@ -2,11 +2,12 @@ import { Link } from "react-router-dom";
 import { TiltCard } from "@/components/public/vfx/TiltCard";
 import { MagneticCTA } from "@/components/public/vfx/MagneticCTA";
 import { Reveal } from "@/components/public/vfx/Reveal";
+import { CAP_PRESETS } from "@/lib/captionStyle";
 
 const stats = [
   { n: "10,000+", l: "creators" },
+  { n: `${CAP_PRESETS.length}+`, l: "viral templates" },
   { n: "100+", l: "languages" },
-  { n: "2 min", l: "avg turnaround" },
   { n: "4.9★", l: "user rating" },
 ];
 

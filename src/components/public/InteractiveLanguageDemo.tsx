@@ -51,6 +51,7 @@ export const VIDEO_PRESETS: VideoPreset[] = [
     title: 'Intro & Welcome',
     spokenVoice: '"Welcome to Yourcaptions.in — Auto-generate viral video captions in seconds!"',
     sources: [
+      "/demo-video.mp4",
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
       "https://vjs.zencdn.net/v/oceans.mp4"
     ],
@@ -95,6 +96,7 @@ export const VIDEO_PRESETS: VideoPreset[] = [
     title: 'AI Voice Accuracy',
     spokenVoice: '"Supercharge your audience reach with 99.2% subtitle accuracy and automated Roman script!"',
     sources: [
+      "/demo-video.mp4",
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
     ],
@@ -139,6 +141,7 @@ export const VIDEO_PRESETS: VideoPreset[] = [
     title: 'Viral Shorts & Reels',
     spokenVoice: '"Create high-converting video captions for YouTube Shorts, Instagram Reels, and TikTok!"',
     sources: [
+      "/demo-video.mp4",
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
       "https://vjs.zencdn.net/v/oceans.mp4"
     ],
@@ -299,7 +302,7 @@ export default function InteractiveLanguageDemo() {
   }, [customVideoUrl, customVideoName, currentPreset, selectedLang, scriptMode]);
 
   return (
-    <div className="relative w-full max-w-[1150px] mx-auto mt-12 p-[2px] rounded-[28px] overflow-hidden bg-gradient-to-b from-[#222] via-[#111] to-[#0a0a0a] shadow-[0_0_100px_rgba(230,0,0,0.12)]">
+    <div id="playground" className="relative w-full max-w-[1150px] mx-auto mt-12 p-[2px] rounded-[28px] overflow-hidden bg-gradient-to-b from-[#222] via-[#111] to-[#0a0a0a] shadow-[0_0_100px_rgba(230,0,0,0.12)]">
       {/* Red rotating border glow effect */}
       <div className="absolute inset-0 rounded-[28px] overflow-hidden pointer-events-none">
         <motion.div 
@@ -448,11 +451,6 @@ export default function InteractiveLanguageDemo() {
             {/* Video Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40 pointer-events-none" />
 
-            {/* Top Header Badge */}
-            <div className="absolute top-4 left-4 z-30 flex items-center gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 text-white text-[11px] font-bold">
-              <Mic className="w-3.5 h-3.5 text-[#E60000]" />
-              <span>Voice Matched • {customVideoName ? 'Custom File' : currentPreset.title}</span>
-            </div>
 
             {/* Mute/Unmute Toggle Button */}
             <button
@@ -473,21 +471,6 @@ export default function InteractiveLanguageDemo() {
               </div>
             </div>
 
-            {/* Dynamic Animated Caption Display matching spoken voice */}
-            <div className="absolute bottom-20 sm:bottom-22 left-4 right-4 z-20 flex justify-center text-center pointer-events-none">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`${selectedPresetId}-${customVideoUrl}-${selectedLang.name}-${scriptMode}`}
-                  initial={{ opacity: 0, y: 12, scale: 0.92 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -12, scale: 0.92 }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
-                  className="bg-black/85 border border-[#E60000]/80 backdrop-blur-md px-5 py-3 rounded-xl text-white font-black text-[15px] sm:text-[18px] tracking-wide shadow-[0_10px_35px_rgba(230,0,0,0.35)] max-w-[92%]"
-                >
-                  <span className="drop-shadow-md">{currentCaption}</span>
-                </motion.div>
-              </AnimatePresence>
-            </div>
 
             {/* Video Timeline Scrubber */}
             <div className="absolute bottom-12 left-4 right-4 z-30 pointer-events-none">

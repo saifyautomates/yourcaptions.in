@@ -46,6 +46,15 @@ export default function Dashboard() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const applyTemplate = params.get("applyTemplate");
+    if (applyTemplate) {
+      localStorage.setItem("captions:appliedTemplate", applyTemplate);
+      toast.success(`Selected "${applyTemplate}"! Upload or open a project to style your video.`);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!user) return;
     const perf = startPerfMeasure("dashboard_load");
     

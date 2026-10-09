@@ -38,7 +38,7 @@ describe("arrow ↔ video alignment contract", () => {
   });
 
   it("frame style caps non-fullscreen widths so video never overflows its track", () => {
-    const frameBlock = source.match(/const frameStyle:[\s\S]*?;\n/)?.[0] ?? "";
+    const frameBlock = source.match(/const frameStyle:[\s\S]*?;\r?\n/)?.[0] ?? "";
     expect(frameBlock).toBeTruthy();
     const nonFullscreenBranches = frameBlock.split("\n").filter((l) => l.includes("framedCap"));
     expect(nonFullscreenBranches.length).toBeGreaterThanOrEqual(3);

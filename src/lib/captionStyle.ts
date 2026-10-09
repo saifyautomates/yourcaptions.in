@@ -463,1070 +463,6 @@ export const captionSpanStyle = (s: CapStyle): React.CSSProperties => {
   return style;
 };
 
-export const CAP_PRESETS: { name: string; patch: Partial<CapStyle>; category?: string }[] = [
-  {
-    // "The Cinematic Story" — bottom-center Helvetica-Neue 700, white fill with
-    // a bold black stroke + hard-then-soft double drop shadow so it stays crisp
-    // over any footage. Active word flips to Star-Wars yellow (#FFE81F) while
-    // keeping the same black outline. Natural case, fade-in entry, no
-    // per-word transition — mimics a documentary/story-telling look.
-    name: "The Cinematic Story",
-    category: "Cinematic",
-    patch: {
-      fontFamily: font("Helvetica Neue"),
-      fontWeight: 700,
-      fontSize: 40,
-      textCase: "normal",
-      color: "#FFFFFF",
-      letterSpacing: 0,
-      lineHeight: 1.2,
-      align: "center",
-      posY: 82,
-      wordsPerChunk: 4,
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 2,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 2, shadowY: 2, shadowBlur: 5,
-      glowOn: false, bgOn: false,
-      transition: "fade", transitionSpeed: 200,
-      activeWordOn: true, activeWordBgOn: false,
-      activeWordColor: "#FFE81F", activeWordScale: 1.0,
-    },
-  },
-
-  {
-    // "The DOAC Podcast Style" — viral short-form podcast look inspired by The Diary
-    // Of A CEO clips. Heavy uppercase Montserrat, deep black stroke + drop-shadow for
-    // readability on any background, and per-word impact highlighting in red/yellow.
-    // Fill in `impactWordsRed` / `impactWordsYellow` in the style panel per clip.
-    name: "The DOAC Podcast Style",
-    category: "Podcast",
-    patch: {
-      fontFamily: font("Montserrat"),
-      fontWeight: 900,
-      fontSize: 42,
-      textCase: "upper",
-      color: "#FFFFFF",
-      letterSpacing: -0.5,
-      lineHeight: 1.1,
-      align: "center",
-      posY: 80,
-      wordsPerChunk: 3,
-      strokeOn: true, strokeColor: "rgba(0,0,0,0.9)", strokeWidth: 2,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 85, shadowX: 0, shadowY: 6, shadowBlur: 12,
-      glowOn: false, bgOn: false,
-      transition: "fade", transitionSpeed: 150,
-      activeWordOn: true, activeWordBgOn: false,
-      activeWordColor: "#FFFFFF", activeWordScale: 1.05,
-      impactRedColor: "#E60000",
-      impactYellowColor: "#FFEA00",
-      impactWordsRed: "never, stop, don't, no, wrong, fail, hate, kill, lost, broken",
-      impactWordsYellow: "money, success, secret, truth, win, growth, huge, insane, changed, everything",
-    },
-  },
-
-  {
-    // Matches the reference clip: white sans text with a solid blue box behind the active word,
-    // natural case, bottom-centered, one word chunks so every word reads as its own blue pill.
-    name: "AI Blue Box",
-    category: "Core Pack",
-    patch: {
-      fontFamily: font("Inter"), fontWeight: 700, fontSize: 46, textCase: "normal",
-      color: "#FFFFFF",
-      strokeOn: false, glowOn: false, bgOn: false,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      posY: 86, wordsPerChunk: 3, align: "center",
-      transition: "fade", transitionSpeed: 160,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#1E5BFF",
-      activeWordColor: "#FFFFFF", activeWordScale: 1.0,
-    },
-  },
-  {
-    // One-click: bright yellow highlight behind the active word.
-    name: "Yellow Highlight",
-    patch: {
-      fontFamily: font("Inter"), fontWeight: 800, fontSize: 44, textCase: "upper",
-      color: "#FFFFFF",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 2,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 2, shadowBlur: 6,
-      glowOn: false, bgOn: false, posY: 78, wordsPerChunk: 3,
-      transition: "pop", transitionSpeed: 220,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#FACC15",
-      activeWordColor: "#111111", activeWordScale: 1.06,
-    },
-  },
-  {
-    // One-click: bold text that pops in with a scale bounce, no background.
-    name: "Popping Text",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 900, fontSize: 48, textCase: "upper",
-      color: "#FFFFFF",
-      strokeOn: false, glowOn: false, bgOn: false,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 65, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      posY: 72, wordsPerChunk: 2,
-      transition: "pop", transitionSpeed: 180,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#FDE047", activeWordScale: 1.22,
-    },
-  },
-  {
-    // One-click: heavy black stroke outline around white text.
-    name: "Stroke Outline",
-    patch: {
-      fontFamily: font("Anton"), fontWeight: 800, fontSize: 46, textCase: "upper",
-      color: "#FFFFFF",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 5,
-      shadowOn: false, glowOn: false, bgOn: false,
-      posY: 75, wordsPerChunk: 3,
-      transition: "pop", transitionSpeed: 220,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#FACC15", activeWordScale: 1.08,
-    },
-  },
-  {
-    // Elegant cinematic serif in warm gold on softly tinted backdrop — inspired by film title cards.
-    name: "Cinematic Serif",
-    patch: {
-      fontFamily: font("Playfair Display"), fontWeight: 700, fontSize: 44, textCase: "normal",
-      color: "#D9B98A",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 55, shadowX: 0, shadowY: 3, shadowBlur: 14,
-      glowOn: false, bgOn: false, strokeOn: false, posY: 50, wordsPerChunk: 3,
-      transition: "fade", transitionSpeed: 380,
-      activeWordOn: true, activeWordColor: "#F1D9A8", activeWordBgOn: false, activeWordScale: 1.02,
-      letterSpacing: 1,
-    },
-  },
-  {
-    name: "Ali Abdaal",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 700, fontSize: 30, textCase: "normal",
-      color: "#111111", bgOn: true, bgColor: "#FFFFFF", bgOpacity: 100, bgRadius: 12, bgPadX: 18, bgPadY: 10,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 25, shadowX: 0, shadowY: 6, shadowBlur: 18,
-      glowOn: false, strokeOn: false, posY: 82,
-      transition: "fade", transitionSpeed: 260,
-      activeWordOn: true, activeWordColor: "#9CA3AF", activeWordBgOn: false, activeWordScale: 1,
-    },
-  },
-  {
-    name: "Pop Up",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 42, textCase: "upper",
-      color: "#FFFFFF", strokeOn: true, strokeColor: "#000000", strokeWidth: 2,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 4, shadowBlur: 0,
-      glowOn: false, bgOn: false, posY: 60, transition: "pop", transitionSpeed: 260,
-      activeWordOn: true, activeWordColor: "#22C55E", activeWordBgOn: false, activeWordScale: 1.08,
-    },
-  },
-  {
-    name: "Kalakar Shadow",
-    patch: {
-      fontFamily: font("Bebas Neue"), fontWeight: 700, fontSize: 38, textCase: "normal",
-      colorMode: "gradient", gradFrom: "#FBBF24", gradTo: "#F97316", gradAngle: 90,
-      shadowOn: true, shadowColor: "#7C2D12", shadowOpacity: 90, shadowX: 0, shadowY: 4, shadowBlur: 12,
-      glowOn: false, bgOn: false, strokeOn: false, posY: 55,
-      transition: "pop", transitionSpeed: 240,
-    },
-  },
-  {
-    name: "Double Trouble",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 700, fontSize: 30, textCase: "normal",
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 80, shadowX: 0, shadowY: 2, shadowBlur: 8,
-      glowOn: false, bgOn: false, strokeOn: false, posY: 82, wordsPerChunk: 3,
-      transition: "fade", transitionSpeed: 240,
-      activeWordOn: true, activeWordColor: "#FDE047", activeWordBgOn: false, activeWordScale: 1.06,
-    },
-  },
-  {
-    name: "Bubble Style",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 800, fontSize: 30, textCase: "normal",
-      color: "#FFFFFF", bgOn: false,
-      shadowOn: false, strokeOn: false, glowOn: false, posY: 86,
-      transition: "bounce", transitionSpeed: 320,
-      // Bubble = per-word rounded pill on the active word.
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#22C55E", activeWordColor: "#FFFFFF", activeWordScale: 1.04,
-    },
-  },
-  {
-    name: "Shamani",
-    patch: {
-      fontFamily: font("Anton"), fontWeight: 900, fontSize: 42, textCase: "upper",
-      color: "#FDE047",
-      glowOn: true, glowColor: "#FDE047", glowBlur: 28, glowIntensity: 70,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 0, shadowY: 3, shadowBlur: 4,
-      bgOn: false, strokeOn: false, posY: 55,
-      transition: "zoom", transitionSpeed: 300,
-    },
-  },
-  {
-    name: "Hormozi Style",
-    patch: {
-      fontFamily: font("Anton"), fontWeight: 900, fontSize: 44, textCase: "upper",
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 0, shadowY: 4, shadowBlur: 8,
-      strokeOn: true, strokeColor: "#0A0F0A", strokeWidth: 2,
-      glowOn: false, bgOn: false, posY: 55,
-      transition: "pop", transitionSpeed: 200,
-      // Hormozi signature: current word turns lime green.
-      activeWordOn: true, activeWordColor: "#A3E635", activeWordBgOn: false, activeWordScale: 1.12,
-    },
-  },
-  {
-    name: "Editing Skool",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 800, fontSize: 30, textCase: "normal",
-      color: "#FFFFFF", bgOn: false,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 6,
-      strokeOn: false, glowOn: false, posY: 55, wordsPerChunk: 1,
-      transition: "pop", transitionSpeed: 200,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#F97316", activeWordColor: "#FFFFFF", activeWordScale: 1.08,
-    },
-  },
-  {
-    name: "Mr Beast Style 1",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 44, textCase: "upper",
-      color: "#FFFFFF", strokeOn: true, strokeColor: "#000000", strokeWidth: 4,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 0, shadowY: 6, shadowBlur: 0,
-      bgOn: false, glowOn: false, posY: 78,
-      transition: "pop", transitionSpeed: 240,
-      activeWordOn: true, activeWordColor: "#FDE047", activeWordBgOn: false, activeWordScale: 1.12,
-    },
-  },
-  {
-    name: "Mr Beast Style 2",
-    patch: {
-      fontFamily: font("Anton"), fontWeight: 900, fontSize: 40, textCase: "normal",
-      color: "#FDE047",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 3, shadowY: 4, shadowBlur: 0,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 60,
-      transition: "pop", transitionSpeed: 240,
-      activeWordOn: true, activeWordColor: "#22C55E", activeWordBgOn: false, activeWordScale: 1.1,
-    },
-  },
-  {
-    name: "Iman Gadzhi",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 700, fontSize: 32, textCase: "normal",
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 2, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 85,
-      transition: "fade", transitionSpeed: 300,
-      activeWordOn: true, activeWordColor: "#FBBF24", activeWordScale: 1.06,
-    },
-  },
-  {
-    name: "Devin Jatho",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 46, textCase: "upper",
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 80, shadowX: 0, shadowY: 4, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 60,
-      transition: "zoom", transitionSpeed: 320,
-      activeWordOn: true, activeWordColor: "#A78BFA", activeWordBgOn: false, activeWordScale: 1.14,
-    },
-  },
-  {
-    name: "Highlighted Word",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 700, fontSize: 30, textCase: "normal",
-      color: "#F97316",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 2, shadowBlur: 8,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 82,
-      transition: "fade", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Clean Glow Style",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 700, fontSize: 32, textCase: "normal",
-      color: "#FFFFFF",
-      glowOn: true, glowColor: "#FFFFFF", glowBlur: 14, glowIntensity: 30,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 3, shadowBlur: 12,
-      strokeOn: false, bgOn: false, posY: 85,
-      transition: "fade", transitionSpeed: 300,
-    },
-  },
-  {
-    name: "Kalakar Clean",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 600, fontSize: 28, textCase: "normal",
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 2, shadowBlur: 8,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 85,
-      transition: "fade", transitionSpeed: 280,
-    },
-  },
-  {
-    name: "Deep Glow",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 44, textCase: "upper",
-      color: "#FFFFFF",
-      glowOn: true, glowColor: "#FF00FF", glowBlur: 30, glowIntensity: 90,
-      shadowOn: false, strokeOn: false, bgOn: false, posY: 55,
-      transition: "zoom", transitionSpeed: 320,
-    },
-  },
-  {
-    name: "Underline",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 800, fontSize: 32, textCase: "normal",
-      color: "#FFFFFF", bgOn: false,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 80, shadowX: 0, shadowY: 2, shadowBlur: 6,
-      strokeOn: false, glowOn: false, posY: 55, wordsPerChunk: 3,
-      transition: "slide-up", transitionSpeed: 300,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#EC4899", activeWordColor: "#FFFFFF", activeWordScale: 1,
-    },
-  },
-  {
-    name: "Flicker",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 800, fontSize: 46, textCase: "normal",
-      color: "#FFFFFF",
-      glowOn: true, glowColor: "#FFFFFF", glowBlur: 24, glowIntensity: 80,
-      shadowOn: false, strokeOn: false, bgOn: false, posY: 60,
-      transition: "pop", transitionSpeed: 220, wordsPerChunk: 1,
-      activeWordOn: true, activeWordColor: "#7CD3A8", activeWordBgOn: false, activeWordScale: 1.1,
-    },
-  },
-  {
-    name: "Shamani 2",
-    patch: {
-      fontFamily: font("Anton"), fontWeight: 900, fontSize: 40, textCase: "upper",
-      color: "#FFFFFF",
-      glowOn: true, glowColor: "#FDE047", glowBlur: 20, glowIntensity: 60,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 6,
-      strokeOn: false, bgOn: false, posY: 55, wordsPerChunk: 3,
-      transition: "wave", transitionSpeed: 380,
-    },
-  },
-  {
-    name: "Kalakar",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 700, fontSize: 28, textCase: "normal",
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 2, shadowBlur: 8,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 88,
-      transition: "fade", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Clean Motion",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 700, fontSize: 32, textCase: "normal",
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 2, shadowBlur: 8,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 82,
-      transition: "slide-up", transitionSpeed: 380,
-      activeWordOn: true, activeWordColor: "#7CD3A8", activeWordScale: 1.05,
-    },
-  },
-  {
-    name: "Kalakar Glow",
-    patch: {
-      fontFamily: font("Anton"), fontWeight: 900, fontSize: 42, textCase: "upper",
-      color: "#A3E635",
-      glowOn: true, glowColor: "#22C55E", glowBlur: 26, glowIntensity: 80,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 3, shadowBlur: 6,
-      strokeOn: false, bgOn: false, posY: 60,
-      transition: "pop", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Delhi",
-    patch: {
-      fontFamily: font("Playfair Display"), fontWeight: 500, italic: true, fontSize: 30, textCase: "normal",
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 80, shadowX: 0, shadowY: 2, shadowBlur: 12,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 82,
-      transition: "slide-up", transitionSpeed: 340,
-      activeWordOn: true, activeWordColor: "#FBBF24", activeWordScale: 1.04,
-    },
-  },
-  {
-    name: "Pixelated Word",
-    patch: {
-      fontFamily: font("JetBrains Mono"), fontWeight: 700, fontSize: 34, textCase: "upper",
-      color: "#FFFFFF", letterSpacing: 2,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 0,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 60,
-      transition: "typewriter", transitionSpeed: 320,
-    },
-  },
-  {
-    name: "Ziada",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 700, fontSize: 28, textCase: "normal",
-      color: "#FFFFFF", bgOn: true, bgColor: "#000000", bgOpacity: 100, bgRadius: 999, bgPadX: 16, bgPadY: 8,
-      shadowOn: false, strokeOn: false, glowOn: false, posY: 78, lineHeight: 1.6, wordsPerChunk: 3,
-      transition: "slide-up", transitionSpeed: 320,
-    },
-  },
-  {
-    name: "Thora Cinematic",
-    patch: {
-      fontFamily: font("Space Grotesk"), fontWeight: 500, fontSize: 38, textCase: "upper",
-      color: "#FFFFFF", letterSpacing: 6,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 2, shadowBlur: 8,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 55,
-      transition: "fade", transitionSpeed: 500,
-    },
-  },
-  {
-    name: "Zero Gravity",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 700, fontSize: 26, textCase: "normal",
-      color: "#FFFFFF", bgOn: true, bgColor: "#EC4899", bgOpacity: 100, bgRadius: 999, bgPadX: 16, bgPadY: 8,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 40, shadowX: 0, shadowY: 4, shadowBlur: 10,
-      strokeOn: false, glowOn: false, posY: 65, lineHeight: 1.8, wordsPerChunk: 3,
-      transition: "bounce", transitionSpeed: 340,
-    },
-  },
-  // ── Reference-video inspired presets ─────────────────────────────────
-  {
-    // Bold lavender uppercase keyword hook at the top of the frame.
-    name: "Purple Punch",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 44, textCase: "upper",
-      color: "#A78BFA", letterSpacing: 1,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 18,
-      transition: "pop", transitionSpeed: 240,
-    },
-  },
-  {
-    // Crisp white pill with dark text — green tint reads as a highlight keyword.
-    name: "White Pill Highlight",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 800, fontSize: 30, textCase: "normal",
-      color: "#0F172A",
-      bgOn: true, bgColor: "#FFFFFF", bgOpacity: 100, bgRadius: 10, bgPadX: 14, bgPadY: 7,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 25, shadowX: 0, shadowY: 4, shadowBlur: 14,
-      strokeOn: false, glowOn: false, posY: 22,
-      transition: "fade", transitionSpeed: 260,
-    },
-  },
-  {
-    // Documentary title-card: heavy serif, blood red, uppercase, top-heavy.
-    name: "Documentary Serif",
-    patch: {
-      fontFamily: font("Playfair Display"), fontWeight: 900, fontSize: 48, textCase: "upper",
-      color: "#7F1D1D", letterSpacing: 2, lineHeight: 1.05,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 25, shadowX: 2, shadowY: 4, shadowBlur: 8,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 28,
-      transition: "slide-down", transitionSpeed: 420,
-    },
-  },
-  {
-    // Classic TikTok / reels: bold white with heavy black stroke, centered-lower.
-    name: "TikTok Bold",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 900, fontSize: 32, textCase: "normal",
-      color: "#FFFFFF", lineHeight: 1.15,
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 3,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 6,
-      bgOn: false, glowOn: false, posY: 75,
-      transition: "pop", transitionSpeed: 220,
-    },
-  },
-  // ── Additional popular creator/social styles ─────────────────────────
-  {
-    name: "MrBeast Yellow",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 44, textCase: "upper",
-      color: "#FDE047", strokeOn: true, strokeColor: "#000000", strokeWidth: 4,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 0, shadowY: 6, shadowBlur: 0,
-      bgOn: false, glowOn: false, posY: 78,
-      transition: "pop", transitionSpeed: 220,
-      activeWordOn: true, activeWordColor: "#22C55E", activeWordScale: 1.12,
-    },
-  },
-  {
-    name: "Karaoke Yellow",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 800, fontSize: 34, textCase: "normal",
-      color: "#FFFFFF", strokeOn: true, strokeColor: "#000000", strokeWidth: 2,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 6,
-      bgOn: false, glowOn: false, posY: 82,
-      transition: "fade", transitionSpeed: 220,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#FDE047", activeWordColor: "#000000", activeWordScale: 1,
-    },
-  },
-  {
-    name: "Neon Cyan",
-    patch: {
-      fontFamily: font("Anton"), fontWeight: 900, fontSize: 42, textCase: "upper",
-      color: "#22D3EE",
-      glowOn: true, glowColor: "#06B6D4", glowBlur: 30, glowIntensity: 90,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 80, shadowX: 0, shadowY: 2, shadowBlur: 6,
-      strokeOn: false, bgOn: false, posY: 58,
-      transition: "zoom", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Neon Pink",
-    patch: {
-      fontFamily: font("Bebas Neue"), fontWeight: 700, fontSize: 44, textCase: "upper", letterSpacing: 2,
-      color: "#FFFFFF",
-      glowOn: true, glowColor: "#EC4899", glowBlur: 28, glowIntensity: 85,
-      shadowOn: true, shadowColor: "#7E22CE", shadowOpacity: 70, shadowX: 0, shadowY: 4, shadowBlur: 14,
-      strokeOn: false, bgOn: false, posY: 60,
-      transition: "pop", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Retro VHS",
-    patch: {
-      fontFamily: font("Press Start 2P"), fontWeight: 400, fontSize: 22, textCase: "upper", letterSpacing: 2,
-      color: "#F0FDF4",
-      shadowOn: true, shadowColor: "#EC4899", shadowOpacity: 100, shadowX: 3, shadowY: 0, shadowBlur: 0,
-      glowOn: true, glowColor: "#22D3EE", glowBlur: 14, glowIntensity: 60,
-      strokeOn: false, bgOn: false, posY: 60,
-      transition: "typewriter", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Newspaper",
-    patch: {
-      fontFamily: font("Playfair Display"), fontWeight: 900, fontSize: 40, textCase: "upper", letterSpacing: 1,
-      color: "#0A0A0A",
-      bgOn: true, bgColor: "#FFFFFF", bgOpacity: 100, bgRadius: 0, bgPadX: 18, bgPadY: 10,
-      shadowOn: false, strokeOn: false, glowOn: false, posY: 30,
-      transition: "slide-down", transitionSpeed: 320,
-    },
-  },
-  {
-    name: "Chalkboard",
-    patch: {
-      fontFamily: font("Caveat"), fontWeight: 700, fontSize: 44, textCase: "normal",
-      color: "#FEF3C7",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 2, shadowBlur: 4,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 55,
-      transition: "fade", transitionSpeed: 340,
-    },
-  },
-  {
-    name: "Comic Pop",
-    patch: {
-      fontFamily: font("Bangers"), fontWeight: 400, fontSize: 46, textCase: "upper", letterSpacing: 2,
-      color: "#FDE047", strokeOn: true, strokeColor: "#000000", strokeWidth: 3,
-      shadowOn: true, shadowColor: "#EF4444", shadowOpacity: 100, shadowX: 4, shadowY: 4, shadowBlur: 0,
-      bgOn: false, glowOn: false, posY: 55,
-      transition: "bounce", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Marker Highlight",
-    patch: {
-      fontFamily: font("Permanent Marker"), fontWeight: 400, fontSize: 40, textCase: "normal",
-      color: "#FFFFFF",
-      bgOn: true, bgColor: "#F97316", bgOpacity: 100, bgRadius: 4, bgPadX: 10, bgPadY: 4,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 2, shadowBlur: 4,
-      strokeOn: false, glowOn: false, posY: 65,
-      transition: "pop", transitionSpeed: 240,
-    },
-  },
-  {
-    name: "Reels Minimal",
-    patch: {
-      fontFamily: font("Inter"), fontWeight: 700, fontSize: 26, textCase: "normal",
-      color: "#FFFFFF",
-      bgOn: true, bgColor: "#000000", bgOpacity: 55, bgRadius: 6, bgPadX: 10, bgPadY: 5,
-      shadowOn: false, strokeOn: false, glowOn: false, posY: 88,
-      transition: "fade", transitionSpeed: 220,
-    },
-  },
-  {
-    name: "Podcast Clip",
-    patch: {
-      fontFamily: font("Montserrat"), fontWeight: 800, fontSize: 34, textCase: "upper", letterSpacing: 1,
-      color: "#FFFFFF",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 2,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 85, shadowX: 0, shadowY: 3, shadowBlur: 8,
-      bgOn: false, glowOn: false, posY: 82,
-      transition: "slide-up", transitionSpeed: 280,
-      activeWordOn: true, activeWordColor: "#FBBF24", activeWordScale: 1.08,
-    },
-  },
-  {
-    name: "Cinematic Bar",
-    patch: {
-      fontFamily: font("Space Grotesk"), fontWeight: 500, fontSize: 30, textCase: "normal", letterSpacing: 3,
-      color: "#F5F5F4",
-      bgOn: true, bgColor: "#000000", bgOpacity: 85, bgRadius: 0, bgPadX: 20, bgPadY: 10,
-      shadowOn: false, strokeOn: false, glowOn: false, posY: 90,
-      transition: "fade", transitionSpeed: 480,
-    },
-  },
-  {
-    name: "Gaming Streamer",
-    patch: {
-      fontFamily: font("Russo One"), fontWeight: 400, fontSize: 40, textCase: "upper", letterSpacing: 1,
-      color: "#A3E635",
-      strokeOn: true, strokeColor: "#0A0A0A", strokeWidth: 3,
-      glowOn: true, glowColor: "#22C55E", glowBlur: 20, glowIntensity: 70,
-      shadowOn: false, bgOn: false, posY: 78,
-      transition: "zoom", transitionSpeed: 240,
-    },
-  },
-  {
-    name: "Vlog Bubble",
-    patch: {
-      fontFamily: font("Fredoka"), fontWeight: 600, fontSize: 30, textCase: "normal",
-      color: "#0F172A",
-      bgOn: true, bgColor: "#FDE68A", bgOpacity: 100, bgRadius: 999, bgPadX: 18, bgPadY: 10,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 25, shadowX: 0, shadowY: 4, shadowBlur: 12,
-      strokeOn: false, glowOn: false, posY: 80,
-      transition: "bounce", transitionSpeed: 320,
-    },
-  },
-  {
-    name: "Explainer Serif",
-    patch: {
-      fontFamily: font("DM Serif Display"), fontWeight: 400, fontSize: 36, textCase: "normal",
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 78,
-      transition: "fade", transitionSpeed: 360,
-    },
-  },
-  {
-    name: "Sunset Gradient",
-    patch: {
-      fontFamily: font("Outfit"), fontWeight: 900, fontSize: 40, textCase: "upper",
-      colorMode: "gradient", gradFrom: "#F97316", gradTo: "#EC4899", gradAngle: 90,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 60,
-      transition: "pop", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Ocean Gradient",
-    patch: {
-      fontFamily: font("Sora"), fontWeight: 800, fontSize: 38, textCase: "normal",
-      colorMode: "gradient", gradFrom: "#22D3EE", gradTo: "#6366F1", gradAngle: 135,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 60,
-      transition: "slide-up", transitionSpeed: 300,
-    },
-  },
-  {
-    name: "Horror",
-    patch: {
-      fontFamily: font("Creepster"), fontWeight: 400, fontSize: 48, textCase: "normal", letterSpacing: 2,
-      color: "#DC2626",
-      glowOn: true, glowColor: "#7F1D1D", glowBlur: 24, glowIntensity: 80,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 0, shadowY: 4, shadowBlur: 10,
-      strokeOn: false, bgOn: false, posY: 55,
-      transition: "wave", transitionSpeed: 380,
-    },
-  },
-  {
-    name: "Kinetic Caps",
-    patch: {
-      fontFamily: font("Barlow Condensed"), fontWeight: 900, fontSize: 46, textCase: "upper", letterSpacing: 1,
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 0, shadowY: 4, shadowBlur: 0,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 55, wordsPerChunk: 1,
-      transition: "pop", transitionSpeed: 180,
-      activeWordOn: true, activeWordColor: "#FDE047", activeWordScale: 1.15,
-    },
-  },
-  {
-    name: "Instagram Story",
-    patch: {
-      fontFamily: font("Poppins"), fontWeight: 700, fontSize: 30, textCase: "normal",
-      color: "#FFFFFF",
-      bgOn: true, bgColor: "#DB2777", bgOpacity: 100, bgRadius: 6, bgPadX: 12, bgPadY: 6,
-      shadowOn: false, strokeOn: false, glowOn: false, posY: 55,
-      transition: "slide-up", transitionSpeed: 280,
-    },
-  },
-  {
-    name: "YouTube Shorts",
-    patch: {
-      fontFamily: font("Roboto"), fontWeight: 900, fontSize: 36, textCase: "upper",
-      color: "#FFFFFF", strokeOn: true, strokeColor: "#000000", strokeWidth: 3,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 4, shadowBlur: 8,
-      bgOn: false, glowOn: false, posY: 75,
-      transition: "pop", transitionSpeed: 220,
-      activeWordOn: true, activeWordColor: "#EF4444", activeWordScale: 1.1,
-    },
-  },
-  {
-    name: "Twitch Chat",
-    patch: {
-      fontFamily: font("Inter"), fontWeight: 700, fontSize: 24, textCase: "normal",
-      color: "#FFFFFF",
-      bgOn: true, bgColor: "#6441A5", bgOpacity: 100, bgRadius: 4, bgPadX: 10, bgPadY: 5,
-      shadowOn: false, strokeOn: false, glowOn: false, posY: 88,
-      transition: "fade", transitionSpeed: 200,
-    },
-  },
-  {
-    name: "Motivational",
-    patch: {
-      fontFamily: font("Oswald"), fontWeight: 700, fontSize: 42, textCase: "upper", letterSpacing: 2,
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 4, shadowBlur: 12,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 55,
-      transition: "zoom", transitionSpeed: 360,
-      activeWordOn: true, activeWordColor: "#FDE047", activeWordScale: 1.1,
-    },
-  },
-  {
-    name: "Luxury Gold",
-    patch: {
-      fontFamily: font("Cormorant Garamond"), fontWeight: 700, italic: true, fontSize: 40, textCase: "normal",
-      colorMode: "gradient", gradFrom: "#FBBF24", gradTo: "#B45309", gradAngle: 135,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 55,
-      transition: "fade", transitionSpeed: 460,
-    },
-  },
-  // ── Reference-pack styles (Align, Volt, Ember, Rebel, Lumen, Magazine,
-  //     Film, Ignite, Clarity, Growth, Recess, Cinematic II, Pulse,
-  //     Velocity, Blueprint, Core, Analog, Zine, Archive) ─────────────────
-  {
-    name: "Align",
-    patch: {
-      fontFamily: font("Special Elite"), fontWeight: 400, fontSize: 22, textCase: "upper", letterSpacing: 6,
-      color: "#0F172A",
-      bgOn: true, bgColor: "#FFFFFF", bgOpacity: 100, bgRadius: 4, bgPadX: 14, bgPadY: 8,
-      shadowOn: false, strokeOn: false, glowOn: false, posY: 82,
-      transition: "fade", transitionSpeed: 280,
-    },
-  },
-  {
-    name: "Volt",
-    patch: {
-      fontFamily: font("Inter"), fontWeight: 800, fontSize: 40, textCase: "normal",
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 80, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 60,
-      transition: "pop", transitionSpeed: 220, wordsPerChunk: 1,
-      activeWordOn: true, activeWordColor: "#A3E635", activeWordScale: 1.08,
-    },
-  },
-  {
-    name: "Ember",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 34, textCase: "upper", letterSpacing: 1,
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 4, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 82,
-      transition: "slide-up", transitionSpeed: 300,
-    },
-  },
-  {
-    name: "Rebel",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 34, textCase: "normal",
-      color: "#FFFFFF", strokeOn: true, strokeColor: "#000000", strokeWidth: 3,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 3, shadowY: 3, shadowBlur: 0,
-      bgOn: false, glowOn: false, posY: 78,
-      transition: "pop", transitionSpeed: 220,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#EAFF00", activeWordColor: "#0A0A0A", activeWordScale: 1,
-    },
-  },
-  {
-    name: "Lumen",
-    patch: {
-      fontFamily: font("Inter"), fontWeight: 700, fontSize: 30, textCase: "normal",
-      color: "#FFFFFF",
-      bgOn: true, bgColor: "#0A0A0A", bgOpacity: 95, bgRadius: 8, bgPadX: 14, bgPadY: 8,
-      shadowOn: false, strokeOn: false, glowOn: false, posY: 60,
-      transition: "fade", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Magazine",
-    patch: {
-      fontFamily: font("Great Vibes"), fontWeight: 400, italic: true, fontSize: 46, textCase: "normal",
-      color: "#F5F5F4",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 22,
-      transition: "fade", transitionSpeed: 460,
-    },
-  },
-  {
-    name: "Film",
-    patch: {
-      fontFamily: font("Anton"), fontWeight: 900, fontSize: 50, textCase: "upper", letterSpacing: 2,
-      color: "#FDE047",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 4, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 20,
-      transition: "slide-down", transitionSpeed: 340,
-      activeWordOn: true, activeWordColor: "#FACC15", activeWordScale: 1.05,
-    },
-  },
-  {
-    name: "Ignite",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 52, textCase: "upper", letterSpacing: 2,
-      color: "#DC2626",
-      strokeOn: true, strokeColor: "#7F1D1D", strokeWidth: 2,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 4, shadowBlur: 14,
-      bgOn: false, glowOn: false, posY: 18,
-      transition: "zoom", transitionSpeed: 320,
-    },
-  },
-  {
-    name: "Clarity",
-    patch: {
-      fontFamily: font("Inter"), fontWeight: 700, fontSize: 28, textCase: "normal", lineHeight: 1.4,
-      color: "#0F172A",
-      bgOn: true, bgColor: "#E5E7EB", bgOpacity: 95, bgRadius: 8, bgPadX: 14, bgPadY: 8,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 25, shadowX: 0, shadowY: 4, shadowBlur: 12,
-      strokeOn: false, glowOn: false, posY: 78, wordsPerChunk: 4,
-      transition: "fade", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Growth",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 60, textCase: "upper", letterSpacing: 2,
-      color: "#B91C1C",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 3, shadowY: 4, shadowBlur: 8,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 30,
-      transition: "zoom", transitionSpeed: 320,
-    },
-  },
-  {
-    name: "Recess",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 44, textCase: "upper", letterSpacing: 1,
-      colorMode: "gradient", gradFrom: "#FFFFFF", gradTo: "#A78BFA", gradAngle: 90,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 3, shadowBlur: 12,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 55,
-      transition: "pop", transitionSpeed: 260,
-    },
-  },
-  {
-    name: "Cinematic II",
-    patch: {
-      fontFamily: font("Playfair Display"), fontWeight: 700, italic: true, fontSize: 34, textCase: "normal",
-      color: "#FBBF24",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 80, shadowX: 0, shadowY: 3, shadowBlur: 14,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 82,
-      transition: "fade", transitionSpeed: 420,
-    },
-  },
-  {
-    name: "Pulse",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 34, textCase: "upper", letterSpacing: 1,
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 80, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 78,
-      transition: "pop", transitionSpeed: 240,
-      activeWordOn: true, activeWordColor: "#22D3EE", activeWordScale: 1.06,
-    },
-  },
-  {
-    name: "Velocity",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 46, textCase: "upper", letterSpacing: 1,
-      color: "#FDE047",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 2,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 4, shadowY: 4, shadowBlur: 0,
-      glowOn: true, glowColor: "#FACC15", glowBlur: 20, glowIntensity: 60,
-      bgOn: false, posY: 22,
-      transition: "slide-down", transitionSpeed: 300,
-    },
-  },
-  {
-    name: "Blueprint",
-    patch: {
-      fontFamily: font("Archivo Black"), fontWeight: 900, fontSize: 40, textCase: "upper", letterSpacing: 2,
-      color: "#3B82F6",
-      strokeOn: true, strokeColor: "#1E3A8A", strokeWidth: 1,
-      shadowOn: false, glowOn: false, bgOn: false, posY: 22,
-      transition: "fade", transitionSpeed: 320,
-    },
-  },
-  {
-    name: "Core",
-    patch: {
-      fontFamily: font("Inter"), fontWeight: 700, fontSize: 28, textCase: "normal",
-      color: "#FFFFFF",
-      bgOn: true, bgColor: "#0F172A", bgOpacity: 85, bgRadius: 12, bgPadX: 14, bgPadY: 8,
-      shadowOn: false, strokeOn: false, glowOn: false, posY: 82,
-      transition: "fade", transitionSpeed: 260,
-      activeWordOn: true, activeWordColor: "#F5F5F4", activeWordScale: 1,
-    },
-  },
-  {
-    name: "Analog",
-    patch: {
-      fontFamily: font("Special Elite"), fontWeight: 400, fontSize: 26, textCase: "normal", letterSpacing: 1,
-      color: "#FFFFFF",
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 2, shadowBlur: 6,
-      strokeOn: false, bgOn: false, glowOn: false, posY: 78,
-      transition: "typewriter", transitionSpeed: 300,
-    },
-  },
-  {
-    name: "Zine",
-    patch: {
-      fontFamily: font("Caveat"), fontWeight: 700, fontSize: 40, textCase: "normal",
-      color: "#0F172A",
-      shadowOn: false, strokeOn: false, bgOn: false, glowOn: false, posY: 82,
-      transition: "wave", transitionSpeed: 340,
-      activeWordOn: true, activeWordColor: "#DB2777", activeWordScale: 1.06,
-    },
-  },
-  {
-    name: "Archive",
-    patch: {
-      fontFamily: font("Bebas Neue"), fontWeight: 700, fontSize: 44, textCase: "upper", letterSpacing: 3,
-      color: "#F5F5F4",
-      strokeOn: true, strokeColor: "#0A0A0A", strokeWidth: 1,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 80, shadowX: 0, shadowY: 3, shadowBlur: 10,
-      bgOn: false, glowOn: false, posY: 78,
-      transition: "slide-up", transitionSpeed: 320,
-    },
-  },
-  {
-    name: "NEET Protest - Bold Alert",
-    category: "Protest",
-    patch: {
-      fontFamily: "var(--font-anton)",
-      fontWeight: 400,
-      fontStyle: "normal",
-      textTransform: "uppercase",
-      fontSize: 110,
-      fill: "#FFFFFF",
-      strokeColor: "#E60000",
-      strokeWidth: 10,
-      shadowColor: "#000000",
-      shadowBlur: 20,
-      activeColor: "#FFC107",
-      activeScale: 1.1,
-      yPos: 80,
-      glowIntensity: 0.5,
-    },
-  },
-  {
-    name: "NEET Protest - Stark Truth",
-    category: "Protest",
-    patch: {
-      fontFamily: "var(--font-inter)",
-      fontWeight: 900,
-      fontStyle: "italic",
-      textTransform: "uppercase",
-      fontSize: 90,
-      fill: "#E60000",
-      strokeColor: "#000000",
-      strokeWidth: 12,
-      shadowColor: "#FFFFFF",
-      shadowBlur: 5,
-      activeColor: "#FFFFFF",
-      activeScale: 1.1,
-      yPos: 75,
-      glowIntensity: 0.8,
-    },
-  },
-
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// External template ingestion — core pack + famous-creator pack.
-// Compact author-facing schema → CapStyle patches via toCapPatch().
-// ─────────────────────────────────────────────────────────────────────────────
-
-type ExtSpec = {
-  name: string;
-  fontFamily?: string;
-  fontWeight?: number | string;
-  textTransform?: string;
-  textColor?: string;
-  highlightColor?: string;
-  stroke?: string;
-  shadow?: string;
-  background?: string;
-  animationIn?: string;
-  placement?: string;
-};
-
-const parseStroke = (s?: string) => {
-  if (!s || s === "none") return { strokeOn: false as const };
-  const m = /(\d+)\s*px\s+solid\s+(#?[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/.exec(s);
-  if (!m) return { strokeOn: false as const };
-  return { strokeOn: true as const, strokeWidth: Number(m[1]), strokeColor: m[2] };
-};
-
-const parseShadow = (s?: string) => {
-  if (!s || s === "none") return { shadowOn: false as const };
-  const m = /(-?\d+)px\s+(-?\d+)px\s+(\d+)px\s+(#?[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/.exec(s);
-  if (!m) return { shadowOn: true as const, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 3, shadowBlur: 8 };
-  return {
-    shadowOn: true as const,
-    shadowX: Number(m[1]), shadowY: Number(m[2]), shadowBlur: Number(m[3]),
-    shadowColor: m[4], shadowOpacity: 80,
-  };
-};
-
-const parseBg = (bg?: string) => {
-  if (!bg || bg === "transparent" || bg === "none") return { bgOn: false as const };
-  return { bgOn: true as const, bgColor: bg, bgOpacity: 90, bgRadius: 6, bgPadX: 10, bgPadY: 4 };
-};
-
-const mapCase = (t?: string): TextCase => {
-  switch ((t || "").toLowerCase()) {
-    case "uppercase": return "upper";
-    case "lowercase": return "lower";
-    case "capitalize":
-    case "title": return "title";
-    default: return "normal";
-  }
-};
-
-const mapPos = (p?: string): number => {
-  switch ((p || "").toLowerCase()) {
-    case "top-third":
-    case "top-left": return 22;
-    case "middle-third": return 40;
-    case "center": return 50;
-    case "bottom-third": return 78;
-    case "bottom-edge": return 90;
-    default: return 78;
-  }
-};
-
-const mapAnim = (a?: string): { transition: CapTransition; transitionSpeed: number } => {
-  const raw = (a || "").toLowerCase();
-  if (raw.startsWith("bounce")) return { transition: "bounce", transitionSpeed: 220 };
-  if (raw.startsWith("punch") || raw.startsWith("zoom") || raw.startsWith("pop") || raw.startsWith("spring") || raw.startsWith("shake")) return { transition: "pop", transitionSpeed: 200 };
-  if (raw.startsWith("slide-up") || raw.startsWith("fade-up")) return { transition: "slide-up", transitionSpeed: 260 };
-  if (raw.startsWith("slide-down")) return { transition: "slide-down", transitionSpeed: 260 };
-  if (raw.startsWith("slide-left") || raw.startsWith("color-sweep")) return { transition: "wave", transitionSpeed: 300 };
-  if (raw.startsWith("typewriter")) return { transition: "typewriter", transitionSpeed: 260 };
-  if (raw.startsWith("blur") || raw.startsWith("slow-fade") || raw.startsWith("fade")) return { transition: "fade", transitionSpeed: 320 };
-  if (raw.startsWith("gentle") || raw.startsWith("wave")) return { transition: "wave", transitionSpeed: 300 };
-  if (raw.startsWith("hard-cut")) return { transition: "none", transitionSpeed: 0 };
-  if (raw.startsWith("glitch")) return { transition: "pop", transitionSpeed: 140 };
-  return { transition: "fade", transitionSpeed: 240 };
-};
-
-// Known fields on ExtSpec — anything else authored in the compact schema is
-// considered unmapped and surfaced via a warning to the UI.
-const EXT_SPEC_KNOWN_KEYS = new Set<string>([
-  "name", "fontFamily", "fontWeight", "textTransform", "textColor",
-  "highlightColor", "stroke", "shadow", "background", "animationIn", "placement",
-]);
-
-// Known enum-ish string values per field. Values that don't match still get
-// mapped to a sensible default (see mapCase/mapPos/mapAnim above), but we warn
-// so authors can tighten up the source pack.
-const KNOWN_TEXT_TRANSFORM = new Set(["", "none", "uppercase", "lowercase", "capitalize", "title"]);
-const KNOWN_PLACEMENT = new Set([
-  "", "top-left", "top-third", "middle-third", "center", "bottom-third", "bottom-edge",
-]);
-const KNOWN_ANIM_PREFIXES = [
-  "bounce", "punch", "zoom", "pop", "spring", "shake", "slide-up", "slide-down",
-  "slide-left", "color-sweep", "typewriter", "blur", "slow-fade", "fade-up", "fade-in",
-  "fade", "gentle", "wave", "hard-cut", "glitch",
-];
-
 export type TemplateWarning = {
   templateName: string;
   field: string;
@@ -1534,466 +470,1449 @@ export type TemplateWarning = {
   reason: string;
 };
 
-// Warnings collected during library init. Consumers (e.g. a top-level effect)
-// can drain this list and show toasts without pulling `sonner` into a
-// framework-agnostic style library.
+// Warnings collected during library init.
 export const TEMPLATE_WARNINGS: TemplateWarning[] = [];
 
-const warn = (w: TemplateWarning) => {
-  TEMPLATE_WARNINGS.push(w);
-  // Fire an event so UI shells can react in real time (e.g. hot module reloads
-  // that re-import this file). Guarded for non-browser environments.
-  if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
-    try { window.dispatchEvent(new CustomEvent("captions:template-warning", { detail: w })); } catch { /* noop */ }
-  }
-  if (typeof console !== "undefined") console.warn(`[templates] ${w.templateName}: ${w.field}="${w.value}" — ${w.reason}`);
-};
-
-const validateExtSpec = (s: ExtSpec) => {
-  // Unknown keys
-  for (const key of Object.keys(s)) {
-    if (!EXT_SPEC_KNOWN_KEYS.has(key)) {
-      warn({ templateName: s.name, field: key, value: String((s as any)[key]), reason: "unmapped field — ignored" });
-    }
-  }
-  // Font: warn if the requested family isn't in FONT_OPTIONS (falls back to Inter).
-  if (s.fontFamily) {
-    const known = FONT_OPTIONS.some((f) => f.label === s.fontFamily);
-    if (!known) warn({ templateName: s.name, field: "fontFamily", value: s.fontFamily, reason: "font not registered — falling back to Inter" });
-  }
-  // textTransform
-  if (s.textTransform && !KNOWN_TEXT_TRANSFORM.has(s.textTransform.toLowerCase())) {
-    warn({ templateName: s.name, field: "textTransform", value: s.textTransform, reason: "unknown value — defaulting to normal" });
-  }
-  // placement
-  if (s.placement && !KNOWN_PLACEMENT.has(s.placement.toLowerCase())) {
-    warn({ templateName: s.name, field: "placement", value: s.placement, reason: "unknown placement — defaulting to bottom-third" });
-  }
-  // animationIn: warn if none of the known prefixes match (still falls back to fade).
-  if (s.animationIn) {
-    const raw = s.animationIn.toLowerCase();
-    const matched = KNOWN_ANIM_PREFIXES.some((p) => raw.startsWith(p));
-    if (!matched) warn({ templateName: s.name, field: "animationIn", value: s.animationIn, reason: "unknown animation — falling back to fade" });
-  }
-  // Stroke / shadow: warn if a non-empty value fails to parse.
-  if (s.stroke && s.stroke !== "none") {
-    const parsed = parseStroke(s.stroke);
-    if (!parsed.strokeOn) warn({ templateName: s.name, field: "stroke", value: s.stroke, reason: "could not parse — expected \"<n>px solid <color>\"" });
-  }
-  if (s.shadow && s.shadow !== "none") {
-    const m = /(-?\d+)px\s+(-?\d+)px\s+(\d+)px\s+(#?[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/.test(s.shadow);
-    if (!m) warn({ templateName: s.name, field: "shadow", value: s.shadow, reason: "could not parse — using default drop shadow" });
-  }
-  // Color sanity (hex only; rgba/named colors are passed through).
-  for (const k of ["textColor", "highlightColor"] as const) {
-    const v = s[k];
-    if (typeof v === "string" && v.startsWith("#") && !/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v)) {
-      warn({ templateName: s.name, field: k, value: v, reason: "invalid hex color" });
-    }
-  }
-  // fontWeight
-  if (s.fontWeight !== undefined) {
-    const n = Number(s.fontWeight);
-    if (!Number.isFinite(n) || n < 100 || n > 900) {
-      warn({ templateName: s.name, field: "fontWeight", value: String(s.fontWeight), reason: "expected number 100–900 — defaulting to 700" });
-    }
-  }
-};
-
-const toCapPatch = (s: ExtSpec): { name: string; patch: Partial<CapStyle> } => {
-  try {
-    validateExtSpec(s);
-    const anim = mapAnim(s.animationIn);
-    const stroke = parseStroke(s.stroke);
-    const shadow = parseShadow(s.shadow);
-    const bg = parseBg(s.background);
-    const patch: Partial<CapStyle> = {
-      fontFamily: font(s.fontFamily || "Inter"),
-      fontWeight: Number(s.fontWeight) || 700,
-      fontSize: 44,
-      textCase: mapCase(s.textTransform),
-      color: s.textColor || "#FFFFFF",
-      posY: mapPos(s.placement),
+// ---------------------------------------------------------------------------
+// 1. Kinetic Motion Pack — high-retention short-form templates with kinetic glow,
+// 3D depth layer positioning, punch scale, and creator hooks.
+// ---------------------------------------------------------------------------
+export const KINETIC_TEMPLATE_PACK: { name: string; patch: Partial<CapStyle> }[] = [
+  {
+    name: "Kinetic · Viral Flow",
+    patch: {
+      fontFamily: font("Montserrat"),
+      fontWeight: 900,
+      fontSize: 48,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 4,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 95,
+      shadowX: 0,
+      shadowY: 6,
+      shadowBlur: 14,
+      glowOn: true,
+      glowColor: "rgba(255, 230, 0, 0.5)",
+      glowBlur: 16,
+      glowIntensity: 80,
+      posY: 75,
       wordsPerChunk: 3,
-      ...anim, ...stroke, ...shadow, ...bg,
-      glowOn: false,
+      transition: "pop",
+      transitionSpeed: 120,
       activeWordOn: true,
-      activeWordColor: s.highlightColor || "#FACC15",
       activeWordBgOn: false,
-      activeWordScale: 1.08,
-    };
-    return { name: s.name, patch };
-  } catch (err: any) {
-    // A conversion failure must never break the preset list — return a safe
-    // no-op patch and surface a warning so the picker still renders everything.
-    warn({
-      templateName: s?.name ?? "(unnamed)",
-      field: "*",
-      value: "",
-      reason: `conversion failed: ${err?.message ?? String(err)}`,
-    });
-    return { name: s?.name ?? "Unnamed template", patch: {} };
-  }
-};
-
-const CORE_TEMPLATE_PACK: ExtSpec[] = [
-  { name: "High-Retention Pop (Yellow)", fontFamily: "Montserrat", fontWeight: 900, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#FFFF00", shadow: "0px 4px 15px rgba(0,0,0,0.8)", animationIn: "bounce-scale", placement: "center" },
-  { name: "High-Retention Pop (Green)", fontFamily: "Montserrat", fontWeight: 900, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#00FF00", shadow: "0px 4px 15px rgba(0,0,0,0.8)", animationIn: "bounce-scale", placement: "center" },
-  { name: "High-Energy Action (Cyan)", fontFamily: "Anton", fontWeight: 800, textTransform: "capitalize", textColor: "#FFFFFF", highlightColor: "#00FFFF", stroke: "4px solid #000000", animationIn: "punch-zoom", placement: "center" },
-  { name: "High-Energy Action (Yellow)", fontFamily: "Anton", fontWeight: 800, textTransform: "capitalize", textColor: "#FFFFFF", highlightColor: "#FFD700", stroke: "5px solid #000000", animationIn: "punch-zoom", placement: "center" },
-  { name: "Minimalist Educator", fontFamily: "Inter", fontWeight: 500, textTransform: "none", textColor: "#F3F4F6", highlightColor: "#FDFD96", shadow: "0px 2px 4px rgba(0,0,0,0.3)", animationIn: "fade-up", placement: "bottom-third" },
-  { name: "Cinematic Documentary", fontFamily: "Playfair Display", fontWeight: 400, textColor: "#FFFFFF", highlightColor: "#E5E7EB", shadow: "0px 0px 20px rgba(255,255,255,0.4)", animationIn: "slow-fade", placement: "center" },
-  { name: "Casual Vlog", fontFamily: "Nunito", fontWeight: 600, textTransform: "lowercase", textColor: "#FFFFFF", highlightColor: "#A7F3D0", shadow: "0px 2px 8px rgba(0,0,0,0.4)", animationIn: "gentle-wiggle", placement: "bottom-third" },
-  { name: "Neon Streamer (Purple)", fontFamily: "Barlow Condensed", fontWeight: 800, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#A855F7", shadow: "0px 0px 15px #A855F7", animationIn: "shake-pop", placement: "center" },
-  { name: "Neon Streamer (Green)", fontFamily: "Barlow Condensed", fontWeight: 800, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#22C55E", shadow: "0px 0px 15px #22C55E", animationIn: "shake-pop", placement: "center" },
-  { name: "Breaking News Ticker", fontFamily: "Roboto", fontWeight: 700, textTransform: "uppercase", textColor: "#000000", highlightColor: "#DC2626", background: "#FFFFFF", animationIn: "slide-left", placement: "bottom-edge" },
-  { name: "Gen-Z Rapid Fire", fontFamily: "Poppins", fontWeight: 800, textColor: "#FFFFFF", highlightColor: "#FF0050", stroke: "2px solid #000000", shadow: "2px 2px 0px #00FFFF", animationIn: "pop-in", placement: "middle-third" },
-  { name: "Pastel Aesthetic", fontFamily: "Poppins", fontWeight: 500, textTransform: "lowercase", textColor: "#4B5563", highlightColor: "#FBCFE8", background: "#FDF2F8", animationIn: "fade-in", placement: "center" },
-  { name: "8-Bit Arcade", fontFamily: "Press Start 2P", fontWeight: 400, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#FACC15", stroke: "4px solid #000000", shadow: "4px 4px 0px #000000", animationIn: "typewriter", placement: "bottom-third" },
-  { name: "Cyber Terminal", fontFamily: "Space Mono", fontWeight: 600, textTransform: "lowercase", textColor: "#22C55E", highlightColor: "#FFFFFF", shadow: "0px 0px 8px #22C55E", background: "rgba(0,0,0,0.8)", animationIn: "typewriter-cursor", placement: "top-left" },
-  { name: "Karaoke Sing-Along", fontFamily: "Archivo Black", fontWeight: 900, textTransform: "capitalize", textColor: "#FFFFFF", highlightColor: "#3B82F6", stroke: "3px solid #1E3A8A", animationIn: "color-sweep-left-to-right", placement: "bottom-third" },
-  { name: "B2B Professional", fontFamily: "Roboto", fontWeight: 400, textColor: "#1F2937", highlightColor: "#2563EB", background: "rgba(255,255,255,0.95)", animationIn: "slide-up", placement: "bottom-edge" },
-  { name: "High Contrast Educator", fontFamily: "Inter", fontWeight: 700, textColor: "#FFFF00", highlightColor: "#FFFFFF", background: "#DC2626", animationIn: "hard-cut", placement: "bottom-third" },
-  { name: "Luxury Serif", fontFamily: "EB Garamond", fontWeight: 400, textTransform: "capitalize", textColor: "#F3F4F6", highlightColor: "#D4AF37", shadow: "0px 2px 10px rgba(0,0,0,0.9)", animationIn: "slow-fade", placement: "center" },
-  { name: "Comic Book Action", fontFamily: "Bangers", fontWeight: 400, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#EF4444", stroke: "2px solid #000000", shadow: "3px 3px 0px #000000", animationIn: "bounce", placement: "top-third" },
-  { name: "Cyberpunk Glitch", fontFamily: "Bebas Neue", fontWeight: 700, textTransform: "uppercase", textColor: "#E5E7EB", highlightColor: "#EC4899", shadow: "2px 0px 0px #00FFFF", animationIn: "glitch-reveal", placement: "center" },
-  { name: "Bubblegum Pop", fontFamily: "Fredoka", fontWeight: 400, textTransform: "lowercase", textColor: "#FFFFFF", highlightColor: "#F472B6", stroke: "3px solid #831843", animationIn: "spring-up", placement: "center" },
-  { name: "Dark Mode Minimal", fontFamily: "Inter", fontWeight: 300, textColor: "#9CA3AF", highlightColor: "#FFFFFF", animationIn: "fade", placement: "bottom-third" },
-  { name: "Mechanical Typewriter", fontFamily: "Special Elite", fontWeight: 400, textColor: "#FFFFFF", highlightColor: "#D1D5DB", shadow: "0px 1px 3px rgba(0,0,0,0.8)", animationIn: "typewriter", placement: "center" },
-  { name: "Maximum Impact", fontFamily: "Anton", fontWeight: 400, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#F97316", shadow: "0px 6px 0px rgba(0,0,0,0.9)", animationIn: "zoom-in-hard", placement: "center" },
-  { name: "Soft Focus Story", fontFamily: "Lora", fontWeight: 500, textColor: "#FFFFFF", highlightColor: "#FDE047", shadow: "0px 0px 30px rgba(255,255,255,0.5)", animationIn: "blur-in", placement: "center" },
-];
-
-const CREATOR_TEMPLATE_PACK: ExtSpec[] = [
-  { name: "MrBeast Style", fontFamily: "Anton", fontWeight: 800, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#00FFFF", stroke: "4px solid #000000", animationIn: "punch-zoom", placement: "center" },
-  { name: "Airrack Style", fontFamily: "Bebas Neue", fontWeight: 900, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#FACC15", stroke: "5px solid #000000", animationIn: "bounce-scale", placement: "center" },
-  { name: "Ryan Trahan Style", fontFamily: "Nunito", fontWeight: 700, textTransform: "lowercase", textColor: "#FFFFFF", highlightColor: "#A7F3D0", shadow: "0px 2px 8px rgba(0,0,0,0.5)", animationIn: "gentle-wiggle", placement: "bottom-third" },
-  { name: "Zach King Style", fontFamily: "Poppins", fontWeight: 800, textColor: "#FFFFFF", highlightColor: "#FF0050", stroke: "2px solid #000000", animationIn: "pop-in", placement: "middle-third" },
-  { name: "Dude Perfect Style", fontFamily: "Anton", fontWeight: 400, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#E11D48", stroke: "3px solid #000000", shadow: "3px 3px 0px #000000", animationIn: "zoom-in-hard", placement: "top-third" },
-  { name: "Mark Rober Style", fontFamily: "Archivo Black", fontWeight: 900, textColor: "#FFFF00", highlightColor: "#FFFFFF", stroke: "3px solid #000000", animationIn: "hard-cut", placement: "bottom-third" },
-  { name: "Ludwig Style", fontFamily: "Barlow Condensed", fontWeight: 800, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#A855F7", stroke: "3px solid #000000", animationIn: "shake-pop", placement: "center" },
-  { name: "Alex Hormozi Style", fontFamily: "Montserrat", fontWeight: 900, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#FFFF00", shadow: "0px 4px 10px rgba(0,0,0,0.9)", animationIn: "bounce-scale", placement: "center" },
-  { name: "Leila Hormozi Style", fontFamily: "Montserrat", fontWeight: 900, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#00FF00", shadow: "0px 4px 10px rgba(0,0,0,0.9)", animationIn: "bounce-scale", placement: "center" },
-  { name: "Iman Gadzhi Style", fontFamily: "Playfair Display", fontWeight: 400, textColor: "#FFFFFF", highlightColor: "#D4AF37", shadow: "0px 2px 15px rgba(0,0,0,0.6)", animationIn: "slow-fade", placement: "center" },
-  { name: "GaryVee Style", fontFamily: "Bebas Neue", fontWeight: 400, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#EA580C", shadow: "2px 2px 0px #000000", animationIn: "pop-in", placement: "bottom-third" },
-  { name: "Grant Cardone Style", fontFamily: "Roboto", fontWeight: 700, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#2563EB", animationIn: "slide-up", placement: "bottom-third" },
-  { name: "Dan Koe Style", fontFamily: "Inter", fontWeight: 300, textColor: "#9CA3AF", highlightColor: "#FFFFFF", animationIn: "fade", placement: "center" },
-  { name: "Codie Sanchez Style", fontFamily: "Montserrat", fontWeight: 800, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#FB923C", shadow: "0px 4px 8px rgba(0,0,0,0.8)", animationIn: "bounce-scale", placement: "center" },
-  { name: "Johnny Harris Style", fontFamily: "EB Garamond", fontWeight: 400, textColor: "#F3F4F6", highlightColor: "#F59E0B", shadow: "0px 1px 4px rgba(0,0,0,0.8)", animationIn: "typewriter", placement: "center" },
-  { name: "MagnatesMedia Style", fontFamily: "Playfair Display", fontWeight: 600, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#D4AF37", shadow: "0px 0px 12px rgba(212,175,55,0.6)", animationIn: "blur-in", placement: "center" },
-  { name: "SunnyV2 Style", fontFamily: "Inter", fontWeight: 600, textColor: "#FFFFFF", highlightColor: "#EF4444", shadow: "0px 2px 8px rgba(0,0,0,0.9)", animationIn: "fade-up", placement: "bottom-third" },
-  { name: "Ali Abdaal Style", fontFamily: "Inter", fontWeight: 500, textColor: "#F3F4F6", highlightColor: "#FDFD96", animationIn: "fade-up", placement: "bottom-third" },
-  { name: "Alix Earle Style", fontFamily: "Poppins", fontWeight: 500, textTransform: "lowercase", textColor: "#FFFFFF", highlightColor: "#F472B6", shadow: "0px 2px 5px rgba(0,0,0,0.3)", animationIn: "fade-in", placement: "bottom-third" },
-  { name: "Emma Chamberlain Style", fontFamily: "Space Mono", fontWeight: 600, textTransform: "lowercase", textColor: "#FFFFFF", highlightColor: "#FBCFE8", animationIn: "gentle-wiggle", placement: "center" },
-  { name: "Kai Cenat Style", fontFamily: "Anton", fontWeight: 400, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#10B981", stroke: "2px solid #000000", shadow: "4px 4px 0px #000000", animationIn: "zoom-in-hard", placement: "center" },
-  { name: "IShowSpeed Style", fontFamily: "Anton", fontWeight: 400, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#DC2626", stroke: "4px solid #000000", animationIn: "shake-pop", placement: "center" },
-  { name: "Dhruv Rathee Style", fontFamily: "Inter", fontWeight: 700, textColor: "#FFFFFF", highlightColor: "#FFFF00", background: "#000000", animationIn: "hard-cut", placement: "bottom-third" },
-  { name: "CarryMinati Style", fontFamily: "Roboto", fontWeight: 900, textTransform: "uppercase", textColor: "#FFFFFF", highlightColor: "#E11D48", stroke: "3px solid #000000", animationIn: "punch-zoom", placement: "center" },
-  { name: "Technical Guruji Style", fontFamily: "Poppins", fontWeight: 700, textColor: "#FFFF00", highlightColor: "#FFFFFF", background: "#DC2626", animationIn: "slide-up", placement: "bottom-third" },
-  { name: "Physics Wallah Style", fontFamily: "Roboto", fontWeight: 700, textColor: "#FFFFFF", highlightColor: "#FACC15", background: "#1E3A8A", animationIn: "fade-in", placement: "bottom-third" },
-  { name: "Bhuvan Bam Style", fontFamily: "Nunito", fontWeight: 600, textColor: "#FFFFFF", highlightColor: "#38BDF8", stroke: "2px solid #000000", animationIn: "gentle-wiggle", placement: "center" },
-];
-
-// Merge external packs into the exported preset list so they appear in the
-// Templates picker alongside the built-ins.
-CAP_PRESETS.push(...CORE_TEMPLATE_PACK.map((s) => ({ ...toCapPatch(s), category: "Core Pack" as const })));
-CAP_PRESETS.push(...CREATOR_TEMPLATE_PACK.map((s) => ({ ...toCapPatch(s), category: "Creators" as const })));
-
-// ---------------------------------------------------------------------------
-// YT Creators pack — 10 spec-precise built-ins requested for the editor Style tab.
-// Each entry uses the shared CapStyle schema so the overlay and the FFmpeg WASM
-// export render identically. Only "Kai Cenat" is an approximation: true per-word
-// rainbow cycling isn't in the schema; we cycle the active word color instead.
-// ---------------------------------------------------------------------------
-const YT_CREATORS_PACK: { name: string; patch: Partial<CapStyle> }[] = [
+      activeWordColor: "#FFE600",
+      activeWordScale: 1.15,
+    }
+  },
   {
-    name: "YT · MrBeast",
+    name: "Kinetic · 3D Depth Cutout",
     patch: {
-      fontFamily: font("Anton"), fontWeight: 900, fontSize: 52, textCase: "upper",
+      fontFamily: font("Anton"),
+      fontWeight: 900,
+      fontSize: 54,
+      textCase: "upper",
       color: "#FFFFFF",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 6,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 0, shadowY: 3, shadowBlur: 0,
-      glowOn: false, bgOn: false, posY: 82, wordsPerChunk: 3,
-      transition: "pop", transitionSpeed: 80,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#FACC15",
-      activeWordColor: "#111111", activeWordScale: 1.08,
-    },
+      strokeOn: true,
+      strokeColor: "#111111",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 0,
+      shadowY: 8,
+      shadowBlur: 20,
+      posY: 52,
+      wordsPerChunk: 2,
+      transition: "fade",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#E60000",
+      activeWordColor: "#FFFFFF",
+      activeWordScale: 1.1,
+    }
   },
   {
-    name: "YT · Iman Gadzhi",
+    name: "Kinetic · Beast Punch",
     patch: {
-      fontFamily: font("Montserrat"), fontWeight: 800, fontSize: 46, textCase: "upper",
+      fontFamily: font("Bangers"),
+      fontWeight: 800,
+      fontSize: 52,
+      textCase: "upper",
       color: "#FFFFFF",
-      strokeOn: false, glowOn: false, bgOn: false,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 12,
-      posY: 50, wordsPerChunk: 2,
-      transition: "fade", transitionSpeed: 180,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#FACC15", activeWordScale: 1.10,
-    },
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 6,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 3,
+      shadowY: 3,
+      shadowBlur: 0,
+      posY: 80,
+      wordsPerChunk: 2,
+      transition: "bounce",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#00F0FF",
+      activeWordScale: 1.2,
+    }
   },
   {
-    name: "YT · Alex Hormozi",
+    name: "Kinetic · Word Highlighter",
     patch: {
-      fontFamily: font("Oswald"), fontWeight: 800, fontSize: 48, textCase: "upper",
+      fontFamily: font("Inter"),
+      fontWeight: 900,
+      fontSize: 44,
+      textCase: "upper",
       color: "#FFFFFF",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 5,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 0,
-      glowOn: false, bgOn: false, posY: 50, wordsPerChunk: 3,
-      transition: "pop", transitionSpeed: 90,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#DC2626",
-      activeWordColor: "#FFFFFF", activeWordScale: 1.06,
-    },
-  },
-  {
-    name: "YT · Kai Cenat",
-    patch: {
-      fontFamily: font("Fredoka"), fontWeight: 700, fontSize: 46, textCase: "upper",
-      color: "#FDE047",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 3,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 0,
-      glowOn: false, bgOn: false, posY: 78, wordsPerChunk: 3,
-      transition: "bounce", transitionSpeed: 260,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#22D3EE", activeWordScale: 1.14,
-    },
-  },
-  {
-    name: "YT · Andrew Tate",
-    patch: {
-      fontFamily: font("Bebas Neue"), fontWeight: 700, fontSize: 44, textCase: "upper",
-      color: "#FFFFFF",
-      strokeOn: false, bgOn: false,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 70, shadowX: 0, shadowY: 2, shadowBlur: 6,
-      glowOn: false, posY: 82, wordsPerChunk: 5,
-      transition: "slide-up", transitionSpeed: 220,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#F5D020", activeWordScale: 1.04,
-      letterSpacing: 0.5,
-    },
-  },
-  {
-    name: "YT · Subtitles (Clean)",
-    patch: {
-      fontFamily: font("Inter"), fontWeight: 600, fontSize: 32, textCase: "normal",
-      color: "#FFFFFF",
-      bgOn: true, bgColor: "#000000", bgOpacity: 55, bgRadius: 6, bgPadX: 14, bgPadY: 8,
-      strokeOn: false, glowOn: false, shadowOn: false,
-      posY: 88, wordsPerChunk: 0,
-      transition: "fade", transitionSpeed: 260,
-      activeWordOn: false,
-    },
-  },
-  {
-    name: "YT · TikTok Viral",
-    patch: {
-      fontFamily: font("Montserrat"), fontWeight: 900, fontSize: 50, textCase: "upper",
-      color: "#FFFFFF",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 5,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 0,
-      glowOn: false, bgOn: false, posY: 50, wordsPerChunk: 2,
-      transition: "pop", transitionSpeed: 120,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#FDE047", activeWordScale: 1.20,
-    },
-  },
-  {
-    name: "YT · Aesthetic Soft",
-    patch: {
-      fontFamily: font("Playfair Display"), fontWeight: 500, fontSize: 38, textCase: "normal",
-      color: "#FFFFFF",
-      strokeOn: false, glowOn: false, bgOn: false,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 35, shadowX: 0, shadowY: 2, shadowBlur: 10,
-      posY: 82, wordsPerChunk: 5,
-      transition: "fade", transitionSpeed: 380,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#FCE7F3", activeWordScale: 1.02,
-      letterSpacing: 0.5,
-    },
-  },
-  {
-    name: "YT · Neon Glow",
-    patch: {
-      fontFamily: font("Rajdhani"), fontWeight: 700, fontSize: 46, textCase: "upper",
-      color: "#22D3EE",
       strokeOn: false,
-      glowOn: true, glowColor: "#22D3EE", glowBlur: 28, glowIntensity: 90,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 80, shadowX: 0, shadowY: 2, shadowBlur: 4,
-      bgOn: true, bgColor: "#000000", bgOpacity: 45, bgRadius: 8, bgPadX: 14, bgPadY: 8,
-      posY: 78, wordsPerChunk: 3,
-      transition: "fade", transitionSpeed: 180,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#A3E635", activeWordScale: 1.06,
-    },
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 80,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      posY: 78,
+      wordsPerChunk: 3,
+      transition: "pop",
+      transitionSpeed: 140,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#22C55E",
+      activeWordColor: "#000000",
+      activeWordScale: 1.08,
+    }
   },
   {
-    name: "YT · Minimal Elegant",
+    name: "Kinetic · Storyteller",
     patch: {
-      fontFamily: font("DM Sans"), fontWeight: 500, fontSize: 34, textCase: "normal",
+      fontFamily: font("Outfit"),
+      fontWeight: 800,
+      fontSize: 42,
+      textCase: "normal",
       color: "#FFFFFF",
-      strokeOn: false, glowOn: false, bgOn: false, shadowOn: false,
-      posY: 88, wordsPerChunk: 5,
-      transition: "fade", transitionSpeed: 260,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#FFFFFF", activeWordScale: 1.00,
-      underline: false, letterSpacing: 0.3,
-    },
+      strokeOn: true,
+      strokeColor: "rgba(0,0,0,0.8)",
+      strokeWidth: 2,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      posY: 76,
+      wordsPerChunk: 3,
+      transition: "pop",
+      transitionSpeed: 110,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#F43F5E",
+      activeWordScale: 1.12,
+    }
   },
+  {
+    name: "Kinetic · Dark Minimal",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 700,
+      fontSize: 40,
+      textCase: "upper",
+      color: "#E2E8F0",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 12,
+      posY: 82,
+      wordsPerChunk: 2,
+      transition: "fade",
+      transitionSpeed: 150,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFFFFF",
+      activeWordScale: 1.05,
+    }
+  },
+  {
+    name: "Kinetic · Supreme Red Hook",
+    patch: {
+      fontFamily: font("Montserrat"),
+      fontWeight: 900,
+      fontSize: 46,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 5,
+      shadowBlur: 12,
+      posY: 74,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 90,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#EF4444",
+      activeWordColor: "#FFFFFF",
+      activeWordScale: 1.18,
+    }
+  },
+  {
+    name: "Kinetic · Studio Clean",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 600,
+      fontSize: 36,
+      textCase: "normal",
+      color: "#F8FAFC",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 60,
+      shadowX: 0,
+      shadowY: 2,
+      shadowBlur: 6,
+      bgOn: true,
+      bgColor: "rgba(15, 23, 42, 0.75)",
+      bgOpacity: 80,
+      bgRadius: 10,
+      bgPadX: 16,
+      bgPadY: 8,
+      posY: 82,
+      wordsPerChunk: 3,
+      transition: "fade",
+      transitionSpeed: 160,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FDE047",
+      activeWordScale: 1.05,
+    }
+  },
+  {
+    name: "Kinetic · Bounce 3D",
+    patch: {
+      fontFamily: font("Bebas Neue"),
+      fontWeight: 900,
+      fontSize: 52,
+      textCase: "upper",
+      color: "#FFFFFF",
+      letterSpacing: 1,
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 4,
+      shadowOn: true,
+      shadowColor: "#06B6D4",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 16,
+      posY: 75,
+      wordsPerChunk: 2,
+      transition: "bounce",
+      transitionSpeed: 95,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#06B6D4",
+      activeWordScale: 1.22,
+    }
+  },
+  {
+    name: "Kinetic · Dual Layer Overlay",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 800,
+      fontSize: 42,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "rgba(0,0,0,0.9)",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 85,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      posY: 84,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 110,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FBBF24",
+      activeWordScale: 1.12,
+    }
+  }
 ];
-CAP_PRESETS.push(...YT_CREATORS_PACK.map((s) => ({ ...s, category: "YT Creators" as const })));
+export const MOONSHOT_TEMPLATE_PACK = KINETIC_TEMPLATE_PACK;
 
 // ---------------------------------------------------------------------------
-// Ultimate Creator pack — imported from user CSV. Uses the shared CapStyle
-// schema so overlay + FFmpeg export render identically.
+// 2. Dynamic Pop Pack — signature pill containers, teleprompter typewriter,
+// cyber neon strokes, and hyper-clean creator aesthetics.
 // ---------------------------------------------------------------------------
-const ULTIMATE_CREATOR_PACK: { name: string; patch: Partial<CapStyle> }[] = [
+export const DYNAMIC_POP_TEMPLATE_PACK: { name: string; patch: Partial<CapStyle> }[] = [
   {
-    name: "The Hormozi",
+    name: "Dynamic · Classic Pill",
     patch: {
-      fontFamily: font("Montserrat"), fontWeight: 900, fontSize: 48, textCase: "upper",
-      color: "#FFFFFF",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 3,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 0,
-      glowOn: false, bgOn: false, posY: 50, wordsPerChunk: 3,
-      transition: "pop", transitionSpeed: 120,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#FFD700",
-      activeWordColor: "#111111", activeWordScale: 1.08,
-    },
+      fontFamily: font("Inter"),
+      fontWeight: 800,
+      fontSize: 42,
+      textCase: "normal",
+      color: "#F1F5F9",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 60,
+      shadowX: 0,
+      shadowY: 3,
+      shadowBlur: 8,
+      bgOn: true,
+      bgColor: "rgba(0, 0, 0, 0.65)",
+      bgOpacity: 75,
+      bgRadius: 12,
+      bgPadX: 18,
+      bgPadY: 10,
+      posY: 80,
+      wordsPerChunk: 2,
+      transition: "fade",
+      transitionSpeed: 160,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#3B82F6",
+      activeWordColor: "#FFFFFF",
+      activeWordScale: 1.06,
+    }
   },
   {
-    name: "The Grant Cardone",
+    name: "Dynamic · Kinetic Pop",
     patch: {
-      fontFamily: font("Anton"), fontWeight: 900, fontSize: 50, textCase: "upper",
+      fontFamily: font("Outfit"),
+      fontWeight: 800,
+      fontSize: 48,
+      textCase: "upper",
       color: "#FFFFFF",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 4,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 0, shadowY: 4, shadowBlur: 0,
-      glowOn: false, bgOn: false, posY: 50, wordsPerChunk: 2,
-      transition: "zoom", transitionSpeed: 140,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#FF0000",
-      activeWordColor: "#FFFFFF", activeWordScale: 1.18,
-    },
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 5,
+      shadowBlur: 12,
+      posY: 76,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 90,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#06B6D4",
+      activeWordScale: 1.18,
+    }
   },
   {
-    name: "The Abdaal",
+    name: "Dynamic · Typewriter Glow",
     patch: {
-      fontFamily: font("Inter"), fontWeight: 600, fontSize: 36, textCase: "normal",
+      fontFamily: font("JetBrains Mono"),
+      fontWeight: 700,
+      fontSize: 38,
+      textCase: "normal",
       color: "#FFFFFF",
-      strokeOn: false, glowOn: false, bgOn: false,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 40, shadowX: 0, shadowY: 2, shadowBlur: 8,
-      posY: 82, wordsPerChunk: 5,
-      transition: "fade", transitionSpeed: 320,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#A7F3D0", activeWordScale: 1.03,
-    },
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "rgba(0, 240, 255, 0.5)",
+      shadowOpacity: 80,
+      shadowX: 0,
+      shadowY: 0,
+      shadowBlur: 15,
+      posY: 82,
+      wordsPerChunk: 4,
+      transition: "typewriter",
+      transitionSpeed: 200,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#00F0FF",
+      activeWordScale: 1.0,
+    }
   },
   {
-    name: "The Huberman",
+    name: "Dynamic · Neon Cyber",
     patch: {
-      fontFamily: font("Inter"), fontWeight: 500, fontSize: 34, textCase: "normal",
+      fontFamily: font("Montserrat"),
+      fontWeight: 900,
+      fontSize: 46,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#FF0055",
+      strokeWidth: 2,
+      glowOn: true,
+      glowColor: "#FF0055",
+      glowBlur: 20,
+      glowIntensity: 90,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 8,
+      posY: 78,
+      wordsPerChunk: 3,
+      transition: "bounce",
+      transitionSpeed: 110,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFE600",
+      activeWordScale: 1.12,
+    }
+  },
+  {
+    name: "Dynamic · Editorial Clean",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 600,
+      fontSize: 36,
+      textCase: "normal",
+      color: "#E2E8F0",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 50,
+      shadowX: 0,
+      shadowY: 2,
+      shadowBlur: 6,
+      posY: 84,
+      wordsPerChunk: 3,
+      transition: "fade",
+      transitionSpeed: 180,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FBBF24",
+      activeWordScale: 1.05,
+    }
+  },
+  {
+    name: "Dynamic · Boxed Highlight",
+    patch: {
+      fontFamily: font("Archivo Black"),
+      fontWeight: 900,
+      fontSize: 44,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 70,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      posY: 80,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#FACC15",
+      activeWordColor: "#000000",
+      activeWordScale: 1.1,
+    }
+  },
+  {
+    name: "Dynamic · Glitch Twitch",
+    patch: {
+      fontFamily: font("Montserrat"),
+      fontWeight: 900,
+      fontSize: 48,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#00F0FF",
+      strokeWidth: 2,
+      shadowOn: true,
+      shadowColor: "#FF0055",
+      shadowOpacity: 90,
+      shadowX: 3,
+      shadowY: -2,
+      shadowBlur: 6,
+      posY: 76,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 80,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFE600",
+      activeWordScale: 1.15,
+    }
+  },
+  {
+    name: "Dynamic · High Retention Beast",
+    patch: {
+      fontFamily: font("Bangers"),
+      fontWeight: 900,
+      fontSize: 52,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 6,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 3,
+      shadowY: 3,
+      shadowBlur: 0,
+      posY: 78,
+      wordsPerChunk: 2,
+      transition: "bounce",
+      transitionSpeed: 95,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFEA00",
+      activeWordScale: 1.25,
+    }
+  },
+  {
+    name: "Dynamic · Floating Emoji Hook",
+    patch: {
+      fontFamily: font("Poppins"),
+      fontWeight: 800,
+      fontSize: 44,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      autoEmojiOn: true,
+      emojiSize: 32,
+      posY: 78,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFE600",
+      activeWordScale: 1.16,
+    }
+  },
+  {
+    name: "Dynamic · Cinematic Serif",
+    patch: {
+      fontFamily: font("Playfair Display"),
+      fontWeight: 700,
+      fontSize: 40,
+      textCase: "normal",
+      italic: true,
+      color: "#F8FAFC",
+      letterSpacing: 1,
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 80,
+      shadowX: 0,
+      shadowY: 3,
+      shadowBlur: 12,
+      posY: 80,
+      wordsPerChunk: 3,
+      transition: "fade",
+      transitionSpeed: 220,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#F59E0B",
+      activeWordScale: 1.08,
+    }
+  }
+];
+export const CAPTIONS_AI_TEMPLATE_PACK = DYNAMIC_POP_TEMPLATE_PACK;
+
+// ---------------------------------------------------------------------------
+// 3. Desi Viral Pack — Bharat-first Hinglish & 22 Indian languages templates,
+// karaoke word flow, bold drop shadows, and podcast duo presets.
+// ---------------------------------------------------------------------------
+export const DESI_VIRAL_TEMPLATE_PACK: { name: string; patch: Partial<CapStyle> }[] = [
+  {
+    name: "Desi · Karaoke Flow",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 900,
+      fontSize: 46,
+      textCase: "normal",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      posY: 78,
+      wordsPerChunk: 3,
+      transition: "pop",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#F59E0B", // Warm amber gold
+      activeWordScale: 1.14,
+    }
+  },
+  {
+    name: "Desi · Bold Drop",
+    patch: {
+      fontFamily: font("Montserrat"),
+      fontWeight: 900,
+      fontSize: 50,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "rgba(0,0,0,0.9)",
+      strokeWidth: 4,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 0,
+      shadowY: 8,
+      shadowBlur: 16,
+      posY: 50, // Center aligned
+      wordsPerChunk: 2,
+      transition: "fade",
+      transitionSpeed: 120,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#EF4444", // Bold red
+      activeWordScale: 1.12,
+    }
+  },
+  {
+    name: "Desi · Reels Clean",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 600,
+      fontSize: 34,
+      textCase: "normal",
       color: "#F3F4F6",
-      strokeOn: false, glowOn: false, bgOn: false, shadowOn: false,
-      posY: 82, wordsPerChunk: 4,
-      transition: "fade", transitionSpeed: 260,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#93C5FD", activeWordScale: 1.04,
-    },
+      letterSpacing: -0.5,
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 70,
+      shadowX: 0,
+      shadowY: 2,
+      shadowBlur: 6,
+      posY: 84,
+      wordsPerChunk: 4,
+      transition: "fade",
+      transitionSpeed: 180,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#60A5FA", // Soft blue
+      activeWordScale: 1.04,
+    }
   },
   {
-    name: "The Gadzhi",
+    name: "Desi · Podcast Duo",
     patch: {
-      fontFamily: font("Playfair Display"), fontWeight: 400, fontSize: 40, textCase: "normal",
-      color: "#E5E7EB",
-      strokeOn: false, bgOn: false,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 50, shadowX: 0, shadowY: 3, shadowBlur: 16,
-      glowOn: true, glowColor: "#FFFFFF", glowBlur: 20, glowIntensity: 30,
-      posY: 50, wordsPerChunk: 4,
-      transition: "fade", transitionSpeed: 420,
-      activeWordOn: false, letterSpacing: 0.5,
-    },
-  },
-  {
-    name: "The Magnate",
-    patch: {
-      fontFamily: font("Playfair Display"), fontWeight: 500, fontSize: 38, textCase: "normal",
+      fontFamily: font("Montserrat"),
+      fontWeight: 800,
+      fontSize: 42,
+      textCase: "upper",
       color: "#FFFFFF",
-      strokeOn: false, glowOn: false, bgOn: false,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 60, shadowX: 0, shadowY: 2, shadowBlur: 8,
-      posY: 78, wordsPerChunk: 4,
-      transition: "typewriter", transitionSpeed: 90,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#D1D5DB", activeWordScale: 1.02,
-    },
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 2,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 80,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      bgOn: true,
+      bgColor: "rgba(15, 15, 20, 0.8)",
+      bgOpacity: 85,
+      bgRadius: 8,
+      bgPadX: 14,
+      bgPadY: 8,
+      posY: 80,
+      wordsPerChunk: 3,
+      transition: "pop",
+      transitionSpeed: 120,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#E11D48", // Duo speaker accent
+      activeWordScale: 1.08,
+    }
   },
   {
-    name: "The Beast",
+    name: "Desi · Bollywood Hit",
     patch: {
-      fontFamily: font("Luckiest Guy"), fontWeight: 700, fontSize: 52, textCase: "upper",
+      fontFamily: font("Impact"),
+      fontWeight: 900,
+      fontSize: 48,
+      textCase: "upper",
       color: "#FFFFFF",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 5,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 100, shadowX: 0, shadowY: 4, shadowBlur: 0,
-      glowOn: false, bgOn: false, posY: 78, wordsPerChunk: 3,
-      transition: "bounce", transitionSpeed: 260,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#00FF00",
-      activeWordColor: "#111111", activeWordScale: 1.14,
-    },
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 5,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 2,
+      shadowY: 4,
+      shadowBlur: 0,
+      posY: 76,
+      wordsPerChunk: 2,
+      transition: "bounce",
+      transitionSpeed: 90,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#F59E0B",
+      activeWordColor: "#000000",
+      activeWordScale: 1.15,
+    }
   },
   {
-    name: "The Gaming Pro",
+    name: "Desi · Bhashini Bharat",
     patch: {
-      fontFamily: font("Bangers"), fontWeight: 700, fontSize: 48, textCase: "upper",
+      fontFamily: font("Inter"),
+      fontWeight: 700,
+      fontSize: 40,
+      textCase: "normal",
       color: "#FFFFFF",
-      strokeOn: true, strokeColor: "#000000", strokeWidth: 4,
-      shadowOn: true, shadowColor: "#000000", shadowOpacity: 90, shadowX: 0, shadowY: 3, shadowBlur: 0,
-      glowOn: false, bgOn: false, posY: 78, wordsPerChunk: 3,
-      transition: "bounce", transitionSpeed: 280,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#FF00FF", activeWordScale: 1.16,
-    },
+      strokeOn: true,
+      strokeColor: "rgba(0,0,0,0.85)",
+      strokeWidth: 2,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 75,
+      shadowX: 0,
+      shadowY: 3,
+      shadowBlur: 8,
+      posY: 82,
+      wordsPerChunk: 3,
+      transition: "fade",
+      transitionSpeed: 150,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#10B981", // Emerald Bharat green
+      activeWordScale: 1.08,
+    }
   },
   {
-    name: "The Emma",
+    name: "Desi · Hinglish Viral Hook",
     patch: {
-      fontFamily: font("JetBrains Mono"), fontWeight: 400, fontSize: 30, textCase: "lower",
+      fontFamily: font("Poppins"),
+      fontWeight: 900,
+      fontSize: 48,
+      textCase: "upper",
       color: "#FFFFFF",
-      strokeOn: false, glowOn: false, bgOn: false, shadowOn: false,
-      posY: 82, wordsPerChunk: 5,
-      transition: "slide-up", transitionSpeed: 260,
-      activeWordOn: false,
-    },
+      strokeOn: true,
+      strokeColor: "#EA580C",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 95,
+      shadowX: 0,
+      shadowY: 5,
+      shadowBlur: 12,
+      posY: 75,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 95,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FACC15",
+      activeWordScale: 1.18,
+    }
   },
   {
-    name: "The Minimalist Vlog",
+    name: "Desi · Finance Guru Hindi",
     patch: {
-      fontFamily: font("Manrope"), fontWeight: 300, fontSize: 32, textCase: "lower",
-      color: "#FAFAFA",
-      strokeOn: false, glowOn: false, bgOn: false, shadowOn: false,
-      posY: 84, wordsPerChunk: 5,
-      transition: "fade", transitionSpeed: 300,
-      activeWordOn: true, activeWordBgOn: false, activeWordColor: "#FCA5A5", activeWordScale: 1.02,
-    },
-  },
-  {
-    name: "The Vice",
-    patch: {
-      fontFamily: font("Inter"), fontWeight: 700, fontSize: 38, textCase: "upper",
+      fontFamily: font("Montserrat"),
+      fontWeight: 800,
+      fontSize: 44,
+      textCase: "upper",
       color: "#FFFFFF",
-      bgOn: true, bgColor: "#000000", bgOpacity: 100, bgRadius: 0, bgPadX: 14, bgPadY: 8,
-      strokeOn: false, glowOn: false, shadowOn: false,
-      posY: 84, wordsPerChunk: 4,
-      transition: "none", transitionSpeed: 0,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#FFFF00",
-      activeWordColor: "#000000", activeWordScale: 1.02,
-    },
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 85,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      posY: 80,
+      wordsPerChunk: 3,
+      transition: "pop",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#10B981",
+      activeWordColor: "#FFFFFF",
+      activeWordScale: 1.12,
+    }
   },
   {
-    name: "The Vox",
+    name: "Desi · Motivation Spark",
     patch: {
-      fontFamily: font("Work Sans"), fontWeight: 600, fontSize: 36, textCase: "normal",
-      color: "#FFEA00",
-      strokeOn: false, glowOn: false, shadowOn: false, bgOn: false,
-      posY: 82, wordsPerChunk: 4,
-      transition: "fade", transitionSpeed: 200,
-      activeWordOn: true, activeWordBgOn: true, activeWordBgColor: "#FFFFFF",
-      activeWordColor: "#111111", activeWordScale: 1.04,
-    },
+      fontFamily: font("Outfit"),
+      fontWeight: 800,
+      fontSize: 46,
+      textCase: "upper",
+      color: "#FFFBEB",
+      glowOn: true,
+      glowColor: "#FBBF24",
+      glowBlur: 16,
+      glowIntensity: 80,
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 2,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 95,
+      shadowX: 0,
+      shadowY: 6,
+      shadowBlur: 14,
+      posY: 78,
+      wordsPerChunk: 2,
+      transition: "bounce",
+      transitionSpeed: 110,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#F59E0B",
+      activeWordScale: 1.16,
+    }
   },
+  {
+    name: "Desi · Marathi & Hindi Bold",
+    patch: {
+      fontFamily: font("Archivo Black"),
+      fontWeight: 900,
+      fontSize: 48,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 5,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 2,
+      shadowY: 4,
+      shadowBlur: 2,
+      posY: 76,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 90,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FF5722", // Fiery saffron
+      activeWordScale: 1.2,
+    }
+  }
 ];
-CAP_PRESETS.push(...ULTIMATE_CREATOR_PACK.map((s) => ({ ...s, category: "Ultimate" as const })));
+export const CAPTIK_TEMPLATE_PACK = DESI_VIRAL_TEMPLATE_PACK;
 
+// ---------------------------------------------------------------------------
+// 4. Creator Pro Pack — viral creator presets, Hormozi, MrBeast,
+// Ali Abdaal, Iman Gadzhi, and Raj Shamani style templates.
+// ---------------------------------------------------------------------------
+export const CREATOR_PRO_TEMPLATE_PACK: { name: string; patch: Partial<CapStyle> }[] = [
+  {
+    name: "Creator · Hormozi Viral",
+    patch: {
+      fontFamily: font("Impact"),
+      fontWeight: 900,
+      fontSize: 50,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 4,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 95,
+      shadowX: 0,
+      shadowY: 6,
+      shadowBlur: 12,
+      posY: 78,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFE600",
+      activeWordScale: 1.2,
+    }
+  },
+  {
+    name: "Creator · MrBeast Pop",
+    patch: {
+      fontFamily: font("Anton"),
+      fontWeight: 900,
+      fontSize: 52,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 6,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 0,
+      posY: 80,
+      wordsPerChunk: 2,
+      transition: "bounce",
+      transitionSpeed: 90,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#00F0FF",
+      activeWordColor: "#000000",
+      activeWordScale: 1.15,
+    }
+  },
+  {
+    name: "Creator · Ali Abdaal Studio",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 600,
+      fontSize: 38,
+      textCase: "normal",
+      color: "#F8FAFC",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 60,
+      shadowX: 0,
+      shadowY: 2,
+      shadowBlur: 6,
+      bgOn: true,
+      bgColor: "rgba(15, 23, 42, 0.7)",
+      bgOpacity: 80,
+      bgRadius: 10,
+      bgPadX: 16,
+      bgPadY: 8,
+      posY: 82,
+      wordsPerChunk: 3,
+      transition: "fade",
+      transitionSpeed: 160,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FDE047", // Pastel yellow
+      activeWordScale: 1.05,
+    }
+  },
+  {
+    name: "Creator · Iman Gadzhi Luxury",
+    patch: {
+      fontFamily: font("Montserrat"),
+      fontWeight: 800,
+      fontSize: 44,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 95,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 14,
+      posY: 52,
+      wordsPerChunk: 2,
+      transition: "fade",
+      transitionSpeed: 180,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#D4AF37", // Gold
+      activeWordScale: 1.08,
+    }
+  },
+  {
+    name: "Creator · Raj Shamani Podcast",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 800,
+      fontSize: 44,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      posY: 80,
+      wordsPerChunk: 3,
+      transition: "pop",
+      transitionSpeed: 110,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FF9933", // Saffron Hindi accent
+      activeWordScale: 1.15,
+    }
+  },
+  {
+    name: "Creator · Alpha Channel Overlay",
+    patch: {
+      fontFamily: font("Montserrat"),
+      fontWeight: 900,
+      fontSize: 46,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "rgba(0,0,0,0.95)",
+      strokeWidth: 4,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 8,
+      posY: 75,
+      wordsPerChunk: 3,
+      transition: "fade",
+      transitionSpeed: 120,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#22C55E",
+      activeWordColor: "#000000",
+      activeWordScale: 1.1,
+    }
+  },
+  {
+    name: "Creator · Ranveer Spiritual Vibe",
+    patch: {
+      fontFamily: font("Instrument Serif"),
+      fontWeight: 700,
+      fontSize: 44,
+      textCase: "normal",
+      italic: true,
+      color: "#FEF08A",
+      glowOn: true,
+      glowColor: "#EAB308",
+      glowBlur: 18,
+      glowIntensity: 75,
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 80,
+      shadowX: 0,
+      shadowY: 3,
+      shadowBlur: 10,
+      posY: 82,
+      wordsPerChunk: 3,
+      transition: "fade",
+      transitionSpeed: 200,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFFFFF",
+      activeWordScale: 1.06,
+    }
+  },
+  {
+    name: "Creator · Sharan Hegde Finance",
+    patch: {
+      fontFamily: font("Plus Jakarta Sans"),
+      fontWeight: 800,
+      fontSize: 44,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 85,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 8,
+      posY: 78,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 90,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#22C55E",
+      activeWordColor: "#000000",
+      activeWordScale: 1.12,
+    }
+  },
+  {
+    name: "Creator · Raw & Real Hindi Podcast",
+    patch: {
+      fontFamily: font("Barlow Condensed"),
+      fontWeight: 900,
+      fontSize: 50,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 4,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 0,
+      shadowY: 6,
+      shadowBlur: 14,
+      posY: 80,
+      wordsPerChunk: 3,
+      transition: "pop",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFEA00",
+      activeWordScale: 1.18,
+    }
+  },
+  {
+    name: "Creator · Storytelling Hook",
+    patch: {
+      fontFamily: font("Outfit"),
+      fontWeight: 900,
+      fontSize: 48,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "rgba(0,0,0,0.9)",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      posY: 60,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 110,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FACC15",
+      activeWordScale: 1.2,
+    }
+  }
+];
+export const KALAKAR_TEMPLATE_PACK = CREATOR_PRO_TEMPLATE_PACK;
+
+// ---------------------------------------------------------------------------
+// 5. Shorts & Reels Pack — frictionless word-by-word subtitles, 1-click mobile reels,
+// bold pop drop shadows, and clean bottom-third subtitles.
+// ---------------------------------------------------------------------------
+export const SHORTS_REELS_TEMPLATE_PACK: { name: string; patch: Partial<CapStyle> }[] = [
+  {
+    name: "Reels · 1-Click Karaoke",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 800,
+      fontSize: 44,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 85,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      posY: 78,
+      wordsPerChunk: 3,
+      transition: "pop",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFE600",
+      activeWordScale: 1.15,
+    }
+  },
+  {
+    name: "Reels · Ultra Clean",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 500,
+      fontSize: 34,
+      textCase: "normal",
+      color: "#F8FAFC",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 80,
+      shadowX: 0,
+      shadowY: 2,
+      shadowBlur: 6,
+      posY: 84,
+      wordsPerChunk: 4,
+      transition: "fade",
+      transitionSpeed: 150,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFFFFF",
+      activeWordScale: 1.05,
+    }
+  },
+  {
+    name: "Reels · Bold Pop",
+    patch: {
+      fontFamily: font("Impact"),
+      fontWeight: 900,
+      fontSize: 50,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 4,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 2,
+      shadowY: 4,
+      shadowBlur: 0,
+      posY: 76,
+      wordsPerChunk: 2,
+      transition: "bounce",
+      transitionSpeed: 90,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#00F0FF",
+      activeWordScale: 1.2,
+    }
+  },
+  {
+    name: "Reels · Classic Subtitle",
+    patch: {
+      fontFamily: font("Arial"),
+      fontWeight: 700,
+      fontSize: 36,
+      textCase: "normal",
+      color: "#FFFFFF",
+      strokeOn: false,
+      shadowOn: false,
+      bgOn: true,
+      bgColor: "rgba(0, 0, 0, 0.75)",
+      bgOpacity: 85,
+      bgRadius: 4,
+      bgPadX: 12,
+      bgPadY: 6,
+      posY: 86,
+      wordsPerChunk: 4,
+      transition: "fade",
+      transitionSpeed: 160,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFE600",
+      activeWordScale: 1.0,
+    }
+  },
+  {
+    name: "Reels · Dynamic Color Flow",
+    patch: {
+      fontFamily: font("Montserrat"),
+      fontWeight: 900,
+      fontSize: 46,
+      textCase: "upper",
+      color: "#E0E7FF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 3,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 5,
+      shadowBlur: 12,
+      posY: 78,
+      wordsPerChunk: 3,
+      transition: "pop",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#A855F7", // Electric purple
+      activeWordScale: 1.15,
+    }
+  },
+  {
+    name: "Reels · Hormozi Punch",
+    patch: {
+      fontFamily: font("Anton"),
+      fontWeight: 900,
+      fontSize: 52,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 5,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 95,
+      shadowX: 0,
+      shadowY: 5,
+      shadowBlur: 10,
+      posY: 78,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 100,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#22C55E", // Hormozi green
+      activeWordScale: 1.25,
+    }
+  },
+  {
+    name: "Reels · Single Word Blitz",
+    patch: {
+      fontFamily: font("Impact"),
+      fontWeight: 900,
+      fontSize: 56,
+      textCase: "upper",
+      color: "#FFE600",
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 5,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 100,
+      shadowX: 0,
+      shadowY: 6,
+      shadowBlur: 14,
+      posY: 50,
+      wordsPerChunk: 1,
+      transition: "pop",
+      transitionSpeed: 80,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#FFE600",
+      activeWordScale: 1.2,
+    }
+  },
+  {
+    name: "Reels · Marker Highlighter",
+    patch: {
+      fontFamily: font("Inter"),
+      fontWeight: 800,
+      fontSize: 44,
+      textCase: "upper",
+      color: "#FFFFFF",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 70,
+      shadowX: 0,
+      shadowY: 3,
+      shadowBlur: 8,
+      posY: 80,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 110,
+      activeWordOn: true,
+      activeWordBgOn: true,
+      activeWordBgColor: "#FACC15",
+      activeWordColor: "#000000",
+      activeWordScale: 1.1,
+    }
+  },
+  {
+    name: "Reels · Minimalist Story",
+    patch: {
+      fontFamily: font("DM Sans"),
+      fontWeight: 600,
+      fontSize: 36,
+      textCase: "normal",
+      color: "#F1F5F9",
+      strokeOn: false,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 60,
+      shadowX: 0,
+      shadowY: 2,
+      shadowBlur: 8,
+      posY: 85,
+      wordsPerChunk: 3,
+      transition: "fade",
+      transitionSpeed: 180,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#38BDF8",
+      activeWordScale: 1.04,
+    }
+  },
+  {
+    name: "Reels · Cyber Neon Glow",
+    patch: {
+      fontFamily: font("Righteous"),
+      fontWeight: 700,
+      fontSize: 46,
+      textCase: "upper",
+      color: "#FFFFFF",
+      glowOn: true,
+      glowColor: "#00F0FF",
+      glowBlur: 18,
+      glowIntensity: 85,
+      strokeOn: true,
+      strokeColor: "#000000",
+      strokeWidth: 2,
+      shadowOn: true,
+      shadowColor: "#000000",
+      shadowOpacity: 90,
+      shadowX: 0,
+      shadowY: 4,
+      shadowBlur: 10,
+      posY: 76,
+      wordsPerChunk: 2,
+      transition: "pop",
+      transitionSpeed: 95,
+      activeWordOn: true,
+      activeWordBgOn: false,
+      activeWordColor: "#00F0FF",
+      activeWordScale: 1.18,
+    }
+  }
+];
+export const DIVEO_TEMPLATE_PACK = SHORTS_REELS_TEMPLATE_PACK;
+
+// Top 50 World-Class Curated Presets (10 per category)
+export const CAP_PRESETS: { name: string; patch: Partial<CapStyle>; category?: string }[] = [
+  ...KINETIC_TEMPLATE_PACK.map((s) => ({ ...s, category: "Kinetic Motion" as const })),
+  ...SHORTS_REELS_TEMPLATE_PACK.map((s) => ({ ...s, category: "Shorts & Reels" as const })),
+  ...DYNAMIC_POP_TEMPLATE_PACK.map((s) => ({ ...s, category: "Dynamic Pop" as const })),
+  ...DESI_VIRAL_TEMPLATE_PACK.map((s) => ({ ...s, category: "Desi Viral" as const })),
+  ...CREATOR_PRO_TEMPLATE_PACK.map((s) => ({ ...s, category: "Creator Pro" as const })),
+];
 
 // Category derivation for the Templates picker. Explicit `category` wins; otherwise
 // we infer from the preset name using well-known keywords.
 export type PresetCategory =
   | "All"
+  | "Kinetic Motion"
+  | "Shorts & Reels"
+  | "Dynamic Pop"
+  | "Desi Viral"
+  | "Creator Pro"
+  | "Moonshot"
+  | "Captions.ai"
+  | "Captik"
+  | "Kalakar"
+  | "Diveo"
   | "Built-in"
   | "Core Pack"
   | "Creators"
@@ -2008,6 +1927,11 @@ export type PresetCategory =
   | "News & Pro";
 
 const CATEGORY_RULES: { label: Exclude<PresetCategory, "All" | "Built-in">; test: RegExp }[] = [
+  { label: "Kinetic Motion", test: /kinetic|viral flow|3d depth|moonshot/i },
+  { label: "Shorts & Reels", test: /reels|shorts|blitz|marker|diveo/i },
+  { label: "Dynamic Pop",   test: /dynamic|classic pill|typewriter|captions\.ai/i },
+  { label: "Desi Viral",    test: /desi|bhashini|hinglish|bollywood|captik/i },
+  { label: "Creator Pro",   test: /creator|podcast|hormozi|sharan|ranveer|shamani|kalakar/i },
   { label: "Karaoke",       test: /karaoke|sing|word[- ]?highlight|color[- ]?sweep/i },
   { label: "Neon & Glow",   test: /neon|glow|cyber|glitch|streamer/i },
   { label: "Cinematic",     test: /cinemat|luxury|serif|documentary|magnates|johnny|iman/i },
@@ -2018,7 +1942,7 @@ const CATEGORY_RULES: { label: Exclude<PresetCategory, "All" | "Built-in">; test
 ];
 
 export const getPresetCategory = (p: { name: string; category?: string }): PresetCategory => {
-  if (p.category === "Core Pack" || p.category === "Creators" || p.category === "YT Creators" || p.category === "Ultimate") return p.category as PresetCategory;
+  if (p.category) return p.category as PresetCategory;
   for (const rule of CATEGORY_RULES) {
     if (rule.test.test(p.name)) return rule.label;
   }
@@ -2027,6 +1951,11 @@ export const getPresetCategory = (p: { name: string; category?: string }): Prese
 
 export const PRESET_CATEGORIES: PresetCategory[] = [
   "All",
+  "Kinetic Motion",
+  "Shorts & Reels",
+  "Dynamic Pop",
+  "Desi Viral",
+  "Creator Pro",
   "Ultimate",
   "YT Creators",
   "Built-in",
@@ -2048,16 +1977,12 @@ export const PRESET_CATEGORIES: PresetCategory[] = [
 // CAP_PRESETS is premium (paid plan or admin required). Curated to cover the
 // core caption looks: highlight, pop, outline, viral, box, cinematic.
 export const FREE_PRESET_NAMES: readonly string[] = [
-  "Yellow Highlight",
-  "Popping Text",
-  "Stroke Outline",
-  "Hormozi Style",
-  "AI Blue Box",
-  "The Cinematic Story",
+  "Kinetic · Viral Flow",
+  "Kinetic · 3D Depth Cutout",
+  "Reels · 1-Click Karaoke",
+  "Dynamic · Classic Pill",
+  "Desi · Bollywood Hit",
+  "Creator · Hormozi Viral",
 ];
 const FREE_SET = new Set(FREE_PRESET_NAMES.map((n) => n.toLowerCase()));
 export const isPresetFree = (name: string): boolean => FREE_SET.has(name.toLowerCase());
-
-
-
-

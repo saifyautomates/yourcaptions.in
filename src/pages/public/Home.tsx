@@ -125,7 +125,7 @@ export default function Home() {
           {[
             { t: "Frame-accurate AI", d: "Word-level timing tuned for TikTok, Reels and Shorts. Zero drift.", i: "◈" },
             { t: "100+ languages", d: "Auto-detect, translate and dub in one pass. Native accents included.", i: "◉" },
-            { t: "150+ templates", d: "Karaoke, kinetic type, emoji pops. All editable in real time.", i: "◇" },
+            { t: "50+ templates", d: "Karaoke, kinetic type, emoji pops. All editable in real time.", i: "◇" },
             { t: "One-click export", d: "MP4, MOV, burned-in or SRT. 4K supported. No watermark on Pro.", i: "▲" },
             { t: "Team-ready", d: "Roles, shared brand kits, comments and version history built in.", i: "●" },
             { t: "Blazing fast", d: "< 2 min turnaround on a 5-minute video. Cloud-rendered at scale.", i: "⚡" },

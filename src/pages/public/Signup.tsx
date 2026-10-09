@@ -11,6 +11,7 @@ import { logOAuth } from "@/lib/oauthDebug";
 import { logAuthError, logAuthSuccess, newAuthRequestId } from "@/lib/authErrorLog";
 import { useAuth } from "@/hooks/useAuth";
 import { sanitizeRedirectUrl } from "@/lib/authRedirect";
+import { Sparkles } from "lucide-react";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name required").max(100),
@@ -31,7 +32,7 @@ function strength(pw: string) {
 export default function Signup() {
   const nav = useNavigate();
   const loc = useLocation();
-  const { signUp, signInWithGoogle } = useAuth();
+  const { signUp, signInWithGoogle, signInAsDemo } = useAuth();
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [loading, setLoading] = useState(false);
   const s = useMemo(() => strength(form.password), [form.password]);
@@ -97,24 +98,22 @@ export default function Signup() {
 
 
 
-        
         <button
           type="button"
-          onClick={async () => {
-            setLoading(true);
-            try {
-              const nextParam = new URLSearchParams(loc.search).get("next");
-              const fromState = (loc.state as any)?.from;
-              const destination = sanitizeRedirectUrl(fromState || nextParam || "/dashboard", "/dashboard");
-              await signInWithGoogle(destination);
-              if (window !== window.top) setLoading(false);
-            } catch (error: any) {
-              toast.error(error.message);
-              setLoading(false);
-            }
+          onClick={() => {
+            signInAsDemo();
+            nav("/dashboard", { replace: true });
           }}
-          disabled={loading}
-          className="mb-4 flex h-[52px] w-full items-center justify-center gap-2 rounded-[10px] bg-white text-[16px] font-semibold text-black hover:bg-[#e6e6e6] disabled:opacity-60"
+          className="mb-4 flex h-[52px] w-full items-center justify-center gap-2.5 rounded-[12px] bg-gradient-to-r from-[#E60000] to-[#FF4D4D] text-[15px] font-bold text-white hover:from-[#CC0000] hover:to-[#E60000] shadow-[0_0_22px_rgba(230,0,0,0.4)] transition-all hover:scale-[1.01]"
+        >
+          <Sparkles className="h-5 w-5 animate-pulse text-amber-200" />
+          Instant Access to Dashboard (1-Click) →
+        </button>
+
+        <button
+          type="button"
+          onClick={() => signInWithGoogle()}
+          className="mb-4 flex h-[52px] w-full items-center justify-center gap-3 rounded-[10px] border border-[#1F1F1F] bg-[#141414] text-[15px] font-medium text-white transition-colors hover:border-[#333] hover:bg-[#1A1A1A]"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -126,7 +125,7 @@ export default function Signup() {
         </button>
         <div className="mb-4 flex items-center gap-4 text-[13px] text-[#555]">
           <div className="h-px flex-1 bg-[#1F1F1F]" />
-          <span>or continue with email</span>
+          <span>or create account with email</span>
           <div className="h-px flex-1 bg-[#1F1F1F]" />
         </div>
         <form onSubmit={onSubmit} className="space-y-4">

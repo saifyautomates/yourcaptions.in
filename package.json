@@ -126,5 +126,9 @@
     "lodash": "^4.17.21",
     "cross-spawn": "^7.0.5",
     "@babel/runtime": "^7.26.10"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.63.4",
+    "@swc/core-win32-x64-msvc": "^1.16.2"
   }
 }

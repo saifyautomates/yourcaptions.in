@@ -8,7 +8,6 @@ const links = [
   { to: "/", label: "Home", end: true },
   { to: "/features", label: "Features" },
   { to: "/pricing", label: "Pricing" },
-  { to: "/templates", label: "Templates" },
   { to: "/about", label: "About" },
 ];
 

@@ -539,6 +539,16 @@ const WordMenuItem = ({ icon, label, desc, onClick, destructive }: { icon: React
 
 // Templates shown in the Line Styling drawer — subset of CAP_PRESETS matching the reference.
 const LINE_STYLE_TEMPLATES = [
+  "Kinetic · Viral Flow",
+  "Kinetic · 3D Depth Cutout",
+  "Reels · 1-Click Karaoke",
+  "Reels · Hormozi Punch",
+  "Dynamic · Classic Pill",
+  "Dynamic · Kinetic Pop",
+  "Desi · Karaoke Flow",
+  "Desi · Bollywood Hit",
+  "Creator · Hormozi Viral",
+  "Creator · Raj Shamani Podcast",
   "Ali Abdaal", "Clean Motion", "Double Trouble", "Bubble Style",
   "Hormozi Style", "Editing Skool", "Mr Beast Style 1", "Mr Beast Style 2",
 ];
@@ -3308,11 +3318,24 @@ const ProjectView = () => {
   }, [isPremiumTemplateActive, notifyToast, navigate]);
   // Load the saved style whenever the active language (or project) changes.
   useEffect(() => {
+    const appliedTemplateName = localStorage.getItem("captions:appliedTemplate");
+    if (appliedTemplateName) {
+      const preset = CAP_PRESETS.find((p) => p.name.toLowerCase() === appliedTemplateName.toLowerCase())
+        || CAP_PRESETS.find((p) => {
+             const cleanApplied = appliedTemplateName.toLowerCase().replace(/^(moonshot|diveo|captions\.ai|captik|kalakar|kinetic|reels|dynamic|desi|creator)\s*·\s*/i, "");
+             const cleanP = p.name.toLowerCase().replace(/^(moonshot|diveo|captions\.ai|captik|kalakar|kinetic|reels|dynamic|desi|creator)\s*·\s*/i, "");
+             return cleanP === cleanApplied || p.name.toLowerCase().includes(cleanApplied);
+           });
+      if (preset) {
+        setCapStyle(normalizeCapStyle({ ...DEFAULT_CAP_STYLE, ...preset.patch }));
+        toast.success(`Applied template "${preset.name}"!`);
+        localStorage.removeItem("captions:appliedTemplate");
+        return;
+      }
+    }
     const map = readStyleMap();
     const forLang = map[activeLang] ?? map._default;
     if (forLang) setCapStyle(normalizeCapStyle({ ...DEFAULT_CAP_STYLE, ...forLang }));
-    // If nothing saved yet for this language, keep the current style — it will
-    // be written on the next change so this language inherits it.
   }, [activeLang, readStyleMap]);
   // Persist the current style under the active language and as the new default.
   // Debounced so rapid slider/drag updates don't thrash localStorage.

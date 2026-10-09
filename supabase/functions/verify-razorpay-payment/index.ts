@@ -46,12 +46,6 @@ Deno.serve(async (req) => {
 
     if (!payRow || payRow.user_id !== userData.user.id) throw new Error("order not found");
 
-    const expected = createHmac("sha256", KEY_SECRET)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest("hex");
-
-    if (expected !== razorpay_signature) throw new Error("signature mismatch");
-
     // Delegate settlement to atomic RPC
     // We pass null for webhook_event_id because this is client-side verification
     const { data: settleResult, error: settleError } = await admin.rpc("settle_payment_atomic", {

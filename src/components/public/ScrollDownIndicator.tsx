@@ -43,7 +43,7 @@ export function ScrollDownIndicator() {
           animate={{ opacity: 1, y: 0 }} 
           exit={{ opacity: 0, y: 10, scale: 0.95 }}
           transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-50 cursor-pointer group"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-3 z-50 cursor-pointer group"
           onClick={() => window.scrollTo({ top: Math.min(window.innerHeight, document.documentElement.scrollHeight), behavior: 'smooth' })}
         >
           <span className="text-[9px] uppercase tracking-[0.3em] text-[#888] font-semibold group-hover:text-white transition-colors duration-300 drop-shadow-md">Scroll</span>

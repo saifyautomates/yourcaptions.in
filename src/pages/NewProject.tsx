@@ -1,5 +1,5 @@
-// "Prepare Your Media" upload flow — matches the Kalakar reference.
-// Stage 1: Uploading overlay (mosque icon, progress %, "Did you know" card).
+// "Prepare Your Media" upload flow — studio-grade video processing.
+// Stage 1: Uploading overlay (progress %, "Did you know" card).
 // Stage 2: Language Settings modal (spoken language + writing script + Translation + Audio Enhancement + Emojis).
 // Stage 3: Redirects into the editor which shows the "Generating subtitles" state.
 

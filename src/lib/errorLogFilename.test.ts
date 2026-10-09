@@ -103,7 +103,7 @@ describe("buildExportFilename", () => {
     const after = Date.now();
     const match = name.match(/(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})\.csv$/);
     expect(match).not.toBeNull();
-    const parsed = new Date(match![1].replace(/-(\d{2})-(\d{2})$/, ":$1:$2").replace(/T(\d{2})-/, "T$1:")).getTime();
+    const parsed = new Date(match![1].replace(/-(\d{2})-(\d{2})$/, ":$1:$2").replace(/T(\d{2})-/, "T$1:") + "Z").getTime();
     // Allow a 5-second window either side for clock skew.
     expect(parsed).toBeGreaterThanOrEqual(before - 5000);
     expect(parsed).toBeLessThanOrEqual(after + 5000);

@@ -13,7 +13,7 @@ function TiltCard({ children, className, ...props }: any) {
 
 const testimonials = [
   { n: 'Arjun Mehta', r: '@arjunmehta · YouTube, 800K', bg: '#E60000', in: 'AM', text: 'Maine pehle manually captions lagata tha — 3 ghante per video. Ab sirf 2 minute mein perfect captions. Yeh tool ne meri zindagi badal di.', highlight: 'zindagi badal di' },
-  { n: 'Zaryab Khan', r: '@zaryabkhan · TikTok Creator', bg: '#4A90E2', in: 'ZK', text: 'Urdu captions itne accurate hain ki mujhe believe nahi hua. Even Hinglish perfectly samajhta hai. Kalakar se 10x better.', highlight: '10x better' },
+  { n: 'Zaryab Khan', r: '@zaryabkhan · TikTok Creator', bg: '#4A90E2', in: 'ZK', text: 'Urdu captions itne accurate hain ki mujhe believe nahi hua. Even Hinglish perfectly samajhta hai. Market ke baaki apps se 10x better.', highlight: '10x better' },
   { n: 'Priya Sharma', r: '@priyasharma · Instagram Reels', bg: '#50E3C2', in: 'PS', text: 'The template styles are insane. Applied Hormozi style to my reel and my views tripled in one week.', highlight: 'views tripled' },
   { n: 'James Carter', r: '@jamescarter · Podcast Creator', bg: '#F5A623', in: 'JC', text: 'As an English creator covering South Asian topics, I needed accurate Hindi transcription for interviews. This is the only tool that actually works.', highlight: 'actually works' },
   { n: 'Fatima Al-Rashidi', r: '@fatimarashidi · Arabic Content Creator', bg: '#D0021B', in: 'FA', text: "Arabic RTL captions that actually render correctly. I've tried 6 tools before this. Nothing came close.", highlight: 'Nothing came close' },

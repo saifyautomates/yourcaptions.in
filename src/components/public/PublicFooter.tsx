@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { Twitter, Instagram, Youtube } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const col = (title: string, items: { label: string; to: string }[]) => (
   <div>
@@ -33,9 +34,7 @@ export function PublicFooter() {
       <div className="mx-auto max-w-[1440px] px-6">
         <div className="grid gap-12 md:grid-cols-3">
           <div>
-            <div className="flex items-center text-[24px] font-extrabold tracking-tighter text-white font-display">
-              Home
-            </div>
+            <Logo />
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-[#B8B8B8]">
               AI captions, translation and dubbing.
               <br />Built for creators who speak every language.
@@ -58,8 +57,7 @@ export function PublicFooter() {
           {col("Product", [
             { label: "Features", to: "/features" },
             { label: "Pricing", to: "/pricing" },
-            { label: "Templates", to: "/templates" },
-            { label: "Changelog", to: "/features" },
+            { label: "Live Demo", to: "/#playground" },
           ])}
           {col("Company", [
             { label: "About", to: "/about" },
@@ -71,7 +69,7 @@ export function PublicFooter() {
           ])}
         </div>
         <div className="mt-16 flex flex-col items-center justify-between gap-3 border-t border-[#1F1F1F] pt-6 text-[13px] md:flex-row">
-          <div className="text-[#B8B8B8]">© {new Date().getFullYear()} Home</div>
+          <div className="text-[#B8B8B8]">© {new Date().getFullYear()} Yourcaptions.in</div>
           <div className="text-[#8A8A8A]">Made with ♥ for creators</div>
           <div className="flex gap-3 text-[#B8B8B8]">
             <Link to="/contact" className="hover:text-white">Support</Link>

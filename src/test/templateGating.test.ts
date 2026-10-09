@@ -77,7 +77,7 @@ describe("canUseTemplate - admin free-list config edge cases", () => {
   });
 });
 
-describe("canUseTemplate - coverage across all 100+ templates", () => {
+describe("canUseTemplate - coverage across all 50+ templates", () => {
   it("free users can only access templates from freeNames", () => {
     const freeSet = new Set(FREE_PRESET_NAMES.map((n) => n.toLowerCase()));
     for (const p of CAP_PRESETS) {

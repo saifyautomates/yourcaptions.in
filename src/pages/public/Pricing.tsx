@@ -70,7 +70,7 @@ const defaultPlans: Plan[] = [
       "Unlimited speaker presets",
       "Unlimited Brand Kits",
       "Unlimited branding layers",
-      "Priority priority support"
+      "24/7 Priority support"
     ],
   }
 ];

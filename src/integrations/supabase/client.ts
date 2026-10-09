@@ -19,7 +19,11 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
 // Configure functions client to route through local backend emulation in browser
 if (typeof window !== 'undefined') {
   try {
-    (supabase as any).functionsUrl = new URL(`${window.location.origin}/api/supabase/functions/v1`);
+    const fnUrl = `${window.location.origin}/api/supabase/functions/v1`;
+    (supabase as any).functionsUrl = new URL(fnUrl);
+    if ((supabase as any).functions) {
+      (supabase as any).functions.url = fnUrl;
+    }
   } catch (e) {
     console.warn("Could not set custom functionsUrl", e);
   }
