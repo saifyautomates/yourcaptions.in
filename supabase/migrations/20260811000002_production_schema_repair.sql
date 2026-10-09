@@ -99,6 +99,7 @@ REVOKE ALL ON public.webhook_events FROM anon, authenticated;
 
 -- admin_audit_log (Admin read-only, Service Role write)
 ALTER TABLE public.admin_audit_log ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "audit_log_admin" ON public.admin_audit_log;
 CREATE POLICY "audit_log_admin" ON public.admin_audit_log FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
 GRANT SELECT ON public.admin_audit_log TO authenticated;
 GRANT ALL ON public.admin_audit_log TO service_role;
@@ -106,28 +107,36 @@ REVOKE ALL ON public.admin_audit_log FROM anon;
 
 -- plan_pricing (Public read)
 ALTER TABLE public.plan_pricing ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "plan_pricing_read" ON public.plan_pricing;
 CREATE POLICY "plan_pricing_read" ON public.plan_pricing FOR SELECT USING (true);
+DROP POLICY IF EXISTS "plan_pricing_admin" ON public.plan_pricing;
 CREATE POLICY "plan_pricing_admin" ON public.plan_pricing FOR ALL USING (public.has_role(auth.uid(), 'admin'));
 GRANT SELECT ON public.plan_pricing TO anon, authenticated;
 GRANT ALL ON public.plan_pricing TO service_role;
 
 -- topup_pricing (Public read)
 ALTER TABLE public.topup_pricing ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "topup_pricing_read" ON public.topup_pricing;
 CREATE POLICY "topup_pricing_read" ON public.topup_pricing FOR SELECT USING (true);
+DROP POLICY IF EXISTS "topup_pricing_admin" ON public.topup_pricing;
 CREATE POLICY "topup_pricing_admin" ON public.topup_pricing FOR ALL USING (public.has_role(auth.uid(), 'admin'));
 GRANT SELECT ON public.topup_pricing TO anon, authenticated;
 GRANT ALL ON public.topup_pricing TO service_role;
 
 -- system_settings (Public read for globals like maintenance mode)
 ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "system_settings_read" ON public.system_settings;
 CREATE POLICY "system_settings_read" ON public.system_settings FOR SELECT USING (true);
+DROP POLICY IF EXISTS "system_settings_admin" ON public.system_settings;
 CREATE POLICY "system_settings_admin" ON public.system_settings FOR ALL USING (public.has_role(auth.uid(), 'admin'));
 GRANT SELECT ON public.system_settings TO anon, authenticated;
 GRANT ALL ON public.system_settings TO service_role;
 
 -- feature_flags (Public read)
 ALTER TABLE public.feature_flags ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "feature_flags_read" ON public.feature_flags;
 CREATE POLICY "feature_flags_read" ON public.feature_flags FOR SELECT USING (true);
+DROP POLICY IF EXISTS "feature_flags_admin" ON public.feature_flags;
 CREATE POLICY "feature_flags_admin" ON public.feature_flags FOR ALL USING (public.has_role(auth.uid(), 'admin'));
 GRANT SELECT ON public.feature_flags TO anon, authenticated;
 GRANT ALL ON public.feature_flags TO service_role;
@@ -151,6 +160,8 @@ ON CONFLICT (pack) DO NOTHING;
 -- SETTLE PAYMENT ATOMIC RPC
 -- ========================================================
 
+DROP FUNCTION IF EXISTS public.settle_payment_atomic(text, text, numeric, text, text, text);
+DROP FUNCTION IF EXISTS public.settle_payment_atomic;
 CREATE OR REPLACE FUNCTION public.settle_payment_atomic(
   p_razorpay_order_id text,
   p_razorpay_payment_id text,

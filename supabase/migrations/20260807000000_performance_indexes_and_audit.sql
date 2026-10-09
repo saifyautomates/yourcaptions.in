@@ -1,7 +1,14 @@
 -- ADD PERFORMANCE INDEXES
-CREATE INDEX IF NOT EXISTS activity_log_user_id_idx ON public.activity_log(user_id);
-CREATE INDEX IF NOT EXISTS activity_log_created_at_idx ON public.activity_log(created_at);
-CREATE INDEX IF NOT EXISTS error_logs_created_at_idx ON public.error_logs(created_at);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'activity_log') THEN
+    CREATE INDEX IF NOT EXISTS activity_log_user_id_idx ON public.activity_log(user_id);
+    CREATE INDEX IF NOT EXISTS activity_log_created_at_idx ON public.activity_log(created_at);
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'error_logs') THEN
+    CREATE INDEX IF NOT EXISTS error_logs_created_at_idx ON public.error_logs(created_at);
+  END IF;
+END $$;
 
 -- ADD AUDIT LOGS FOR ADMIN
 CREATE TABLE IF NOT EXISTS public.audit_logs (
@@ -19,10 +26,12 @@ GRANT ALL ON public.audit_logs TO service_role;
 
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admins can view audit logs" ON public.audit_logs;
 CREATE POLICY "Admins can view audit logs" ON public.audit_logs FOR SELECT TO authenticated USING (
-  EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
+  EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role::text = 'admin')
 );
 
+DROP POLICY IF EXISTS "Admins can insert audit logs" ON public.audit_logs;
 CREATE POLICY "Admins can insert audit logs" ON public.audit_logs FOR INSERT TO authenticated WITH CHECK (
-  EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
+  EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role::text = 'admin')
 );

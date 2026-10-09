@@ -2,6 +2,7 @@
 -- COMPLETE ADMIN RPC RESTORATION MIGRATION
 
 -- ============ has_role Helper ============
+DROP FUNCTION IF EXISTS public.has_role(uuid, text);
 CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role text)
 RETURNS boolean
 LANGUAGE sql
@@ -16,6 +17,8 @@ AS $$
 $$;
 
 -- ============ log_admin_access_attempt ============
+DROP FUNCTION IF EXISTS public.log_admin_access_attempt(text, boolean, text);
+DROP FUNCTION IF EXISTS public.log_admin_access_attempt;
 CREATE OR REPLACE FUNCTION public.log_admin_access_attempt(_email text, _success boolean, _ip text DEFAULT NULL)
 RETURNS void
 LANGUAGE plpgsql
@@ -32,6 +35,8 @@ END;
 $$;
 
 -- ============ admin_get_user_by_email ============
+DROP FUNCTION IF EXISTS public.admin_get_user_by_email(text);
+DROP FUNCTION IF EXISTS public.admin_get_user_by_email;
 CREATE OR REPLACE FUNCTION public.admin_get_user_by_email(user_email text)
 RETURNS TABLE (id uuid, email text, full_name text, total_credits integer)
 LANGUAGE sql
@@ -47,6 +52,9 @@ AS $$
 $$;
 
 -- ============ admin_usage_summary ============
+DROP FUNCTION IF EXISTS public.admin_usage_summary(timestamptz);
+DROP FUNCTION IF EXISTS public.admin_usage_summary();
+DROP FUNCTION IF EXISTS public.admin_usage_summary;
 CREATE OR REPLACE FUNCTION public.admin_usage_summary(_since timestamptz DEFAULT now() - interval '30 days')
 RETURNS TABLE (
   user_id uuid, full_name text, plan text, credits_seconds int,
@@ -73,6 +81,8 @@ AS $$
 $$;
 
 -- ============ admin_list_users ============
+DROP FUNCTION IF EXISTS public.admin_list_users();
+DROP FUNCTION IF EXISTS public.admin_list_users;
 CREATE OR REPLACE FUNCTION public.admin_list_users()
 RETURNS TABLE(user_id uuid, email text, full_name text, plan text, credits_seconds integer, is_admin boolean, created_at timestamptz)
 LANGUAGE sql
@@ -89,6 +99,8 @@ AS $$
 $$;
 
 -- ============ admin_set_role ============
+DROP FUNCTION IF EXISTS public.admin_set_role(uuid, text, text, boolean);
+DROP FUNCTION IF EXISTS public.admin_set_role;
 CREATE OR REPLACE FUNCTION public.admin_set_role(
   _user_id uuid DEFAULT NULL,
   _email text DEFAULT NULL,
@@ -125,6 +137,8 @@ END;
 $$;
 
 -- ============ admin_list_projects ============
+DROP FUNCTION IF EXISTS public.admin_list_projects(int, int, text, text);
+DROP FUNCTION IF EXISTS public.admin_list_projects;
 CREATE OR REPLACE FUNCTION public.admin_list_projects(_limit int DEFAULT 50, _offset int DEFAULT 0, _status text DEFAULT NULL, _search text DEFAULT NULL)
 RETURNS TABLE(
   id uuid, title text, status text, duration_seconds int,
@@ -146,6 +160,9 @@ AS $$
 $$;
 
 -- ============ admin_grant_access ============
+DROP FUNCTION IF EXISTS public.admin_grant_access(uuid, text, integer, text);
+DROP FUNCTION IF EXISTS public.admin_grant_access(uuid, public.plan_tier, integer, text);
+DROP FUNCTION IF EXISTS public.admin_grant_access;
 CREATE OR REPLACE FUNCTION public.admin_grant_access(
   _user_id uuid,
   _plan text DEFAULT NULL,
@@ -182,6 +199,8 @@ END;
 $$;
 
 -- ============ admin_subscriptions_summary ============
+DROP FUNCTION IF EXISTS public.admin_subscriptions_summary();
+DROP FUNCTION IF EXISTS public.admin_subscriptions_summary;
 CREATE OR REPLACE FUNCTION public.admin_subscriptions_summary()
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -235,6 +254,8 @@ END;
 $$;
 
 -- ============ admin_security_alerts ============
+DROP FUNCTION IF EXISTS public.admin_security_alerts(int);
+DROP FUNCTION IF EXISTS public.admin_security_alerts;
 CREATE OR REPLACE FUNCTION public.admin_security_alerts(_limit int DEFAULT 100)
 RETURNS TABLE(id uuid, type text, severity text, description text, created_at timestamptz, resolved boolean)
 LANGUAGE plpgsql
@@ -257,6 +278,8 @@ END;
 $$;
 
 -- ============ admin_delete_user ============
+DROP FUNCTION IF EXISTS public.admin_delete_user(uuid);
+DROP FUNCTION IF EXISTS public.admin_delete_user;
 CREATE OR REPLACE FUNCTION public.admin_delete_user(_user_id uuid)
 RETURNS void
 LANGUAGE plpgsql
@@ -275,6 +298,8 @@ END;
 $$;
 
 -- ============ admin_overview_stats ============
+DROP FUNCTION IF EXISTS public.admin_overview_stats();
+DROP FUNCTION IF EXISTS public.admin_overview_stats;
 CREATE OR REPLACE FUNCTION public.admin_overview_stats()
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -355,6 +380,8 @@ END;
 $$;
 
 -- ============ admin_recent_activity ============
+DROP FUNCTION IF EXISTS public.admin_recent_activity(int);
+DROP FUNCTION IF EXISTS public.admin_recent_activity;
 CREATE OR REPLACE FUNCTION public.admin_recent_activity(_limit int DEFAULT 20)
 RETURNS TABLE(id uuid, user_id uuid, email text, action_type text, metadata jsonb, created_at timestamptz)
 LANGUAGE plpgsql
@@ -377,6 +404,8 @@ END;
 $$;
 
 -- ============ admin_update_setting ============
+DROP FUNCTION IF EXISTS public.admin_update_setting(text, jsonb);
+DROP FUNCTION IF EXISTS public.admin_update_setting;
 CREATE OR REPLACE FUNCTION public.admin_update_setting(_key text, _value jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql

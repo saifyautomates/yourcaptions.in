@@ -1,5 +1,7 @@
 -- Missing RPCs for credit operations and logging
 
+DROP FUNCTION IF EXISTS public.log_admin_action(uuid, text, jsonb);
+DROP FUNCTION IF EXISTS public.log_admin_action;
 CREATE OR REPLACE FUNCTION public.log_admin_action(_user_id uuid, _action text, _details jsonb)
 RETURNS void
 LANGUAGE plpgsql
@@ -17,6 +19,8 @@ $$;
 -- Credit operation placeholders for missing functions
 -- These wrap the actual credit tables to safely execute logic
 
+DROP FUNCTION IF EXISTS public.commit_credits(uuid, numeric, uuid, text, jsonb);
+DROP FUNCTION IF EXISTS public.commit_credits;
 CREATE OR REPLACE FUNCTION public.commit_credits(p_user_id uuid, p_amount numeric, p_reference_id uuid DEFAULT NULL::uuid, p_reference_type text DEFAULT NULL::text, p_metadata jsonb DEFAULT NULL::jsonb)
 RETURNS void
 LANGUAGE plpgsql
@@ -33,6 +37,8 @@ EXCEPTION WHEN undefined_table THEN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.refund_credits(uuid, numeric, uuid, text, jsonb);
+DROP FUNCTION IF EXISTS public.refund_credits;
 CREATE OR REPLACE FUNCTION public.refund_credits(p_user_id uuid, p_amount numeric, p_reference_id uuid DEFAULT NULL::uuid, p_reference_type text DEFAULT NULL::text, p_metadata jsonb DEFAULT NULL::jsonb)
 RETURNS void
 LANGUAGE plpgsql
@@ -48,6 +54,8 @@ EXCEPTION WHEN undefined_table THEN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.add_topup_credits(uuid, numeric, uuid, text, jsonb);
+DROP FUNCTION IF EXISTS public.add_topup_credits;
 CREATE OR REPLACE FUNCTION public.add_topup_credits(p_user_id uuid, p_amount numeric, p_reference_id uuid DEFAULT NULL::uuid, p_reference_type text DEFAULT NULL::text, p_metadata jsonb DEFAULT NULL::jsonb)
 RETURNS void
 LANGUAGE plpgsql
@@ -64,6 +72,8 @@ EXCEPTION WHEN undefined_table THEN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_adjust_credits(uuid, numeric, text);
+DROP FUNCTION IF EXISTS public.admin_adjust_credits;
 CREATE OR REPLACE FUNCTION public.admin_adjust_credits(user_id uuid, amount numeric, reason text)
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -92,6 +102,8 @@ EXCEPTION WHEN undefined_table THEN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.monthly_credit_reset(uuid, numeric);
+DROP FUNCTION IF EXISTS public.monthly_credit_reset;
 CREATE OR REPLACE FUNCTION public.monthly_credit_reset(p_user_id uuid, p_plan_credits numeric)
 RETURNS void
 LANGUAGE plpgsql
