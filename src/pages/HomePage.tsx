@@ -15,7 +15,6 @@ import { useTilt } from '@/hooks/useTilt';
 import { ScrollDownIndicator } from '@/components/public/ScrollDownIndicator';
 import InteractiveLanguageDemo from '@/components/public/InteractiveLanguageDemo';
 import { PublicNav } from '@/components/public/PublicNav';
-import { ViralTemplatesShowcase } from '@/components/public/ViralTemplatesShowcase';
 
 function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) {
   return (
@@ -223,9 +222,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* SECTION 5.5 — VIRAL CREATOR TEMPLATES SHOWCASE */}
-      <ViralTemplatesShowcase />
 
       {/* SECTION 6 — FEATURE DEEP DIVE */}
       <section id="features" className="py-[80px] md:py-[120px] bg-[#050505]">

@@ -21,6 +21,7 @@ import { ProjectCard } from "@/components/projects/ProjectCard";
 import { Skeleton, ProjectCardSkeleton } from "@/components/ui/skeleton";
 import { ProjectsEmptyState } from "@/components/ui/EmptyState";
 import { staggerContainer, scrollReveal } from "@/lib/animations";
+import { DashboardTemplatesSection } from "@/components/dashboard/DashboardTemplatesSection";
 
 interface Project {
   id: string;
@@ -129,6 +130,9 @@ export default function Dashboard() {
             </Button>
           </motion.div>
         </div>
+
+        {/* VIRAL CREATOR TEMPLATES DIRECTLY IN DASHBOARD */}
+        <DashboardTemplatesSection />
 
         {/* MAIN LAYOUT: PROJECTS & SIDEBAR */}
         <div className="flex flex-col gap-8">
