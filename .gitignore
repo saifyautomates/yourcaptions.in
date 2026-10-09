@@ -27,3 +27,5 @@ dist-ssr
 e2e/artifacts/
 
 supabase/.temp/
+test-results/
+playwright-report/

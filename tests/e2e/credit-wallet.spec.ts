@@ -65,6 +65,10 @@ async function readJson(res: Response): Promise<unknown> {
 
 test.describe("Credits — wallet + API loading", () => {
   test.setTimeout(60_000);
+  test.skip(
+    !SESSION_JSON && (!TEST_EMAIL || !TEST_PASSWORD),
+    "Set SUPABASE_TEST_SESSION_JSON or TEST_EMAIL/TEST_PASSWORD to run authenticated credit tests.",
+  );
 
   test("credit_wallets returns the caller's wallet with valid numeric buckets", async ({ page }) => {
     await ensureAuthed(page);

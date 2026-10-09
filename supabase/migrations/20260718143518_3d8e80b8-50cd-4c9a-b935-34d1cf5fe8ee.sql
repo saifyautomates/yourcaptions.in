@@ -1,7 +1,8 @@
 
--- 1) Grant admin role to owner
+-- 1) Grant admin role to owner (if user exists)
 INSERT INTO public.user_roles (user_id, role)
-VALUES ('64f73634-1f54-4cd6-83f4-b57d709747c5', 'admin')
+SELECT '64f73634-1f54-4cd6-83f4-b57d709747c5', 'admin'
+WHERE EXISTS (SELECT 1 FROM auth.users WHERE id = '64f73634-1f54-4cd6-83f4-b57d709747c5')
 ON CONFLICT (user_id, role) DO NOTHING;
 
 -- 2) Protect owner admin row from deletion / role change
