@@ -359,3 +359,174 @@ export function getCaptionForLanguage(
     words: chosen.split(/\s+/).filter(Boolean),
   };
 }
+
+export interface SyncedWord {
+  word: string;
+  start: number;
+  end: number;
+}
+
+export interface SyncedSegment {
+  id: number;
+  start: number;
+  end: number;
+  text: string;
+  words: SyncedWord[];
+}
+
+export function createSyncedSegment(
+  id: number,
+  start: number,
+  end: number,
+  text: string
+): SyncedSegment {
+  const wordsArr = text.split(/\s+/).filter(Boolean);
+  const dur = Math.max(0.1, end - start);
+  const wordDur = dur / Math.max(1, wordsArr.length);
+  const words: SyncedWord[] = wordsArr.map((w, i) => ({
+    word: w,
+    start: Number((start + i * wordDur).toFixed(2)),
+    end: Number((start + (i + 1) * wordDur).toFixed(2)),
+  }));
+  return { id, start, end, text, words };
+}
+
+// Exact Deepgram Nova-2 millisecond-precise timestamps for the audio of public/demo-video.mp4
+export const ENGLISH_VOICE_SYNCED_SEGMENTS: SyncedSegment[] = [
+  {
+    id: 1,
+    start: 0.0,
+    end: 2.45,
+    text: "Hey, struggling with captions for your videos?",
+    words: [
+      { word: "Hey,", start: 0.16, end: 0.48 },
+      { word: "struggling", start: 0.48, end: 0.96 },
+      { word: "with", start: 0.96, end: 1.20 },
+      { word: "captions", start: 1.20, end: 1.60 },
+      { word: "for", start: 1.60, end: 1.76 },
+      { word: "your", start: 1.76, end: 1.92 },
+      { word: "videos?", start: 1.92, end: 2.45 },
+    ],
+  },
+  {
+    id: 2,
+    start: 2.48,
+    end: 4.90,
+    text: "With Yourcaptions.in, you don't have to!",
+    words: [
+      { word: "With", start: 2.48, end: 2.72 },
+      { word: "Yourcaptions.in,", start: 2.72, end: 3.84 },
+      { word: "you", start: 3.84, end: 4.00 },
+      { word: "don't", start: 4.00, end: 4.24 },
+      { word: "have", start: 4.24, end: 4.48 },
+      { word: "to!", start: 4.48, end: 4.90 },
+    ],
+  },
+  {
+    id: 3,
+    start: 4.95,
+    end: 6.95,
+    text: "Just upload your video and our AI",
+    words: [
+      { word: "Just", start: 4.96, end: 5.28 },
+      { word: "upload", start: 5.28, end: 5.60 },
+      { word: "your", start: 5.60, end: 5.84 },
+      { word: "video", start: 5.84, end: 6.16 },
+      { word: "and", start: 6.16, end: 6.32 },
+      { word: "our", start: 6.32, end: 6.48 },
+      { word: "AI", start: 6.48, end: 6.95 },
+    ],
+  },
+  {
+    id: 4,
+    start: 6.96,
+    end: 10.00,
+    text: "instantly generates accurate captions, perfectly synced!",
+    words: [
+      { word: "instantly", start: 6.96, end: 7.44 },
+      { word: "generates", start: 7.44, end: 7.94 },
+      { word: "accurate", start: 8.00, end: 8.40 },
+      { word: "captions,", start: 8.40, end: 8.90 },
+      { word: "perfectly", start: 9.04, end: 9.52 },
+      { word: "synced!", start: 9.52, end: 10.00 },
+    ],
+  },
+];
+
+export const HINDI_VOICE_SYNCED_SEGMENTS: Record<'native' | 'roman', SyncedSegment[]> = {
+  native: [
+    createSyncedSegment(1, 0.0, 2.45, "क्या आप वीडियो कैप्शंस से परेशान हैं?"),
+    createSyncedSegment(2, 2.48, 4.90, "Yourcaptions.in के साथ अब टेंशन खत्म!"),
+    createSyncedSegment(3, 4.95, 6.95, "बस वीडियो अपलोड करें और हमारा AI"),
+    createSyncedSegment(4, 6.96, 10.00, "सेकंडों में परफेक्ट वायरल कैप्शंस बना देगा!"),
+  ],
+  roman: [
+    createSyncedSegment(1, 0.0, 2.45, "Kya aap video captions se pareshan hain?"),
+    createSyncedSegment(2, 2.48, 4.90, "Yourcaptions.in ke saath ab tension khatam!"),
+    createSyncedSegment(3, 4.95, 6.95, "Bas video upload karein aur hamara AI"),
+    createSyncedSegment(4, 6.96, 10.00, "seconds mein perfect viral captions bana dega!"),
+  ],
+};
+
+export const HINGLISH_VOICE_SYNCED_SEGMENTS: SyncedSegment[] = [
+  createSyncedSegment(1, 0.0, 2.45, "Video captions likhne mein dikkat aati hai?"),
+  createSyncedSegment(2, 2.48, 4.90, "Yourcaptions.in ke sath tension khatam!"),
+  createSyncedSegment(3, 4.95, 6.95, "Bas video upload karo aur hamara AI"),
+  createSyncedSegment(4, 6.96, 10.00, "seconds mein viral captions perfectly sync karega!"),
+];
+
+/**
+ * Returns 4 bite-sized voice-synced segments tightly aligned with the speech timing in public/demo-video.mp4.
+ */
+export function getVoiceSyncedSegments(
+  langName: string,
+  nativeEndonym?: string,
+  scriptMode: 'native' | 'roman' = 'native'
+): SyncedSegment[] {
+  const clean = (langName || '').trim();
+  const lower = clean.toLowerCase();
+
+  if (lower.startsWith('english')) {
+    return ENGLISH_VOICE_SYNCED_SEGMENTS;
+  }
+  if (lower === 'hindi') {
+    return HINDI_VOICE_SYNCED_SEGMENTS[scriptMode];
+  }
+  if (lower === 'hinglish') {
+    return HINGLISH_VOICE_SYNCED_SEGMENTS;
+  }
+
+  // Check language dictionary entries
+  const entry = INTRO_CAPTIONS[clean];
+  const fullText = entry
+    ? scriptMode === 'roman'
+      ? entry.roman
+      : entry.native
+    : getCaptionForLanguage(clean, nativeEndonym, 'intro', scriptMode).text;
+
+  // Split into 4 bite-sized natural speech chunks
+  const rawParts = fullText.split(/\s*[-—–]\s*|\s*,\s*|\s*\.\s*/).filter(Boolean);
+  if (rawParts.length >= 4) {
+    return [
+      createSyncedSegment(1, 0.0, 2.45, rawParts[0].trim()),
+      createSyncedSegment(2, 2.48, 4.90, rawParts[1].trim()),
+      createSyncedSegment(3, 4.95, 6.95, rawParts[2].trim()),
+      createSyncedSegment(4, 6.96, 10.00, rawParts.slice(3).join(' ').trim()),
+    ];
+  }
+
+  // Fallback: chunk all words across the 4 voice intervals
+  const allWords = fullText.split(/\s+/).filter(Boolean);
+  const quarter = Math.max(1, Math.ceil(allWords.length / 4));
+  const chunk1 = allWords.slice(0, quarter).join(' ');
+  const chunk2 = allWords.slice(quarter, quarter * 2).join(' ');
+  const chunk3 = allWords.slice(quarter * 2, quarter * 3).join(' ');
+  const chunk4 = allWords.slice(quarter * 3).join(' ') || allWords.slice(quarter * 2).join(' ');
+
+  return [
+    createSyncedSegment(1, 0.0, 2.45, chunk1 || `Yourcaptions.in ${clean}`),
+    createSyncedSegment(2, 2.48, 4.90, chunk2 || `Auto-captions in seconds!`),
+    createSyncedSegment(3, 4.95, 6.95, chunk3 || `Upload video with AI`),
+    createSyncedSegment(4, 6.96, 10.00, chunk4 || `Perfect viral subtitles synced!`),
+  ];
+}

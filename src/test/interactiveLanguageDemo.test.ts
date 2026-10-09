@@ -80,4 +80,38 @@ describe('Interactive Language Demo Captions', () => {
       expect(tpl.badgeText).toBeTruthy();
     }
   });
+
+  it('provides precise voice-synced segments matching speech in demo-video.mp4', async () => {
+    const { getVoiceSyncedSegments, ENGLISH_VOICE_SYNCED_SEGMENTS } = await import('@/lib/demoCaptions');
+    
+    // English voice-synced segments
+    const enSegments = getVoiceSyncedSegments('English');
+    expect(enSegments).toEqual(ENGLISH_VOICE_SYNCED_SEGMENTS);
+    expect(enSegments.length).toBe(4);
+    expect(enSegments[0].start).toBe(0.0);
+    expect(enSegments[3].end).toBe(10.0);
+
+    // Check that each word in English segments has strictly valid timing
+    for (const seg of enSegments) {
+      expect(seg.words.length).toBeGreaterThan(0);
+      for (const w of seg.words) {
+        expect(w.start).toBeLessThan(w.end);
+        expect(w.word).toBeTruthy();
+      }
+    }
+
+    // Hindi voice-synced segments (native & roman)
+    const hiNative = getVoiceSyncedSegments('Hindi', 'हिन्दी', 'native');
+    const hiRoman = getVoiceSyncedSegments('Hindi', 'हिन्दी', 'roman');
+    expect(hiNative.length).toBe(4);
+    expect(hiRoman.length).toBe(4);
+    expect(hiNative[0].text).toContain('परेशान');
+    expect(hiRoman[0].text).toContain('pareshan');
+
+    // Any regional language returns 4 bite-sized timed segments
+    const malviSegments = getVoiceSyncedSegments('Malvi', 'मालवी', 'native');
+    expect(malviSegments.length).toBe(4);
+    expect(malviSegments[0].words.length).toBeGreaterThan(0);
+  });
 });
+

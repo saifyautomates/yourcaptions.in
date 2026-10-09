@@ -2,7 +2,7 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Check, Volume2, VolumeX, Sparkles, Search, Play, Pause, Captions, Upload, Video, Mic, RefreshCw, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LANGUAGES as ALL_LANGUAGES } from '@/lib/languages';
-import { getCaptionForLanguage } from '@/lib/demoCaptions';
+import { getCaptionForLanguage, getVoiceSyncedSegments, type SyncedSegment } from '@/lib/demoCaptions';
 import { DEMO_CAPTION_TEMPLATES, DEFAULT_DEMO_TEMPLATE, type DemoCaptionTemplate } from '@/lib/demoTemplates';
 
 
@@ -227,19 +227,26 @@ export default function InteractiveLanguageDemo() {
     return VIDEO_PRESETS.find((p) => p.id === selectedPresetId) || VIDEO_PRESETS[0];
   }, [selectedPresetId]);
 
+  const [currentTime, setCurrentTime] = useState(0);
+
   // Handle Video Time Progress
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     const updateProgress = () => {
+      setCurrentTime(video.currentTime);
       if (video.duration) {
         setProgress((video.currentTime / video.duration) * 100);
       }
     };
 
     video.addEventListener('timeupdate', updateProgress);
-    return () => video.removeEventListener('timeupdate', updateProgress);
+    video.addEventListener('seeked', updateProgress);
+    return () => {
+      video.removeEventListener('timeupdate', updateProgress);
+      video.removeEventListener('seeked', updateProgress);
+    };
   }, [selectedPresetId, customVideoUrl, videoSourceIndex]);
 
   // When changing video preset
@@ -327,12 +334,66 @@ export default function InteractiveLanguageDemo() {
     );
   }, [customVideoUrl, customVideoName, selectedLang, selectedPresetId, scriptMode]);
 
-  // Active word index calculated from video playback progress (0% - 100%)
+  // Real-time voice synced segments matching the spoken audio
+  const syncedSegments = useMemo<SyncedSegment[]>(() => {
+    if (customVideoUrl) {
+      const words = captionData.words;
+      const count = words.length;
+      if (count === 0) return [];
+      const spans = [
+        { start: 0.0, end: 2.5 },
+        { start: 2.5, end: 5.0 },
+        { start: 5.0, end: 7.5 },
+        { start: 7.5, end: 10.0 },
+      ];
+      const size = Math.max(1, Math.ceil(count / spans.length));
+      return spans.map((span, sIdx) => {
+        const segWords = words.slice(sIdx * size, (sIdx + 1) * size);
+        const duration = span.end - span.start;
+        const step = segWords.length > 0 ? duration / segWords.length : 0;
+        return {
+          id: sIdx + 1,
+          start: span.start,
+          end: span.end,
+          text: segWords.join(' '),
+          words: segWords.map((w, wIdx) => ({
+            word: w,
+            start: Number((span.start + wIdx * step).toFixed(2)),
+            end: Number((span.start + (wIdx + 1) * step).toFixed(2)),
+          })),
+        };
+      }).filter((s) => s.words.length > 0);
+    }
+
+    return getVoiceSyncedSegments(selectedLang.name, selectedLang.native, scriptMode);
+  }, [customVideoUrl, captionData.words, selectedLang.name, selectedLang.native, scriptMode]);
+
+  const activeSegment = useMemo<SyncedSegment>(() => {
+    if (!syncedSegments.length) {
+      return {
+        id: 1,
+        start: 0,
+        end: 10,
+        text: captionData.text,
+        words: captionData.words.map((w) => ({ word: w, start: 0, end: 10 })),
+      };
+    }
+    const t = currentTime;
+    const found = syncedSegments.find((seg) => t >= seg.start && t <= seg.end);
+    if (found) return found;
+    if (t < syncedSegments[0].start) return syncedSegments[0];
+    return syncedSegments[syncedSegments.length - 1];
+  }, [currentTime, syncedSegments, captionData]);
+
+  // Active word index calculated in real-time matching the voice
   const activeWordIndex = useMemo(() => {
-    if (!captionData.words.length) return 0;
-    const idx = Math.floor((progress / 100) * captionData.words.length);
-    return Math.min(idx, captionData.words.length - 1);
-  }, [progress, captionData.words.length]);
+    if (!activeSegment?.words.length) return 0;
+    const t = currentTime;
+    const idx = activeSegment.words.findIndex((w) => t >= w.start && t < w.end);
+    if (idx !== -1) return idx;
+    if (t < activeSegment.words[0].start) return 0;
+    return activeSegment.words.length - 1;
+  }, [currentTime, activeSegment]);
 
   return (
     <div id="playground" className="relative w-full max-w-[1150px] mx-auto mt-12 p-[2px] rounded-[28px] overflow-hidden bg-gradient-to-b from-[#222] via-[#111] to-[#0a0a0a] shadow-[0_0_100px_rgba(230,0,0,0.12)]">
@@ -551,46 +612,32 @@ export default function InteractiveLanguageDemo() {
               </div>
             </div>
 
-            {/* 🔥 HIGH-IMPACT STUDIO VIRAL CAPTION OVERLAY WITH DYNAMIC TEMPLATE STYLING 🔥 */}
-            <div className="absolute bottom-16 sm:bottom-20 left-3 right-3 z-30 flex flex-col items-center justify-center pointer-events-none text-center px-2">
+            {/* 🔥 PURE FLOATING VIRAL CAPTIONS (ZERO BOX CONTAINER, PRECISE REAL-TIME VOICE SYNC) 🔥 */}
+            <div className="absolute bottom-16 sm:bottom-20 left-4 right-4 z-30 flex flex-col items-center justify-center pointer-events-none text-center px-2 select-none">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={`${selectedLang.name}-${scriptMode}-${currentTemplate.id}`}
-                  initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                  key={`${selectedLang.name}-${scriptMode}-${currentTemplate.id}-${activeSegment.id}`}
+                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                  className={`max-w-[96%] px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-2xl flex flex-col items-center transition-all duration-200 ${currentTemplate.containerClassName}`}
+                  exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                  transition={{ duration: 0.12, ease: "easeOut" }}
+                  className={`max-w-[96%] flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 gap-y-1.5 sm:gap-y-2.5 ${currentTemplate.textClassName}`}
                 >
-                  {/* Active Template & Language Badge */}
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <span
-                      className="w-2 h-2 rounded-full animate-pulse"
-                      style={{ backgroundColor: currentTemplate.dotColor, boxShadow: `0 0 8px ${currentTemplate.dotColor}` }}
-                    />
-                    <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider ${currentTemplate.badgeClassName}`}>
-                      {currentTemplate.badgeText} · {selectedLang.name} · {scriptMode === 'roman' ? 'Roman Script' : 'Native Script'}
-                    </span>
-                  </div>
-
-                  {/* Dynamic Word-by-Word Viral Subtitles with Real-Time Karaoke Sync in currentTemplate Style */}
-                  <div className={`text-[16px] sm:text-[20px] md:text-[22px] leading-snug flex flex-wrap items-center justify-center gap-x-2 gap-y-1 ${currentTemplate.textClassName}`}>
-                    {captionData.words.map((word, idx) => {
-                      const isWordActive = idx === activeWordIndex;
-                      return (
-                        <span
-                          key={idx}
-                          className={`transition-all duration-150 inline-block px-1.5 py-0.5 rounded-md ${
-                            isWordActive
-                              ? currentTemplate.activeWordClassName
-                              : currentTemplate.inactiveWordClassName
-                          }`}
-                        >
-                          {word}
-                        </span>
-                      );
-                    })}
-                  </div>
+                  {activeSegment.words.map((wordObj, idx) => {
+                    const isWordActive = idx === activeWordIndex;
+                    return (
+                      <span
+                        key={idx}
+                        className={`transition-all duration-100 inline-block px-1.5 py-0.5 rounded-md ${
+                          isWordActive
+                            ? currentTemplate.activeWordClassName
+                            : currentTemplate.inactiveWordClassName
+                        }`}
+                      >
+                        {wordObj.word}
+                      </span>
+                    );
+                  })}
                 </motion.div>
               </AnimatePresence>
             </div>
