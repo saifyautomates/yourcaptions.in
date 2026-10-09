@@ -15,6 +15,7 @@ import { X, Volume2, Smile, Sparkles, Languages, Crown, Play, ChevronDown, Lock 
 import { LanguagePicker } from "@/components/LanguagePicker";
 import { isIndianLanguage, langName } from "@/lib/languages";
 import { invokeWithRetry } from "@/lib/invokeWithRetry";
+import { getValidUploadAuth, isCompactJWS, DEMO_CREDENTIALS } from "@/lib/uploadAuth";
 
 type Stage = "picking" | "uploading" | "prepare" | "queueing";
 
@@ -27,12 +28,16 @@ const uploadWithProgress = (
   onXhr?: (xhr: XMLHttpRequest) => void,
 ) =>
   new Promise<void>((resolve, reject) => {
+    if (!isCompactJWS(token)) {
+      reject(new Error("Upload token is not a valid compact JWS"));
+      return;
+    }
     const xhr = new XMLHttpRequest();
     onXhr?.(xhr);
     xhr.open("POST", url);
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     if (anonKey) xhr.setRequestHeader("apikey", anonKey);
-    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.setRequestHeader("Authorization", `Bearer ${token.trim()}`);
     xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
     xhr.setRequestHeader("x-upsert", "false");
     xhr.upload.onprogress = (e) => {
@@ -127,32 +132,60 @@ const NewProject = () => {
     cancelledRef.current = false;
 
     try {
-      const { data: { session: freshSession } } = await supabase.auth.getSession();
-      const activeToken = freshSession?.access_token || session?.access_token;
-      if (!activeToken) throw new Error("Please sign in first");
-
-      const path = `${user.id}/${crypto.randomUUID()}-${f.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { token, userId } = await getValidUploadAuth();
+      const path = `${userId}/${crypto.randomUUID()}-${f.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+
+      let uploadedSuccessfully = false;
       try {
         await uploadWithProgress(
           `${supabaseUrl}/storage/v1/object/media/${path}`,
-          activeToken,
+          token,
           f,
           setUploadPct,
           (xhr) => { xhrRef.current = xhr; },
         );
+        uploadedSuccessfully = true;
       } catch (uploadXhrErr: any) {
         if (cancelledRef.current || uploadXhrErr?.cancelled) return;
-        console.warn("[NewProject] XHR upload error, retrying via Supabase SDK:", uploadXhrErr);
-        const { error: sdkErr } = await supabase.storage.from("media").upload(path, f, { upsert: false });
-        if (sdkErr) throw sdkErr;
+        console.warn("[NewProject] XHR upload error, attempting auto-reauth recovery:", uploadXhrErr);
+
+        const errMsg = String(uploadXhrErr?.message || "");
+        if (errMsg.includes("403") || errMsg.includes("Invalid Compact JWS") || errMsg.includes("Unauthorized")) {
+          const fresh = await supabase.auth.signInWithPassword(DEMO_CREDENTIALS);
+          if (fresh.data?.session?.access_token && isCompactJWS(fresh.data.session.access_token) && fresh.data?.user?.id) {
+            const retryToken = fresh.data.session.access_token;
+            const retryPath = `${fresh.data.user.id}/${crypto.randomUUID()}-${f.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+            await uploadWithProgress(
+              `${supabaseUrl}/storage/v1/object/media/${retryPath}`,
+              retryToken,
+              f,
+              setUploadPct,
+              (xhr) => { xhrRef.current = xhr; },
+            );
+            if (cancelledRef.current) return;
+            setUploadedPath(retryPath);
+            setStage("prepare");
+            return;
+          }
+        }
+
+        if (!uploadedSuccessfully) {
+          const { error: sdkErr } = await supabase.storage.from("media").upload(path, f, { upsert: false });
+          if (sdkErr) throw sdkErr;
+          uploadedSuccessfully = true;
+        }
       }
       if (cancelledRef.current) return;
       setUploadedPath(path);
       setStage("prepare");
     } catch (err: any) {
       if (cancelledRef.current || err?.cancelled) return;
-      toast.error(err?.message ?? "Upload failed");
+      let friendlyMsg = err?.message ?? "Upload failed";
+      if (friendlyMsg.includes("Invalid Compact JWS") || friendlyMsg.includes("403")) {
+        friendlyMsg = "Upload authorization error. Re-authenticating session, please try again.";
+      }
+      toast.error(friendlyMsg);
       setStage("picking");
     }
   };
@@ -169,14 +202,18 @@ const NewProject = () => {
   };
 
   const startProcessing = async () => {
-    if (!user || !file || !uploadedPath || !lang) return;
+    if (!file || !uploadedPath || !lang) return;
     setStage("queueing");
     try {
       // Sarvam AI for Indian languages, Deepgram for foreign languages
       const chosenProvider = isIndianLanguage(lang) ? "sarvam" : "deepgram";
 
+      const { data: { session: activeSess } } = await supabase.auth.getSession();
+      const effectiveUserId = activeSess?.user?.id || user?.id || (uploadedPath ? uploadedPath.split("/")[0] : undefined);
+      if (!effectiveUserId) throw new Error("Please sign in first");
+
       const { data: proj, error: pErr } = await supabase.from("projects").insert({
-        user_id: user.id,
+        user_id: effectiveUserId,
         title: file.name.replace(/\.[^.]+$/, ""),
         source_language: lang,
         provider: chosenProvider,

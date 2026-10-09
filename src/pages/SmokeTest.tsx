@@ -8,6 +8,7 @@ import { CAP_PRESETS, DEFAULT_CAP_STYLE, normalizeCapStyle } from "@/lib/caption
 import { CheckCircle2, Circle, Loader2, AlertCircle, UploadCloud, PlayCircle, Sparkles, Download, RefreshCw, FlaskConical, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { getValidUploadAuth } from "@/lib/uploadAuth";
 
 type StepId = "upload" | "create" | "transcribe" | "editor" | "template" | "export" | "cleanup";
 type StepState = "pending" | "running" | "ok" | "fail" | "skipped";
@@ -78,16 +79,17 @@ const SmokeTest = () => {
     try {
       // 1) Upload
       setState("upload", "running"); log(`Uploading ${file.name} (${(file.size/1024/1024).toFixed(1)} MB) to temporary storage`);
-      const path = `${user.id}/smoke-${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { token, userId } = await getValidUploadAuth();
+      const path = `${userId}/smoke-${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      await uploadWithProgress(`${supabaseUrl}/storage/v1/object/media/${path}`, session.access_token, file, setUploadPct);
+      await uploadWithProgress(`${supabaseUrl}/storage/v1/object/media/${path}`, token, file, setUploadPct);
       mediaPath = path;
       log("Upload complete"); setState("upload", "ok");
 
       // 2) Create project
       setState("create", "running"); log("Creating project row");
       const { data: proj, error: pErr } = await supabase.from("projects").insert({
-        user_id: user.id, title: `Smoke test · ${new Date().toLocaleString()}`,
+        user_id: userId, title: `Smoke test · ${new Date().toLocaleString()}`,
         source_language: "en", provider: "assemblyai", compare_mode: false,
         media_path: path, status: "processing",
       }).select("id").single();

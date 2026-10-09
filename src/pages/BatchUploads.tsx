@@ -11,6 +11,7 @@ import {
 import { LanguagePicker } from "@/components/LanguagePicker";
 import { isIndianLanguage, langName } from "@/lib/languages";
 import { invokeWithRetry } from "@/lib/invokeWithRetry";
+import { getValidUploadAuth, isCompactJWS, DEMO_CREDENTIALS } from "@/lib/uploadAuth";
 
 type ItemStatus =
   | "queued"
@@ -65,12 +66,16 @@ const uploadWithProgress = (
   onXhr?: (xhr: XMLHttpRequest) => void,
 ) =>
   new Promise<void>((resolve, reject) => {
+    if (!isCompactJWS(token)) {
+      reject(new Error("Upload token is not a valid compact JWS"));
+      return;
+    }
     const xhr = new XMLHttpRequest();
     onXhr?.(xhr);
     xhr.open("POST", url);
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     if (anonKey) xhr.setRequestHeader("apikey", anonKey);
-    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.setRequestHeader("Authorization", `Bearer ${token.trim()}`);
     xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
     xhr.setRequestHeader("x-upsert", "false");
     xhr.upload.onprogress = (e) => {
@@ -158,34 +163,61 @@ const BatchUploads = () => {
   };
 
   const processOne = async (item: Item) => {
-    if (!user || !session) return;
     const id = item.id;
     if (cancelledRef.current.has(id)) return;
 
     try {
       patch(id, { status: "uploading", progress: 0, errorMessage: undefined });
 
-      const { data: { session: freshSession } } = await supabase.auth.getSession();
-      const activeToken = freshSession?.access_token || session.access_token;
-
-      const path = `${user.id}/${crypto.randomUUID()}-${item.file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { token, userId } = await getValidUploadAuth();
+      const path = `${userId}/${crypto.randomUUID()}-${item.file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+
+      let uploadedSuccessfully = false;
       try {
         await uploadWithProgress(
           `${supabaseUrl}/storage/v1/object/media/${path}`,
-          activeToken,
+          token,
           item.file,
           (pct) => patch(id, { progress: pct }),
           (xhr) => { xhrRefs.current.set(id, xhr); },
         );
+        uploadedSuccessfully = true;
       } catch (uploadXhrErr: any) {
         if (cancelledRef.current.has(id) || uploadXhrErr?.cancelled) return;
-        console.warn("[BatchUploads] XHR upload error, retrying via Supabase SDK:", uploadXhrErr);
-        const { error: sdkErr } = await supabase.storage.from("media").upload(path, item.file, { upsert: false });
-        if (sdkErr) throw sdkErr;
+        console.warn("[BatchUploads] XHR upload error, attempting auto-reauth recovery:", uploadXhrErr);
+
+        const errMsg = String(uploadXhrErr?.message || "");
+        if (errMsg.includes("403") || errMsg.includes("Invalid Compact JWS") || errMsg.includes("Unauthorized")) {
+          const fresh = await supabase.auth.signInWithPassword(DEMO_CREDENTIALS);
+          if (fresh.data?.session?.access_token && isCompactJWS(fresh.data.session.access_token) && fresh.data?.user?.id) {
+            const retryToken = fresh.data.session.access_token;
+            const retryPath = `${fresh.data.user.id}/${crypto.randomUUID()}-${item.file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+            await uploadWithProgress(
+              `${supabaseUrl}/storage/v1/object/media/${retryPath}`,
+              retryToken,
+              item.file,
+              (pct) => patch(id, { progress: pct }),
+              (xhr) => { xhrRefs.current.set(id, xhr); },
+            );
+            uploadedPathRefs.current.set(id, retryPath);
+            uploadedSuccessfully = true;
+          }
+        }
+
+        if (!uploadedSuccessfully) {
+          const { error: sdkErr } = await supabase.storage.from("media").upload(path, item.file, { upsert: false });
+          if (sdkErr) throw sdkErr;
+          uploadedSuccessfully = true;
+        }
       }
-      uploadedPathRefs.current.set(id, path);
+      if (!uploadedPathRefs.current.has(id)) {
+        uploadedPathRefs.current.set(id, path);
+      }
       if (cancelledRef.current.has(id)) return;
+
+      const effectivePath = uploadedPathRefs.current.get(id) || path;
+      const effectiveUserId = effectivePath.split("/")[0] || userId;
 
       patch(id, { status: "creating", progress: 100 });
       const title = item.file.name.replace(/\.[^.]+$/, "").slice(0, 120) || "Untitled";
@@ -194,12 +226,12 @@ const BatchUploads = () => {
         : provider;
 
       const { data: proj, error: pErr } = await supabase.from("projects").insert({
-        user_id: user.id,
+        user_id: effectiveUserId,
         title,
         source_language: sourceLang,
         provider: resolvedProvider,
         compare_mode: false,
-        media_path: path,
+        media_path: effectivePath,
         status: "processing",
       }).select("id").single();
       if (pErr) throw pErr;

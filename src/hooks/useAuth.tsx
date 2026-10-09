@@ -63,32 +63,21 @@ const ADMIN_EMAILS = new Set([
   "creator@yourcaptions.in",
 ]);
 
-export const DEMO_CREDENTIALS = {
-  email: "creator.demo@yourcaptions.in",
-  password: "DemoAccountPassword2026!Secure",
-};
-
-export const DEMO_USER: User = {
-  id: "00000000-0000-4000-8000-000000000001",
-  app_metadata: { provider: "email" },
-  user_metadata: { full_name: "Demo Creator" },
-  aud: "authenticated",
-  confirmation_sent_at: new Date().toISOString(),
-  confirmed_at: new Date().toISOString(),
-  email: "creator@yourcaptions.in",
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  phone: "",
-  role: "authenticated",
-};
-
-export const DEMO_SESSION: Session = {
-  access_token: "demo-jwt-token-local",
-  token_type: "bearer",
-  expires_in: 3600 * 24 * 365,
-  refresh_token: "demo-refresh-token",
-  user: DEMO_USER,
-};
+export {
+  DEMO_CREDENTIALS,
+  DEMO_USER,
+  DEMO_SESSION,
+  isCompactJWS,
+  hasValidSub,
+  purgeCorruptedStorageTokens,
+} from "@/lib/uploadAuth";
+import {
+  DEMO_CREDENTIALS,
+  DEMO_USER,
+  DEMO_SESSION,
+  hasValidSub,
+  purgeCorruptedStorageTokens,
+} from "@/lib/uploadAuth";
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
@@ -108,21 +97,6 @@ const AuthContext = createContext<AuthContextValue>({
   signInWithGoogle: async () => {},
   signInAsDemo: () => {},
 });
-
-const hasValidSub = (sess: Session | null) => {
-  if (!sess?.access_token) return true;
-  try {
-    let base64 = sess.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    while (base64.length % 4) {
-      base64 += "=";
-    }
-    const payload = JSON.parse(atob(base64));
-    return typeof payload?.sub === "string" && payload.sub.length > 0;
-  } catch { 
-    // If we can't parse the JWT, trust Supabase's session validation
-    return true; 
-  }
-};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
@@ -305,6 +279,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     mountedRef.current = true;
+    purgeCorruptedStorageTokens();
 
     logOAuth("session-restore-start", {
       href: typeof window !== "undefined" ? window.location.href : "",
