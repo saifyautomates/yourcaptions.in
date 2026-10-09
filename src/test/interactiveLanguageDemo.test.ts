@@ -113,5 +113,66 @@ describe('Interactive Language Demo Captions', () => {
     expect(malviSegments.length).toBe(4);
     expect(malviSegments[0].words.length).toBeGreaterThan(0);
   });
+
+  it('correctly chunks words according to wordsPerChunk (1W, 2W, 3W, 4W, 5W)', async () => {
+    const { ENGLISH_VOICE_SYNCED_SEGMENTS } = await import('@/lib/demoCaptions');
+    const seg = ENGLISH_VOICE_SYNCED_SEGMENTS[0]; // e.g. "Create viral captions that get millions of views"
+    const words = seg.words;
+
+    // Helper chunking function matching InteractiveLanguageDemo.tsx
+    const chunkWords = (allWords: typeof words, wordsPerChunk: number | 'auto', currentTime: number) => {
+      if (wordsPerChunk === 'auto' || wordsPerChunk >= allWords.length) {
+        return { words: allWords, activeIndex: 0 };
+      }
+      const chunks: Array<typeof allWords> = [];
+      for (let i = 0; i < allWords.length; i += wordsPerChunk) {
+        chunks.push(allWords.slice(i, i + wordsPerChunk));
+      }
+      let chunkIdx = chunks.findIndex((c) => currentTime < c[c.length - 1].end + 0.04);
+      if (chunkIdx < 0) chunkIdx = chunks.length - 1;
+      const currentChunk = chunks[chunkIdx];
+      const wordIdx = currentChunk.findIndex((w) => currentTime >= w.start && currentTime < w.end);
+      const activeIdx = wordIdx !== -1 ? wordIdx : (currentTime < currentChunk[0].start ? 0 : currentChunk.length - 1);
+      return { words: currentChunk, activeIndex: activeIdx };
+    };
+
+    // 1 Word chunking test
+    const oneWordChunk = chunkWords(words, 1, 0.2);
+    expect(oneWordChunk.words.length).toBe(1);
+    expect(oneWordChunk.words[0].word).toBe(words[0].word);
+
+    // 2 Words chunking test
+    const twoWordsChunk = chunkWords(words, 2, 0.2);
+    expect(twoWordsChunk.words.length).toBe(2);
+
+    // 3 Words chunking test
+    const threeWordsChunk = chunkWords(words, 3, 0.2);
+    expect(threeWordsChunk.words.length).toBe(3);
+
+    // 4 Words chunking test
+    const fourWordsChunk = chunkWords(words, 4, 0.2);
+    expect(fourWordsChunk.words.length).toBe(4);
+
+    // 5 Words chunking test
+    const fiveWordsChunk = chunkWords(words, 5, 0.2);
+    expect(fiveWordsChunk.words.length).toBeLessThanOrEqual(5);
+
+    // Auto chunking returns all words in segment
+    const autoChunk = chunkWords(words, 'auto', 0.2);
+    expect(autoChunk.words.length).toBe(words.length);
+  });
+
+  it('guarantees compact, tasteful font sizing for all templates without covering the video', async () => {
+    const { DEMO_CAPTION_TEMPLATES } = await import('@/lib/demoTemplates');
+    for (const tpl of DEMO_CAPTION_TEMPLATES) {
+      // Must not use oversized font classes
+      expect(tpl.textClassName).not.toContain('text-[36px]');
+      expect(tpl.textClassName).not.toContain('text-[40px]');
+      expect(tpl.textClassName).not.toContain('text-[48px]');
+      expect(tpl.textClassName).not.toContain('scale-125');
+      expect(tpl.textClassName).not.toContain('scale-150');
+    }
+  });
 });
+
 

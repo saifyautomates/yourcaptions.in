@@ -748,8 +748,8 @@ export default function InteractiveLanguageDemo() {
               {/* Row 1: Words Section Selector (1, 2, 3, 4, 5 words option) + Native / Roman */}
               <div className="flex items-center justify-between gap-2 px-0.5">
                 {/* Words Per Section (1 2 3 4 5 Words) */}
-                <div className="flex items-center gap-1 bg-black/85 backdrop-blur-xl border border-white/20 px-2 py-0.5 rounded-full shadow-2xl">
-                  <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-zinc-300 mr-0.5 flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1 bg-black/85 backdrop-blur-xl border border-white/20 px-1.5 sm:px-2 py-0.5 rounded-full shadow-2xl overflow-x-auto no-scrollbar">
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-zinc-300 mr-0.5 flex items-center gap-1 shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#E60000] animate-pulse" />
                     Words:
                   </span>
@@ -759,7 +759,7 @@ export default function InteractiveLanguageDemo() {
                       <button
                         key={cnt}
                         onClick={() => setWordsPerChunk(cnt)}
-                        className={`px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold transition-all ${
+                        className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold transition-all shrink-0 ${
                           isActive
                             ? 'bg-[#E60000] text-white shadow-[0_0_12px_rgba(230,0,0,0.7)] scale-105'
                             : 'text-zinc-400 hover:text-white hover:bg-white/10'
